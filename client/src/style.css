@@ -275,20 +275,30 @@ body {
   padding: 0.5rem 0 2rem 0;
 }
 
-/* Wheel Stage Container - Grand Centerpiece */
+/* Wheel Stage Container - Grand Floating Centerpiece */
 .wheel-stage {
   position: relative;
   width: 100%;
   max-width: 680px;
   aspect-ratio: 1 / 1;
-  margin: 1rem auto 6rem auto;
+  margin: 3.2rem auto 3rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: floatingWheelLevitation 4.5s ease-in-out infinite;
 }
 
-/* 3D Luxury Casino Standing Rig */
-.wheel-stand-structure {
+@keyframes floatingWheelLevitation {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+/* Overhead Luxury Suspension Rig (Anchored from Above behind the wheel) */
+.wheel-overhead-rig {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -296,244 +306,196 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
-/* Realistic Ground Contact Shadow */
-.stand-floor-shadow {
+/* Top Gantry Ceiling Anchor Plate */
+.overhead-ceiling-mount {
   position: absolute;
-  bottom: -98px;
+  top: -42px;
   left: 50%;
   transform: translateX(-50%);
-  width: 95%;
-  max-width: 640px;
-  height: 42px;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0.25) 70%, transparent 88%);
-  filter: blur(12px);
-  z-index: 0;
-}
-
-/* Rear A-Frame Triangular Support Struts */
-.stand-leg {
-  position: absolute;
-  top: 48%;
-  bottom: -68px;
-  width: 30px;
-  background: linear-gradient(135deg, 
-    #64748B 0%, 
-    #334155 20%, 
-    #1E293B 45%, 
-    #0F172A 70%, 
-    #D97706 90%, 
-    #FEF08A 100%
-  );
-  border-radius: 8px;
-  box-shadow: 
-    0 16px 36px rgba(0, 0, 0, 0.95),
-    inset 2.5px 0 5px rgba(254, 240, 138, 0.5),
-    inset -2.5px 0 5px rgba(0, 0, 0, 0.9);
-  border: 2px solid rgba(245, 158, 11, 0.75);
-  z-index: 1;
-}
-
-.stand-leg-left {
-  left: 14%;
-  transform: rotate(24deg);
-  transform-origin: top center;
-}
-
-.stand-leg-right {
-  right: 14%;
-  transform: rotate(-24deg);
-  transform-origin: top center;
-}
-
-/* Horizontal Cross-Brace Bar */
-.stand-crossbar {
-  position: absolute;
-  bottom: -18px;
-  left: 20%;
-  right: 20%;
-  height: 18px;
-  background: linear-gradient(180deg, 
-    #FEF08A 0%, 
-    #F59E0B 35%, 
-    #B45309 70%, 
-    #451A03 100%
-  );
-  border-radius: 5px;
-  border: 1.5px solid #FDE047;
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.9),
-    inset 0 1.5px 2px #FFFBEB;
-  z-index: 2;
-}
-
-.stand-crossbar::before,
-.stand-crossbar::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFF, #D97706 60%, #451A03 100%);
-  border: 1px solid #FEF08A;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-.stand-crossbar::before {
-  left: 12px;
-}
-
-.stand-crossbar::after {
-  right: 12px;
-}
-
-/* Central Axle Mast Column */
-.stand-central-mast {
-  position: absolute;
-  top: 48%;
-  bottom: -68px;
-  width: 52px;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 60%;
+  max-width: 420px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-}
-
-.mast-shaft {
-  width: 38px;
-  flex: 1;
-  background: linear-gradient(90deg, 
-    #0F172A 0%, 
-    #334155 18%, 
-    #94A3B8 38%, 
-    #FEF08A 50%, 
-    #D97706 62%, 
-    #1E293B 85%, 
-    #0F172A 100%
-  );
-  box-shadow: 
-    0 14px 30px rgba(0, 0, 0, 0.92),
-    inset 0 0 10px rgba(0, 0, 0, 0.8);
-  border-left: 2px solid rgba(254, 240, 138, 0.65);
-  border-right: 2px solid rgba(217, 119, 6, 0.85);
-}
-
-.mast-bracket {
-  width: 58px;
-  height: 16px;
-  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 40%, #B45309 75%, #451A03 100%);
-  border-radius: 5px;
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.9), inset 0 1.5px 2px #FFFBEB;
-  border: 1.5px solid #FDE047;
-}
-
-/* Heavy Weighted Base Podium Platform */
-.stand-base-podium {
-  position: absolute;
-  bottom: -78px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 74%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 3;
-}
-
-.podium-bevel {
-  width: 86%;
-  height: 14px;
-  background: linear-gradient(90deg, 
-    #78350F 0%, 
-    #D97706 18%, 
-    #FEF08A 50%, 
-    #F59E0B 82%, 
-    #78350F 100%
-  );
-  border-radius: 6px 6px 0 0;
-  box-shadow: inset 0 2px 4px #FFFBEB, 0 -3px 8px rgba(0, 0, 0, 0.7);
-  border: 1.5px solid rgba(254, 240, 138, 0.9);
-  border-bottom: none;
-}
-
-.podium-main-plate {
-  width: 100%;
-  height: 32px;
-  background: linear-gradient(180deg, #1E293B 0%, #0F172A 55%, #050B14 100%);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  border: 2px solid #F59E0B;
+  z-index: 4;
+}
+
+.ceiling-anchor-plate {
+  width: 100%;
+  height: 28px;
+  background: linear-gradient(180deg, #334155 0%, #1E293B 40%, #0F172A 100%);
+  border-radius: 6px;
+  border: 1.5px solid #F59E0B;
   box-shadow: 
-    0 20px 48px rgba(0, 0, 0, 0.98),
-    0 0 24px rgba(245, 158, 11, 0.4),
-    inset 0 2px 6px rgba(254, 240, 138, 0.6);
+    0 12px 28px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(245, 158, 11, 0.4),
+    inset 0 1px 3px rgba(254, 240, 138, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
   position: relative;
 }
 
-.podium-bolt {
-  position: absolute;
-  width: 12px;
-  height: 12px;
+.anchor-bolt {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #FFF, #F59E0B 60%, #78350F 100%);
   border: 1px solid #FEF08A;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-.podium-bolt.bolt-l {
-  left: 16px;
-}
-
-.podium-bolt.bolt-r {
-  right: 16px;
-}
-
-.podium-brand-plate {
+.anchor-brand-plate {
   font-family: var(--font-heading, 'Outfit', sans-serif);
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: #FEF08A;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 158, 11, 0.8);
   background: linear-gradient(180deg, rgba(245, 158, 11, 0.25) 0%, rgba(120, 53, 15, 0.4) 100%);
-  padding: 2px 18px;
+  padding: 1px 12px;
   border-radius: 4px;
-  border: 1px solid rgba(254, 240, 138, 0.6);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(254, 240, 138, 0.5);
 }
 
-.podium-feet-track {
-  width: 96%;
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1px;
-}
-
-.podium-foot {
-  width: 48px;
-  height: 9px;
-  background: #070B14;
-  border-radius: 3px;
-  border: 1.5px solid #78350F;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.95);
-}
-
-.wheel-outer-glow {
+/* Dual Diagonal High-Tensile Suspension Rods */
+.overhead-rod {
   position: absolute;
-  inset: -32px;
+  top: -24px;
+  height: 52%;
+  width: 14px;
+  background: linear-gradient(90deg, 
+    #0F172A 0%, 
+    #475569 25%, 
+    #E2E8F0 50%, 
+    #F59E0B 75%, 
+    #1E293B 100%
+  );
+  border-radius: 6px;
+  border: 1px solid rgba(254, 240, 138, 0.7);
+  box-shadow: 
+    0 10px 24px rgba(0, 0, 0, 0.9),
+    inset 1px 0 2px rgba(255, 255, 255, 0.6);
+  z-index: 2;
+}
+
+.overhead-rod.rod-left {
+  left: 24%;
+  transform: rotate(-18deg);
+  transform-origin: top center;
+}
+
+.overhead-rod.rod-right {
+  right: 24%;
+  transform: rotate(18deg);
+  transform-origin: top center;
+}
+
+/* Central Articulated Spine Suspension Arm */
+.overhead-spine-arm {
+  position: absolute;
+  top: -24px;
+  height: 56%;
+  width: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.spine-top-clamp {
+  width: 52px;
+  height: 14px;
+  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 40%, #B45309 75%, #451A03 100%);
+  border-radius: 4px;
+  border: 1.5px solid #FDE047;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
+}
+
+.spine-beam {
+  width: 28px;
+  flex: 1;
+  background: linear-gradient(90deg, 
+    #0F172A 0%, 
+    #334155 20%, 
+    #CBD5E1 45%, 
+    #FEF08A 55%, 
+    #D97706 70%, 
+    #0F172A 100%
+  );
+  border-left: 1.5px solid rgba(254, 240, 138, 0.6);
+  border-right: 1.5px solid rgba(217, 119, 6, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
+}
+
+.spine-mid-coupler {
+  width: 48px;
+  height: 14px;
+  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 45%, #78350F 100%);
+  border-radius: 4px;
+  border: 1.5px solid #FDE047;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.spine-lower-beam {
+  width: 32px;
+  height: 38px;
+  background: linear-gradient(90deg, #0F172A 0%, #475569 30%, #FEF08A 55%, #1E293B 100%);
+  border-left: 1.5px solid rgba(254, 240, 138, 0.6);
+  border-right: 1.5px solid rgba(217, 119, 6, 0.8);
+}
+
+.spine-hub-mount {
+  width: 72px;
+  height: 24px;
+  background: radial-gradient(ellipse at center, #FEF08A 0%, #F59E0B 50%, #78350F 100%);
+  border-radius: 12px;
+  border: 2px solid #FDE047;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 0 15px rgba(245, 158, 11, 0.6);
+}
+
+/* Mid-Air Floating Levitation Field & Ambient Ring */
+.floating-levitation-ring {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75%;
+  height: 28px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.45) 0%, rgba(37, 99, 235, 0.4) 50%, rgba(245, 158, 11, 0.2) 70%, transparent 80%);
-  filter: blur(35px);
-  z-index: 1;
-  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.55) 0%, rgba(245, 158, 11, 0.35) 45%, transparent 75%);
+  filter: blur(14px);
+  animation: pulseFloatingAura 3s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.floating-midair-shadow {
+  position: absolute;
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 80%);
+  filter: blur(16px);
+  z-index: 0;
+}
+
+@keyframes pulseFloatingAura {
+  0% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(0.92);
+  }
+  100% {
+    opacity: 0.95;
+    transform: translateX(-50%) scale(1.08);
+  }
 }
 
 .wheel-wrapper {
@@ -1739,41 +1701,53 @@ body {
     grid-template-columns: 1fr;
   }
 
-  /* Stand Responsive Overrides */
-  .stand-support-leg {
-    width: 16px;
-    bottom: -22px;
+  /* Overhead Rig Responsive Overrides */
+  .overhead-ceiling-mount {
+    top: -28px;
+    width: 75%;
   }
 
-  .stand-central-post {
-    width: 42px;
-    bottom: -22px;
+  .ceiling-anchor-plate {
+    height: 22px;
+    padding: 0 8px;
   }
 
-  .stand-post-shaft {
-    width: 30px;
+  .anchor-brand-plate {
+    font-size: 0.6rem;
+    padding: 1px 6px;
   }
 
-  .stand-post-collar {
-    width: 44px;
+  .overhead-rod {
+    width: 8px;
+    top: -14px;
+  }
+
+  .overhead-spine-arm {
+    width: 32px;
+    top: -14px;
+  }
+
+  .spine-top-clamp {
+    width: 36px;
     height: 10px;
   }
 
-  .stand-base-podium {
-    bottom: -32px;
-    height: 30px;
+  .spine-beam {
+    width: 18px;
   }
 
-  .podium-top-bevel {
-    height: 8px;
+  .spine-mid-coupler {
+    width: 34px;
+    height: 10px;
   }
 
-  .podium-body {
-    height: 20px;
+  .spine-lower-beam {
+    width: 22px;
+    height: 24px;
   }
 
-  .stand-floor-shadow {
-    bottom: -44px;
-    height: 32px;
+  .spine-hub-mount {
+    width: 50px;
+    height: 18px;
   }
 }
