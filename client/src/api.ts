@@ -56,11 +56,28 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     if (isJson) {
-      const errData = (await res.json()) as ApiErrorResponse;
-      throw new ApiError(errData.error || 'Server request failed', errData.code, errData.details);
+      const errData = (await res.json()) as any;
+      let errorMsg = 'Server request failed';
+      if (typeof errData?.error === 'string') {
+        errorMsg = errData.error;
+      } else if (typeof errData?.message === 'string') {
+        errorMsg = errData.message;
+      } else if (typeof errData === 'string') {
+        errorMsg = errData;
+      } else if (errData?.error && typeof errData.error === 'object') {
+        errorMsg = errData.error.message || JSON.stringify(errData.error);
+      }
+      throw new ApiError(errorMsg, errData?.code, errData?.details);
     }
     const text = await res.text();
-    throw new ApiError(text || `Request failed with status ${res.status}`);
+    let displayMessage = text;
+    try {
+      const parsed = JSON.parse(text);
+      displayMessage = parsed.error || parsed.message || text;
+    } catch {
+      // Not JSON
+    }
+    throw new ApiError(displayMessage || `Request failed with status ${res.status}`);
   }
 
   return (isJson ? await res.json() : (undefined as unknown)) as T;

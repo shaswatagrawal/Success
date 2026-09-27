@@ -48,12 +48,10 @@ export class AdminDashboard {
         passwordInput.value = '';
         this.closeLoginModal();
         await this.loadDashboard();
-      } catch (err) {
-        if (err instanceof ApiError) {
-          errorEl.textContent = err.message;
-        } else {
-          errorEl.textContent = 'Invalid administrator password';
-        }
+      } catch (err: any) {
+        console.error('Admin login error:', err);
+        const msg = err?.message || (typeof err === 'string' ? err : 'Invalid administrator password');
+        errorEl.textContent = typeof msg === 'string' ? msg : 'Authentication failed. Please check password.';
       }
     });
 
