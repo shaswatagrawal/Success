@@ -127,10 +127,18 @@ export class Wheel {
       this.ctx.closePath();
 
       // Realistic 3D Radial Gradient per Slice in deep rich jewel tones
+      const isMysteryBox = slot.prizeKey === 'prize_mystery_box' || slot.label.toLowerCase().includes('mystery');
       const isRed = i % 2 === 0;
       const grad = this.ctx.createRadialGradient(0, 0, 15, 0, 0, radius);
 
-      if (isRed) {
+      if (isMysteryBox) {
+        // Mysterious Royal Violet & Purple Gradient with gold highlights
+        grad.addColorStop(0, '#C084FC');
+        grad.addColorStop(0.35, '#7C3AED');
+        grad.addColorStop(0.70, '#581C87');
+        grad.addColorStop(0.92, '#3B0764');
+        grad.addColorStop(1, '#1A0033');
+      } else if (isRed) {
         // Deep Crimson Red Jewel Tone with outer rim vignette
         grad.addColorStop(0, '#FF4D4D');
         grad.addColorStop(0.35, '#DC2626');
@@ -152,8 +160,8 @@ export class Wheel {
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0);
       this.ctx.lineTo(Math.cos(startAngle) * radius, Math.sin(startAngle) * radius);
-      this.ctx.lineWidth = slot.isGrandPrize ? 3.5 : 2.5;
-      this.ctx.strokeStyle = slot.isGrandPrize
+      this.ctx.lineWidth = slot.isGrandPrize || isMysteryBox ? 3.5 : 2.5;
+      this.ctx.strokeStyle = slot.isGrandPrize || isMysteryBox
         ? '#FDE047'
         : 'rgba(254, 240, 138, 0.75)';
       this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
@@ -180,8 +188,68 @@ export class Wheel {
       // Available width at icon distance based on the slice gap/angle
       const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
 
-      // A) Draw Image Asset if available
-      if (slot.image && this.imageCache.has(slot.image)) {
+      // A) Draw Image Asset or 3D Vector Icon if available
+      if (isMysteryBox) {
+        // Draw 3D Glowing Mystery Gift Box Badge
+        this.ctx.save();
+        this.ctx.translate(iconDist, 0);
+        this.ctx.rotate(Math.PI / 2);
+
+        const baseBadgeRadius = isMobile ? 17 : 20;
+        const maxAllowedRadius = (availableWidthAtIcon * 0.76) / 2;
+        const badgeRadius = Math.max(9, Math.min(baseBadgeRadius, maxAllowedRadius));
+
+        // Glowing Purple/Gold backdrop disc
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'rgba(88, 28, 135, 0.92)';
+        this.ctx.shadowColor = 'rgba(253, 224, 71, 0.95)';
+        this.ctx.shadowBlur = Math.max(6, badgeRadius * 0.6);
+        this.ctx.shadowOffsetY = 2;
+        this.ctx.fill();
+
+        const mysteryImg = slot.image ? this.imageCache.get(slot.image) : null;
+        if (mysteryImg && mysteryImg.complete && mysteryImg.naturalWidth > 0) {
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
+          this.ctx.clip();
+          const iconSize = badgeRadius * 2.1;
+          this.ctx.drawImage(mysteryImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        } else {
+          // Render crisp 3D Golden Mystery Gift Box icon with '?'
+          const boxSize = badgeRadius * 1.1;
+          // Box base
+          this.ctx.fillStyle = '#D97706';
+          this.roundRect(-boxSize * 0.44, -boxSize * 0.25, boxSize * 0.88, boxSize * 0.72, 2);
+          this.ctx.fill();
+          // Box lid
+          this.ctx.fillStyle = '#FBBF24';
+          this.roundRect(-boxSize * 0.52, -boxSize * 0.44, boxSize * 1.04, boxSize * 0.24, 2);
+          this.ctx.fill();
+          // Golden Ribbon
+          this.ctx.fillStyle = '#FEF08A';
+          this.ctx.fillRect(-boxSize * 0.1, -boxSize * 0.44, boxSize * 0.2, boxSize * 0.9);
+          // Big bold '?' mark
+          this.ctx.font = `900 ${badgeRadius * 0.85}px var(--font-heading, 'Outfit', sans-serif)`;
+          this.ctx.fillStyle = '#FFFFFF';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+          this.ctx.shadowBlur = 3;
+          this.ctx.fillText('?', 0, boxSize * 0.08);
+        }
+        this.ctx.restore();
+
+        // 3D Polished Gold Rim
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+        this.ctx.lineWidth = Math.max(1.6, badgeRadius * 0.12);
+        this.ctx.strokeStyle = '#FDE047';
+        this.ctx.stroke();
+
+        this.ctx.restore();
+      } else if (slot.image && this.imageCache.has(slot.image)) {
         const img = this.imageCache.get(slot.image);
         if (img && img.complete && img.naturalWidth > 0) {
           this.ctx.save();

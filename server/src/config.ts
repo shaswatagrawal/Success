@@ -146,22 +146,25 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/rs100_note.jpg',
   },
 
-  // === BETTER LUCK NEXT TIME ===
+  // === RARE MYSTERY BOX ===
   {
     index: 10,
-    prizeKey: 'better_luck_6',
-    label: 'Better Luck Next Time',
-    weight: 11,
-    isWin: false,
+    prizeKey: 'prize_mystery_box',
+    label: 'Mystery Box',
+    weight: 2,
+    visualWeight: 0.45,
+    isWin: true,
     isGrandPrize: false,
-    color: '#1E40AF',
+    color: '#7C3AED',
     textColor: '#FFFFFF',
+    accentColor: '#FDE047',
+    image: '/assets/mystery_box.png',
   },
   {
     index: 11,
-    prizeKey: 'better_luck_7',
+    prizeKey: 'better_luck_6',
     label: 'Better Luck Next Time',
-    weight: 11,
+    weight: 10,
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',
@@ -202,6 +205,7 @@ export const ENV = {
   IP_SALT: process.env['IP_SALT'] ?? 'salt_for_hashing_ip_addresses_change_in_production_12345',
   SPIN_LIMIT: Number.parseInt(process.env['SPIN_LIMIT'] ?? '1', 10),
   NORMAL_PRIZE_INTERVAL: Number.parseInt(process.env['NORMAL_PRIZE_INTERVAL'] ?? '10', 10),
+  MYSTERY_BOX_INTERVAL: Number.parseInt(process.env['MYSTERY_BOX_INTERVAL'] ?? '40', 10),
   GRAND_PRIZE_INTERVAL: Number.parseInt(process.env['GRAND_PRIZE_INTERVAL'] ?? '60', 10),
   GRAND_PRIZE_MIN_SPINS: Number.parseInt(process.env['GRAND_PRIZE_MIN_SPINS'] ?? '60', 10),
   CORS_ORIGIN: (process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:3000')

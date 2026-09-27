@@ -123,18 +123,22 @@ export async function executeSpin(
   let winningSlot: (typeof SLOTS)[number];
 
   const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
-  const normalSlots = SLOTS.filter((s) => s.isWin && !s.isGrandPrize);
+  const mysterySlot = SLOTS.find((s) => s.prizeKey === 'prize_mystery_box');
+  const normalSlots = SLOTS.filter((s) => s.isWin && !s.isGrandPrize && s.prizeKey !== 'prize_mystery_box');
   const lossSlots = SLOTS.filter((s) => !s.isWin);
 
   if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_INTERVAL === 0) {
     // Grand Prize milestone (every 60 spins)
     winningSlot = grandSlot;
+  } else if (mysterySlot && globalSpinNumber > 0 && globalSpinNumber % ENV.MYSTERY_BOX_INTERVAL === 0) {
+    // Rare Mystery Box milestone (every 40 spins)
+    winningSlot = mysterySlot;
   } else if (globalSpinNumber > 0 && globalSpinNumber % ENV.NORMAL_PRIZE_INTERVAL === 0) {
     // Normal Prize milestone (every 10 spins)
     const randomNormalIndex = crypto.randomInt(0, normalSlots.length);
     winningSlot = normalSlots[randomNormalIndex] ?? normalSlots[0]!;
   } else {
-    // Better Luck for all other spins
+    // Better Luck Next Time for all other spins
     const randomLossIndex = crypto.randomInt(0, lossSlots.length);
     winningSlot = lossSlots[randomLossIndex] ?? lossSlots[0]!;
   }
@@ -156,12 +160,14 @@ export async function executeSpin(
     prizeImage = '/assets/rs500_note.jpg';
   } else if (lower.includes('100') || lower.includes('cash') || lower.includes('bonus')) {
     prizeImage = '/assets/rs100_note.jpg';
+  } else if (lower.includes('mystery') || lower.includes('box')) {
+    prizeImage = '/assets/mystery_box.png';
   } else if (lower.includes('kite') || lower.includes('changa')) {
     prizeImage = '/assets/kite_rainbow.png';
   }
 
-  // 6. Generate claim code if grand prize winner
-  const claimCode = winningSlot.isGrandPrize ? generateClaimCode() : null;
+  // 6. Generate claim code if grand prize winner or mystery box
+  const claimCode = (winningSlot.isGrandPrize || winningSlot.prizeKey === 'prize_mystery_box') ? generateClaimCode() : null;
   const ipHash = hashIp(clientIp);
 
       // 7. Persist spin record
@@ -197,6 +203,8 @@ export async function executeSpin(
       let message = 'Better luck next time! Thanks for participating.';
       if (winningSlot.isGrandPrize) {
         message = '🎉 CONGRATULATIONS! YOU WON THE GRAND PRIZE! 🎉';
+      } else if (winningSlot.prizeKey === 'prize_mystery_box') {
+        message = '🎁 WOW! YOU UNLOCKED THE EXCLUSIVE MYSTERY BOX! 🎁';
       } else if (winningSlot.isWin) {
         message = `🎉 Congratulations! You won: ${prizeLabel}!`;
       }
