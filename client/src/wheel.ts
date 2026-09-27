@@ -182,8 +182,8 @@ export class Wheel {
       this.ctx.rotate(midAngle);
 
       const isMobile = width < 460;
-      const iconDist = radius * (isMobile ? 0.52 : 0.54);
-      const textDist = radius * (isMobile ? 0.82 : 0.83);
+      const iconDist = radius * (isMobile ? 0.50 : 0.52);
+      const textDist = radius * (isMobile ? 0.81 : 0.82);
 
       // Available width at icon distance based on the slice gap/angle
       const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
@@ -195,9 +195,9 @@ export class Wheel {
         this.ctx.translate(iconDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
-        const baseBadgeRadius = isMobile ? 24 : 32;
-        const maxAllowedRadius = (availableWidthAtIcon * 0.88) / 2;
-        const badgeRadius = Math.max(14, Math.min(baseBadgeRadius, maxAllowedRadius));
+        const baseBadgeRadius = isMobile ? 26 : 38;
+        const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
+        const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
 
         // Glowing Purple/Gold backdrop disc
         this.ctx.save();
@@ -205,7 +205,7 @@ export class Wheel {
         this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
         this.ctx.fillStyle = 'rgba(88, 28, 135, 0.95)';
         this.ctx.shadowColor = 'rgba(253, 224, 71, 0.95)';
-        this.ctx.shadowBlur = Math.max(8, badgeRadius * 0.6);
+        this.ctx.shadowBlur = Math.max(10, badgeRadius * 0.65);
         this.ctx.shadowOffsetY = 2;
         this.ctx.fill();
 
@@ -214,29 +214,29 @@ export class Wheel {
           this.ctx.beginPath();
           this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
           this.ctx.clip();
-          const iconSize = badgeRadius * 2.15;
+          const iconSize = badgeRadius * 2.2;
           this.ctx.drawImage(mysteryImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         } else {
           // Render crisp 3D Golden Mystery Gift Box icon with '?'
           const boxSize = badgeRadius * 1.15;
           // Box base
           this.ctx.fillStyle = '#D97706';
-          this.roundRect(-boxSize * 0.44, -boxSize * 0.25, boxSize * 0.88, boxSize * 0.72, 2);
+          this.roundRect(-boxSize * 0.44, -boxSize * 0.25, boxSize * 0.88, boxSize * 0.72, 3);
           this.ctx.fill();
           // Box lid
           this.ctx.fillStyle = '#FBBF24';
-          this.roundRect(-boxSize * 0.52, -boxSize * 0.44, boxSize * 1.04, boxSize * 0.24, 2);
+          this.roundRect(-boxSize * 0.52, -boxSize * 0.44, boxSize * 1.04, boxSize * 0.24, 3);
           this.ctx.fill();
           // Golden Ribbon
           this.ctx.fillStyle = '#FEF08A';
           this.ctx.fillRect(-boxSize * 0.1, -boxSize * 0.44, boxSize * 0.2, boxSize * 0.9);
           // Big bold '?' mark
-          this.ctx.font = `900 ${badgeRadius * 0.9}px var(--font-heading, 'Outfit', sans-serif)`;
+          this.ctx.font = `900 ${badgeRadius * 0.95}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
           this.ctx.fillStyle = '#FFFFFF';
           this.ctx.textAlign = 'center';
           this.ctx.textBaseline = 'middle';
-          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-          this.ctx.shadowBlur = 3;
+          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+          this.ctx.shadowBlur = 4;
           this.ctx.fillText('?', 0, boxSize * 0.08);
         }
         this.ctx.restore();
@@ -244,7 +244,7 @@ export class Wheel {
         // 3D Polished Gold Rim
         this.ctx.beginPath();
         this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-        this.ctx.lineWidth = Math.max(2, badgeRadius * 0.14);
+        this.ctx.lineWidth = Math.max(2.2, badgeRadius * 0.14);
         this.ctx.strokeStyle = '#FDE047';
         this.ctx.stroke();
 
@@ -266,17 +266,17 @@ export class Wheel {
           if (isGadget) {
             // Flagship Mobile Phone, Earpods, Powerbank & Tech Gadgets
             this.ctx.rotate(Math.PI / 2);
-            const baseBadgeRadius = isMobile ? 25 : 33;
-            const maxAllowedRadius = (availableWidthAtIcon * 0.88) / 2;
-            const badgeRadius = Math.max(14, Math.min(baseBadgeRadius, maxAllowedRadius));
+            const baseBadgeRadius = isMobile ? 26 : 38;
+            const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
+            const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
 
             // Draw glowing backdrop disc with 3D shadow
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
             this.ctx.shadowColor = slot.isGrandPrize ? 'rgba(245, 158, 11, 0.95)' : 'rgba(0, 0, 0, 0.85)';
-            this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(8, badgeRadius * 0.6) : 8;
+            this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
             this.ctx.shadowOffsetY = 2;
             this.ctx.fill();
 
@@ -284,52 +284,52 @@ export class Wheel {
             this.ctx.beginPath();
             this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
             this.ctx.clip();
-            const iconSize = badgeRadius * 2.15;
+            const iconSize = badgeRadius * 2.2;
             this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
             this.ctx.restore();
 
             // 3D Metallic Gold Rim
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.lineWidth = slot.isGrandPrize ? Math.max(2.2, badgeRadius * 0.15) : 1.8;
-            this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(254, 240, 138, 0.85)';
+            this.ctx.lineWidth = slot.isGrandPrize ? Math.max(2.4, badgeRadius * 0.15) : 2;
+            this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(254, 240, 138, 0.9)';
             this.ctx.stroke();
           } else if (isNote) {
-            // Nepalese Banknote: Prominent rectangular card
+            // Nepalese Banknote: Prominent large rectangular card
             this.ctx.rotate(-Math.PI / 2);
-            const baseNoteW = isMobile ? 50 : 64;
-            const maxNoteW = Math.max(24, Math.min(baseNoteW, availableWidthAtIcon * 0.92));
+            const baseNoteW = isMobile ? 54 : 76;
+            const maxNoteW = Math.max(28, Math.min(baseNoteW, availableWidthAtIcon * 0.96));
             const noteW = maxNoteW;
             const noteH = noteW * 0.58;
 
             // Draw soft 3D shadow & card border
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            this.ctx.shadowBlur = 8;
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+            this.ctx.shadowBlur = 10;
             this.ctx.shadowOffsetY = 3;
 
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             this.roundRect(-noteW / 2 - 2, -noteH / 2 - 2, noteW + 4, noteH + 4, 4);
             this.ctx.fill();
 
             // Clip to rounded rectangle
             this.ctx.save();
             this.ctx.beginPath();
-            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3);
+            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
             this.ctx.clip();
             this.ctx.drawImage(img, -noteW / 2, -noteH / 2, noteW, noteH);
             this.ctx.restore();
 
             // Polished Gold border
             this.ctx.beginPath();
-            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3);
-            this.ctx.lineWidth = 1.8;
+            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
+            this.ctx.lineWidth = 2;
             this.ctx.strokeStyle = '#FDE047';
             this.ctx.stroke();
           } else {
             // Graphic icon
             this.ctx.rotate(Math.PI / 2);
-            const baseSize = isMobile ? 42 : 54;
-            const kiteSize = Math.max(20, Math.min(baseSize, availableWidthAtIcon * 0.88));
+            const baseSize = isMobile ? 48 : 68;
+            const kiteSize = Math.max(24, Math.min(baseSize, availableWidthAtIcon * 0.92));
 
             this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
             this.ctx.shadowBlur = 8;
@@ -356,18 +356,18 @@ export class Wheel {
 
       if (isBetterLuck) {
         // Better Luck Next Time: Draw bold high-contrast 2-line text
-        const textCenterDist = radius * (isMobile ? 0.65 : 0.67);
-        const availableW = 2 * textCenterDist * Math.tan(sliceAngle / 2) * 0.94;
+        const textCenterDist = radius * (isMobile ? 0.64 : 0.65);
+        const availableW = 2 * textCenterDist * Math.tan(sliceAngle / 2) * 0.96;
 
-        let lineFontSize = isMobile ? 11 : 13.5;
-        this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+        let lineFontSize = isMobile ? 12 : 16;
+        this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
         // Check if fits, shrink slightly if needed
         let m1 = this.ctx.measureText('Better Luck');
         let m2 = this.ctx.measureText('Next Time');
-        while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 8) {
+        while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 9) {
           lineFontSize -= 0.5;
-          this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+          this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
           m1 = this.ctx.measureText('Better Luck');
           m2 = this.ctx.measureText('Next Time');
         }
@@ -376,11 +376,11 @@ export class Wheel {
         this.ctx.translate(textCenterDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
-        const lineSpacing = lineFontSize * 0.78;
+        const lineSpacing = lineFontSize * 0.76;
 
         // Dark outline pass for extreme contrast
-        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
-        this.ctx.lineWidth = 3.5;
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
+        this.ctx.lineWidth = 4;
         this.ctx.lineJoin = 'round';
         this.ctx.strokeText('Better Luck', 0, -lineSpacing, availableW);
         this.ctx.strokeText('Next Time', 0, lineSpacing, availableW);
@@ -397,14 +397,14 @@ export class Wheel {
         this.ctx.restore();
       } else {
         // Prize Slot Label: Prominent bold typography with dark outline
-        const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.94;
+        const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.96;
         let displayLabel = slot.label;
         if (slot.isGrandPrize && !displayLabel.includes('⭐')) {
           displayLabel = `⭐ ${slot.label}`;
         }
 
         const words = displayLabel.split(' ');
-        const shouldSplit = words.length === 2 && (displayLabel.length > 9 || availableTextWidth < 80);
+        const shouldSplit = words.length === 2 && (displayLabel.length > 8 || availableTextWidth < 90);
 
         this.ctx.save();
         this.ctx.translate(textDist, 0);
@@ -412,22 +412,22 @@ export class Wheel {
 
         if (shouldSplit) {
           // Render as 2 compact stacked lines with larger font
-          let lineSize = slot.isGrandPrize ? (isMobile ? 12 : 14.5) : (isMobile ? 11 : 13);
-          this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', sans-serif)`;
+          let lineSize = slot.isGrandPrize ? (isMobile ? 13.5 : 18) : (isMobile ? 12.5 : 16);
+          this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
           let mw1 = this.ctx.measureText(words[0]!);
           let mw2 = this.ctx.measureText(words[1]!);
-          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 8) {
+          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 9) {
             lineSize -= 0.5;
-            this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', sans-serif)`;
+            this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
             mw1 = this.ctx.measureText(words[0]!);
             mw2 = this.ctx.measureText(words[1]!);
           }
 
-          const lineSpacing = lineSize * 0.72;
+          const lineSpacing = lineSize * 0.74;
 
           this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.lineWidth = 3.5;
+          this.ctx.lineWidth = 4;
           this.ctx.lineJoin = 'round';
           this.ctx.strokeText(words[0]!, 0, -lineSpacing, availableTextWidth);
           this.ctx.strokeText(words[1]!, 0, lineSpacing, availableTextWidth);
@@ -441,18 +441,18 @@ export class Wheel {
           this.ctx.fillText(words[1]!, 0, lineSpacing, availableTextWidth);
         } else {
           // Single-line label
-          let fontSize = slot.isGrandPrize ? (isMobile ? 12 : 14.5) : (isMobile ? 11 : 13.5);
-          this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+          let fontSize = slot.isGrandPrize ? (isMobile ? 13.5 : 18) : (isMobile ? 12.5 : 16.5);
+          this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
           let textMetrics = this.ctx.measureText(displayLabel);
-          while (textMetrics.width > availableTextWidth && fontSize > 8) {
+          while (textMetrics.width > availableTextWidth && fontSize > 9) {
             fontSize -= 0.5;
-            this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+            this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
             textMetrics = this.ctx.measureText(displayLabel);
           }
 
           this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.lineWidth = 3.5;
+          this.ctx.lineWidth = 4;
           this.ctx.lineJoin = 'round';
           this.ctx.strokeText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
 
