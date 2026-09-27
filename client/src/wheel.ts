@@ -126,38 +126,46 @@ export class Wheel {
       this.ctx.arc(0, 0, radius, startAngle, endAngle);
       this.ctx.closePath();
 
-      // Radial Gradient per Slice strictly in Red and Blue theme
+      // Realistic 3D Radial Gradient per Slice in deep rich jewel tones
       const isRed = i % 2 === 0;
-      const grad = this.ctx.createRadialGradient(0, 0, 20, 0, 0, radius);
+      const grad = this.ctx.createRadialGradient(0, 0, 15, 0, 0, radius);
 
       if (isRed) {
-        // Radiant Crimson Red Slice
-        grad.addColorStop(0, '#EF4444');
-        grad.addColorStop(0.4, '#DC2626');
-        grad.addColorStop(0.75, '#991B1B');
-        grad.addColorStop(1, '#500724');
+        // Deep Crimson Red Jewel Tone with outer rim vignette
+        grad.addColorStop(0, '#FF4D4D');
+        grad.addColorStop(0.35, '#DC2626');
+        grad.addColorStop(0.70, '#991B1B');
+        grad.addColorStop(0.92, '#450A0A');
+        grad.addColorStop(1, '#1A0207');
       } else {
-        // Electric Royal Blue Slice
+        // Royal Sapphire Blue Jewel Tone with outer rim vignette
         grad.addColorStop(0, '#60A5FA');
-        grad.addColorStop(0.4, '#2563EB');
-        grad.addColorStop(0.75, '#1E3A8A');
-        grad.addColorStop(1, '#0F172A');
+        grad.addColorStop(0.35, '#2563EB');
+        grad.addColorStop(0.70, '#1E3A8A');
+        grad.addColorStop(0.92, '#0F172A');
+        grad.addColorStop(1, '#050B14');
       }
       this.ctx.fillStyle = grad;
       this.ctx.fill();
 
-      // Slice Outer Border / Golden Separator Line
-      this.ctx.lineWidth = 2.5;
-      this.ctx.strokeStyle = slot.isGrandPrize
-        ? 'rgba(254, 240, 138, 0.9)'
-        : 'rgba(255, 255, 255, 0.28)';
-      this.ctx.stroke();
-
-      // Draw Inner Concentric Highlight Ring
+      // 3D Extruded Metal Divider Rib / Separator Line
       this.ctx.beginPath();
-      this.ctx.arc(0, 0, radius * 0.96, startAngle, endAngle);
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(Math.cos(startAngle) * radius, Math.sin(startAngle) * radius);
+      this.ctx.lineWidth = slot.isGrandPrize ? 3.5 : 2.5;
+      this.ctx.strokeStyle = slot.isGrandPrize
+        ? '#FDE047'
+        : 'rgba(254, 240, 138, 0.75)';
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      this.ctx.shadowBlur = 3;
+      this.ctx.stroke();
+      this.ctx.shadowBlur = 0; // Reset shadow
+
+      // Inner Concentric Accent Track
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, radius * 0.95, startAngle, endAngle);
       this.ctx.lineWidth = 1;
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
       this.ctx.stroke();
 
       // 2. Draw Slice Content (Image Icon + Label)
@@ -194,13 +202,14 @@ export class Wheel {
             const maxAllowedRadius = (availableWidthAtIcon * 0.76) / 2;
             const badgeRadius = Math.max(9, Math.min(baseBadgeRadius, maxAllowedRadius));
 
-            // Draw glowing backdrop disc
+            // Draw glowing backdrop disc with 3D shadow
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-            this.ctx.shadowColor = slot.isGrandPrize ? 'rgba(245, 158, 11, 0.9)' : 'rgba(0, 0, 0, 0.7)';
-            this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(4, badgeRadius * 0.5) : 6;
+            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+            this.ctx.shadowColor = slot.isGrandPrize ? 'rgba(245, 158, 11, 0.95)' : 'rgba(0, 0, 0, 0.8)';
+            this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(6, badgeRadius * 0.6) : 6;
+            this.ctx.shadowOffsetY = 2;
             this.ctx.fill();
 
             // Clip and draw image cleanly inside circular badge
@@ -211,26 +220,26 @@ export class Wheel {
             this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
             this.ctx.restore();
 
-            // Gold / Accent rim
+            // 3D Metallic Gold Rim
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.lineWidth = slot.isGrandPrize ? Math.max(1.5, badgeRadius * 0.12) : 1.5;
-            this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(255, 255, 255, 0.45)';
+            this.ctx.lineWidth = slot.isGrandPrize ? Math.max(1.8, badgeRadius * 0.14) : 1.5;
+            this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(254, 240, 138, 0.8)';
             this.ctx.stroke();
           } else if (isNote) {
-            // Nepalese Banknote: Proportional to gap width
+            // Nepalese Banknote: Proportional to gap width with 3D drop shadow
             this.ctx.rotate(-Math.PI / 2);
             const baseNoteW = isMobile ? 36 : 44;
             const maxNoteW = Math.max(18, Math.min(baseNoteW, availableWidthAtIcon * 0.78));
             const noteW = maxNoteW;
             const noteH = noteW * 0.56;
 
-            // Draw soft shadow & card border
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-            this.ctx.shadowBlur = 5;
-            this.ctx.shadowOffsetY = 2;
+            // Draw soft 3D shadow & card border
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+            this.ctx.shadowBlur = 6;
+            this.ctx.shadowOffsetY = 3;
 
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             this.roundRect(-noteW / 2 - 1.5, -noteH / 2 - 1.5, noteW + 3, noteH + 3, 3);
             this.ctx.fill();
 
@@ -242,10 +251,10 @@ export class Wheel {
             this.ctx.drawImage(img, -noteW / 2, -noteH / 2, noteW, noteH);
             this.ctx.restore();
 
-            // Gold border
+            // Polished Gold border
             this.ctx.beginPath();
             this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 2.5);
-            this.ctx.lineWidth = 1.2;
+            this.ctx.lineWidth = 1.4;
             this.ctx.strokeStyle = '#FDE047';
             this.ctx.stroke();
           } else {
@@ -254,7 +263,7 @@ export class Wheel {
             const baseSize = isMobile ? 32 : 38;
             const kiteSize = Math.max(16, Math.min(baseSize, availableWidthAtIcon * 0.75));
 
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
             this.ctx.shadowBlur = 6;
             this.ctx.shadowOffsetY = 2;
 
@@ -283,6 +292,8 @@ export class Wheel {
         this.ctx.strokeStyle = '#FFFFFF';
         this.ctx.lineWidth = isMobile ? 2.0 : 2.5;
         this.ctx.lineCap = 'round';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.shadowBlur = 3;
         this.ctx.stroke();
 
         // Arrow head on reload circle
@@ -330,11 +341,11 @@ export class Wheel {
 
       this.ctx.fillStyle = slot.textColor || '#FFFFFF';
 
-      // Text Shadow for Readability
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-      this.ctx.shadowBlur = 5;
-      this.ctx.shadowOffsetX = 1;
-      this.ctx.shadowOffsetY = 1;
+      // 3D Text Shadow for Maximum Contrast & Readability
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+      this.ctx.shadowBlur = 6;
+      this.ctx.shadowOffsetX = 1.5;
+      this.ctx.shadowOffsetY = 1.5;
 
       // Draw label rotated outward with maxWidth safety
       this.ctx.save();
@@ -346,61 +357,110 @@ export class Wheel {
       this.ctx.restore();
     }
 
-    // 3. Draw Outer Decorative Ring with Metallic Gold Rim
+    // 2.5 Draw Realistic Glass Specular Sheen / Acrylic Reflection over Wheel Face
+    this.ctx.save();
+    const glossGrad = this.ctx.createLinearGradient(-radius * 0.8, -radius * 0.8, radius * 0.4, radius * 0.4);
+    glossGrad.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+    glossGrad.addColorStop(0.45, 'rgba(255, 255, 255, 0.04)');
+    glossGrad.addColorStop(0.7, 'rgba(255, 255, 255, 0)');
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, radius - 2, 0, 2 * Math.PI);
+    this.ctx.fillStyle = glossGrad;
+    this.ctx.fill();
+
+    // Inner Perimeter Recessed Drop Shadow (Dish Depth Effect)
+    const insetShadow = this.ctx.createRadialGradient(0, 0, radius * 0.88, 0, 0, radius);
+    insetShadow.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    insetShadow.addColorStop(0.7, 'rgba(0, 0, 0, 0.25)');
+    insetShadow.addColorStop(1, 'rgba(0, 0, 0, 0.65)');
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    this.ctx.fillStyle = insetShadow;
+    this.ctx.fill();
+    this.ctx.restore();
+
+    // 3. Draw Heavy 3D Casino Golden Outer Rim
     this.ctx.restore(); // Undo rotation for stationary border elements
 
     this.ctx.save();
     this.ctx.translate(centerX, centerY);
 
-    // Outer Casino Ring Base
+    // Deep Dark Base Shadow under the rim
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius + 2, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 16;
-    const rimGrad = this.ctx.createLinearGradient(-radius, -radius, radius, radius);
-    rimGrad.addColorStop(0, '#FEF08A');
-    rimGrad.addColorStop(0.25, '#F59E0B');
-    rimGrad.addColorStop(0.5, '#78350F');
-    rimGrad.addColorStop(0.75, '#FBBF24');
-    rimGrad.addColorStop(1, '#FEF08A');
-    this.ctx.strokeStyle = rimGrad;
-    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    this.ctx.shadowBlur = 12;
+    this.ctx.arc(0, 0, radius + 4, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 22;
+    this.ctx.strokeStyle = '#1E1005';
+    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    this.ctx.shadowBlur = 18;
+    this.ctx.shadowOffsetY = 6;
     this.ctx.stroke();
 
-    // Inner Gold Bevel Line
+    // Main 3D Metallic Casino Gold Rim with Rich Light Highlights
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius - 6, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = 'rgba(254, 240, 138, 0.8)';
+    this.ctx.arc(0, 0, radius + 2, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 18;
+    const rimGrad = this.ctx.createLinearGradient(-radius, -radius, radius, radius);
+    rimGrad.addColorStop(0, '#FFFBEB');
+    rimGrad.addColorStop(0.20, '#FDE047');
+    rimGrad.addColorStop(0.40, '#D97706');
+    rimGrad.addColorStop(0.60, '#78350F');
+    rimGrad.addColorStop(0.80, '#FBBF24');
+    rimGrad.addColorStop(1, '#FFFBEB');
+    this.ctx.strokeStyle = rimGrad;
     this.ctx.shadowBlur = 0;
     this.ctx.stroke();
 
-    // 4. Draw Edge Pins (Ticking Pegs) on the Rim (rotating with the wheel)
+    // Inner Fine Polished Brass Bevel Lines
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, radius - 7, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = 'rgba(254, 240, 138, 0.95)';
+    this.ctx.stroke();
+
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, radius + 10, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 1.5;
+    this.ctx.strokeStyle = 'rgba(255, 251, 235, 0.8)';
+    this.ctx.stroke();
+
+    // 4. Draw 3D Chrome & Brass Edge Pins (Ticking Pegs) rotating with the wheel
     this.ctx.rotate(this.currentRotation);
     for (let i = 0; i < this.slots.length; i++) {
       const pinAngle = sliceAngles[i]!.start;
       const pinX = Math.cos(pinAngle) * (radius + 2);
       const pinY = Math.sin(pinAngle) * (radius + 2);
 
-      // Pin Shadow & Outer Chrome/Gold Rim
+      // Pin Cast Drop Shadow
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(pinX + 1.5, pinY + 1.5, 6, 0, 2 * Math.PI);
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      this.ctx.shadowBlur = 5;
+      this.ctx.fill();
+      this.ctx.restore();
+
+      // Pin Brass Collar Ring Base
       this.ctx.beginPath();
       this.ctx.arc(pinX, pinY, 5.5, 0, 2 * Math.PI);
+      this.ctx.fillStyle = '#B45309';
+      this.ctx.fill();
+
+      // Pin 3D Spherical Chrome Core
+      this.ctx.beginPath();
+      this.ctx.arc(pinX, pinY, 4.2, 0, 2 * Math.PI);
+      const chromeGrad = this.ctx.createRadialGradient(pinX - 1.2, pinY - 1.2, 0.5, pinX, pinY, 4.2);
+      chromeGrad.addColorStop(0, '#FFFFFF');
+      chromeGrad.addColorStop(0.35, '#E2E8F0');
+      chromeGrad.addColorStop(0.70, '#64748B');
+      chromeGrad.addColorStop(1, '#1E293B');
+      this.ctx.fillStyle = chromeGrad;
+      this.ctx.fill();
+
+      // Pin Sharp White Light Glint
+      this.ctx.beginPath();
+      this.ctx.arc(pinX - 1.3, pinY - 1.3, 1.2, 0, 2 * Math.PI);
       this.ctx.fillStyle = '#FFFFFF';
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      this.ctx.shadowBlur = 4;
-      this.ctx.fill();
-
-      // Pin Core Gem
-      this.ctx.beginPath();
-      this.ctx.arc(pinX, pinY, 3.5, 0, 2 * Math.PI);
-      this.ctx.fillStyle = '#F59E0B';
-      this.ctx.shadowBlur = 0;
-      this.ctx.fill();
-
-      // Pin Light Glint
-      this.ctx.beginPath();
-      this.ctx.arc(pinX - 1, pinY - 1, 1.2, 0, 2 * Math.PI);
-      this.ctx.fillStyle = '#FFFBEB';
       this.ctx.fill();
     }
 

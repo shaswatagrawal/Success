@@ -323,10 +323,10 @@ body {
 
 .wheel-outer-glow {
   position: absolute;
-  inset: -20px;
+  inset: -25px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.35) 0%, rgba(37, 99, 235, 0.3) 55%, transparent 75%);
-  filter: blur(24px);
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, rgba(37, 99, 235, 0.35) 50%, rgba(245, 158, 11, 0.15) 70%, transparent 80%);
+  filter: blur(28px);
   z-index: 1;
   pointer-events: none;
 }
@@ -336,7 +336,10 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.2);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.95),
+    0 0 35px rgba(245, 158, 11, 0.3),
+    inset 0 0 20px rgba(0, 0, 0, 0.8);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -349,12 +352,13 @@ body {
   display: block;
   border-radius: 50%;
   cursor: grab;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
 }
 
-/* Wheel Pointer */
+/* Wheel Pointer / Stopper */
 .wheel-pointer-container {
   position: absolute;
-  top: -18px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -363,49 +367,51 @@ body {
 
 .wheel-pointer {
   position: relative;
-  width: 44px;
-  height: 52px;
+  width: 46px;
+  height: 56px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.85));
   transition: transform 0.08s ease-out;
-  transform-origin: 50% 10px;
+  transform-origin: 50% 12px;
 }
 
 .wheel-pointer.ticking {
-  transform: rotate(-12deg);
+  transform: rotate(-14deg);
 }
 
 .pointer-arrow {
   width: 0;
   height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-top: 40px solid #F59E0B;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-top: 44px solid #F59E0B;
   position: relative;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
 .pointer-arrow::after {
   content: '';
   position: absolute;
-  top: -38px;
-  left: -17px;
+  top: -42px;
+  left: -18px;
   width: 0;
   height: 0;
-  border-left: 17px solid transparent;
-  border-right: 17px solid transparent;
-  border-top: 34px solid #FEF08A;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 38px solid #FEF08A;
 }
 
 .pointer-jewel {
   position: absolute;
-  top: 2px;
-  width: 16px;
-  height: 16px;
-  background: radial-gradient(circle at 30% 30%, #FFF, #EF4444);
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle at 35% 30%, #FFF, #EF4444 60%, #991B1B 100%);
   border-radius: 50%;
-  box-shadow: 0 0 8px #EF4444;
+  border: 1.5px solid #FEF08A;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Center Hub Spin Button */
@@ -414,15 +420,18 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 110px;
-  height: 110px;
+  width: 114px;
+  height: 114px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #1E293B, #0F172A);
-  border: 4px solid #F59E0B;
+  background: radial-gradient(circle at 38% 32%, #1E293B 0%, #0F172A 65%, #020617 100%);
+  border: none;
   box-shadow:
-    0 0 0 4px rgba(245, 158, 11, 0.3),
-    0 10px 25px rgba(0, 0, 0, 0.8),
-    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    0 0 0 4px #F59E0B,
+    0 0 0 6px #78350F,
+    0 0 0 9px rgba(254, 240, 138, 0.5),
+    0 18px 40px rgba(0, 0, 0, 0.95),
+    inset 0 4px 8px rgba(255, 255, 255, 0.3),
+    inset 0 -6px 14px rgba(0, 0, 0, 0.9);
   cursor: pointer;
   z-index: 5;
   display: flex;
@@ -434,21 +443,28 @@ body {
 
 .wheel-hub-btn:hover:not(:disabled) {
   transform: translate(-50%, -50%) scale(1.08);
-  border-color: #FCD34D;
   box-shadow:
-    0 0 0 6px rgba(245, 158, 11, 0.5),
-    0 15px 30px rgba(0, 0, 0, 0.9),
-    0 0 20px rgba(245, 158, 11, 0.4);
+    0 0 0 5px #FCD34D,
+    0 0 0 8px #92400E,
+    0 0 0 12px rgba(254, 240, 138, 0.7),
+    0 22px 45px rgba(0, 0, 0, 0.98),
+    0 0 25px rgba(245, 158, 11, 0.6),
+    inset 0 4px 8px rgba(255, 255, 255, 0.4);
 }
 
 .wheel-hub-btn:active:not(:disabled) {
   transform: translate(-50%, -50%) scale(0.95);
+  box-shadow:
+    0 0 0 3px #F59E0B,
+    0 0 0 5px #78350F,
+    0 8px 20px rgba(0, 0, 0, 0.9),
+    inset 0 6px 12px rgba(0, 0, 0, 0.9);
 }
 
 .wheel-hub-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   cursor: not-allowed;
-  filter: grayscale(0.5);
+  filter: grayscale(0.4);
 }
 
 .hub-inner {
@@ -460,18 +476,21 @@ body {
 
 .hub-spin-text {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.55rem;
   font-weight: 900;
   letter-spacing: 0.08em;
-  color: #FEF08A;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FEF08A 35%, #F59E0B 70%, #B45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95));
 }
 
 .hub-sub-text {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.15em;
-  color: var(--text-muted);
+  letter-spacing: 0.16em;
+  color: #FEF08A;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 /* Participant Status Card */
