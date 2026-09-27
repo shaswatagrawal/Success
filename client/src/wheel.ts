@@ -344,8 +344,6 @@ export class Wheel {
       this.ctx.restore();
 
       this.ctx.restore();
-
-      this.ctx.restore();
     }
 
     // 3. Draw Outer Decorative Ring with Metallic Gold Rim
