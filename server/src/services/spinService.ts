@@ -174,10 +174,10 @@ export async function executeSpin(
     prizeImage = '/assets/mobile_flagship.jpg';
   } else if (lower.includes('earpod') || lower.includes('earbud') || lower.includes('airpod')) {
     prizeImage = '/assets/earpods_pro.jpg';
-  } else if (lower.includes('500')) {
-    prizeImage = '/assets/rs500_note.jpg';
-  } else if (lower.includes('100') || lower.includes('cash') || lower.includes('bonus')) {
-    prizeImage = '/assets/rs100_note.jpg';
+  } else if (lower.includes('500') || lower.includes('ntc')) {
+    prizeImage = '/assets/ntc_logo.png';
+  } else if (lower.includes('100') || lower.includes('ncell') || lower.includes('cash') || lower.includes('bonus')) {
+    prizeImage = '/assets/ncell_logo.png';
   } else if (lower.includes('mystery') || lower.includes('box')) {
     prizeImage = '/assets/mystery_box.png';
   } else if (lower.includes('kite') || lower.includes('changa')) {
@@ -312,10 +312,10 @@ export async function getPublicWheelConfig(): Promise<readonly PublicSlotConfig[
       image = '/assets/mobile_flagship.jpg';
     } else if (lower.includes('earpod') || lower.includes('earbud') || lower.includes('airpod')) {
       image = '/assets/earpods_pro.jpg';
-    } else if (lower.includes('500')) {
-      image = '/assets/rs500_note.jpg';
-    } else if (lower.includes('100') || lower.includes('cash') || lower.includes('bonus')) {
-      image = '/assets/rs100_note.jpg';
+    } else if (lower.includes('500') || lower.includes('ntc')) {
+      image = '/assets/ntc_logo.png';
+    } else if (lower.includes('100') || lower.includes('ncell') || lower.includes('cash') || lower.includes('bonus')) {
+      image = '/assets/ncell_logo.png';
     } else if (lower.includes('kite') || lower.includes('changa')) {
       image = '/assets/kite_rainbow.png';
     }

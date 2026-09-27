@@ -255,16 +255,18 @@ export class Wheel {
           this.ctx.save();
           this.ctx.translate(iconDist, 0);
 
-          const isNote = slot.image.includes('note') || slot.image.includes('rs') || slot.label.toLowerCase().includes('balance');
+          const isNote = (slot.image.includes('note') || slot.image.includes('rs')) && !slot.image.includes('ncell') && !slot.image.includes('ntc');
+          const isTelecom = slot.image.includes('ncell') || slot.image.includes('ntc');
           const isGadget =
             slot.image.includes('mobile') ||
             slot.image.includes('phone') ||
             slot.image.includes('earpod') ||
             slot.image.includes('powerbank') ||
-            slot.image.includes('charger');
+            slot.image.includes('charger') ||
+            isTelecom;
 
           if (isGadget) {
-            // Flagship Mobile Phone, Earpods, Powerbank & Tech Gadgets
+            // Flagship Mobile Phone, Earpods, Powerbank & Telecom Logos
             this.ctx.rotate(Math.PI / 2);
             const baseBadgeRadius = isMobile ? 26 : 38;
             const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
@@ -274,8 +276,12 @@ export class Wheel {
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
-            this.ctx.shadowColor = slot.isGrandPrize ? 'rgba(245, 158, 11, 0.95)' : 'rgba(0, 0, 0, 0.85)';
+            this.ctx.fillStyle = isTelecom
+              ? (slot.image.includes('ncell') ? '#FFFFFF' : '#044C8C')
+              : 'rgba(15, 23, 42, 0.95)';
+            this.ctx.shadowColor = slot.isGrandPrize
+              ? 'rgba(245, 158, 11, 0.95)'
+              : 'rgba(0, 0, 0, 0.85)';
             this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
             this.ctx.shadowOffsetY = 2;
             this.ctx.fill();
@@ -284,7 +290,7 @@ export class Wheel {
             this.ctx.beginPath();
             this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
             this.ctx.clip();
-            const iconSize = badgeRadius * 2.2;
+            const iconSize = isTelecom ? badgeRadius * 1.95 : badgeRadius * 2.2;
             this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
             this.ctx.restore();
 

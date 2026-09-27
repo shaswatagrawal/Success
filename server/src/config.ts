@@ -117,7 +117,7 @@ export const SLOTS: readonly SlotConfig[] = [
     color: '#B91C1C',
     textColor: '#FFFFFF',
     accentColor: '#F87171',
-    image: '/assets/rs500_note.jpg',
+    image: '/assets/ntc_logo.png',
   },
 
   // === BETTER LUCK NEXT TIME ===
@@ -143,7 +143,7 @@ export const SLOTS: readonly SlotConfig[] = [
     color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
-    image: '/assets/rs100_note.jpg',
+    image: '/assets/ncell_logo.png',
   },
 
   // === RARE MYSTERY BOX ===

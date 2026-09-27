@@ -86,7 +86,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     color: '#B91C1C',
     textColor: '#FFFFFF',
     accentColor: '#F87171',
-    image: '/assets/rs500_note.jpg',
+    image: '/assets/ntc_logo.png',
   },
   {
     index: 8,
@@ -106,7 +106,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
-    image: '/assets/rs100_note.jpg',
+    image: '/assets/ncell_logo.png',
   },
   {
     index: 10,
@@ -583,7 +583,7 @@ class App {
     if (titleEl) titleEl.textContent = info.title;
     if (iconEl) {
       if (info.image) {
-        const isNote = info.image.includes('note') || info.image.includes('rs');
+        const isNote = (info.image.includes('note') || info.image.includes('rs')) && !info.image.includes('ncell') && !info.image.includes('ntc');
         iconEl.innerHTML = `<div class="result-img-wrapper ${isNote ? 'note-wrapper' : ''}"><img src="${info.image}" alt="${info.prizeName}" class="result-won-img ${isNote ? 'is-note' : ''}" /></div>`;
       } else {
         iconEl.textContent = info.isGrandPrize ? '🏆' : info.isWin ? '🎁' : '🍀';
