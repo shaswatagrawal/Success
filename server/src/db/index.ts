@@ -121,8 +121,8 @@ export function generateId(): string {
 export const mongoClient = new MongoClient(ENV.MONGODB_URI, {
   maxPoolSize: 10,
   minPoolSize: 1,
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 2500,
+  connectTimeoutMS: 2500,
 });
 
 let isMongoReady = false;
@@ -146,6 +146,7 @@ export async function initDatabase(): Promise<void> {
         console.log(`🍃 Connected to MongoDB Atlas (${ENV.DATABASE_NAME})`);
       } catch (err) {
         isMongoReady = false;
+        connectPromise = null;
         console.warn('⚠️ MongoDB Atlas connection note:', err instanceof Error ? err.message : err);
       }
     })();

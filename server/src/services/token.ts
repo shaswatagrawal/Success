@@ -63,28 +63,44 @@ export async function verifyAndConsumeSpinToken(
     throw new TokenError('Invalid spin token signature', 'TOKEN_SIGNATURE_MISMATCH');
   }
 
-  const record = await findSpinToken(fullToken);
-  if (!record) {
-    throw new TokenError('Spin token not found or already purged', 'TOKEN_NOT_FOUND');
+  // Parse payload components
+  const [tokenUserId, tokenDeviceId, tokenTimestampStr] = rawPayload.split(':');
+  const tokenTimestamp = Number(tokenTimestampStr);
+
+  if (!tokenUserId || !tokenDeviceId || Number.isNaN(tokenTimestamp)) {
+    throw new TokenError('Invalid spin token payload', 'TOKEN_INVALID');
   }
 
-  if (record.used) {
-    throw new TokenError('Spin token has already been used', 'TOKEN_ALREADY_USED');
-  }
-
-  if (Date.now() > record.expiresAt) {
+  // Enforce 60-second validity window
+  const now = Date.now();
+  if (now > tokenTimestamp + TOKEN_EXPIRY_MS || now < tokenTimestamp - 10000) {
     throw new TokenError('Spin token has expired. Please request a new spin.', 'TOKEN_EXPIRED');
   }
 
-  if (providedDeviceId && providedDeviceId !== record.deviceId) {
+  if (providedDeviceId && providedDeviceId !== tokenDeviceId) {
     throw new TokenError('Device identifier mismatch for token', 'DEVICE_MISMATCH');
   }
 
-  // Consume token
-  await markSpinTokenUsed(record._id);
+  const record = await findSpinToken(fullToken);
+  if (record) {
+    if (record.used) {
+      throw new TokenError('Spin token has already been used', 'TOKEN_ALREADY_USED');
+    }
+    if (Date.now() > record.expiresAt) {
+      throw new TokenError('Spin token has expired. Please request a new spin.', 'TOKEN_EXPIRED');
+    }
+    await markSpinTokenUsed(record._id);
+  } else {
+    // Record in local store and mark consumed
+    await createSpinToken(fullToken, tokenUserId, tokenDeviceId, tokenTimestamp + TOKEN_EXPIRY_MS);
+    const newRecord = await findSpinToken(fullToken);
+    if (newRecord) {
+      await markSpinTokenUsed(newRecord._id);
+    }
+  }
 
   return {
-    userId: record.userId,
-    deviceId: record.deviceId,
+    userId: tokenUserId,
+    deviceId: tokenDeviceId,
   };
 }

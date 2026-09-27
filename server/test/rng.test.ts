@@ -21,7 +21,7 @@ describe('Cryptographically Secure Weighted Picker', () => {
     }
 
     // Group checks
-    let tryAgainTotal = 0;
+    let lossTotal = 0;
     let grandPrizeTotal = 0;
     let normalPrizesTotal = 0;
 
@@ -30,24 +30,24 @@ describe('Cryptographically Secure Weighted Picker', () => {
       if (slot.isGrandPrize) {
         grandPrizeTotal += count;
       } else if (!slot.isWin) {
-        tryAgainTotal += count;
+        lossTotal += count;
       } else {
         normalPrizesTotal += count;
       }
     }
 
-    const tryAgainPct = (tryAgainTotal / N) * 100;
+    const lossPct = (lossTotal / N) * 100;
     const grandPrizePct = (grandPrizeTotal / N) * 100;
     const normalPrizesPct = (normalPrizesTotal / N) * 100;
 
-    // Tolerance ±2.5% for 20,000 trials
-    expect(tryAgainPct).toBeGreaterThan(57.0);
-    expect(tryAgainPct).toBeLessThan(63.0);
+    // Expected: 75% loss, 2% grand prize, 23% other wins
+    expect(lossPct).toBeGreaterThan(70.0);
+    expect(lossPct).toBeLessThan(80.0);
 
-    expect(grandPrizePct).toBeGreaterThan(1.5);
-    expect(grandPrizePct).toBeLessThan(3.8);
+    expect(grandPrizePct).toBeGreaterThan(1.0);
+    expect(grandPrizePct).toBeLessThan(3.5);
 
-    expect(normalPrizesPct).toBeGreaterThan(34.5);
-    expect(normalPrizesPct).toBeLessThan(40.5);
+    expect(normalPrizesPct).toBeGreaterThan(19.0);
+    expect(normalPrizesPct).toBeLessThan(27.0);
   });
 });

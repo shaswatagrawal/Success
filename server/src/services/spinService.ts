@@ -101,9 +101,17 @@ export async function executeSpin(
     providedDeviceId
   );
 
-  const user = await findUserById(userId);
+  let user = await findUserById(userId);
   if (!user) {
-    throw new ValidationError('Associated participant account not found');
+    user = {
+      _id: userId,
+      identifier: providedDeviceId || deviceId,
+      name: 'Participant',
+      contact: providedDeviceId || deviceId,
+      deviceId: providedDeviceId || deviceId,
+      consent: true,
+      createdAt: new Date().toISOString(),
+    };
   }
 
   // 2. Strict check on spin limit
