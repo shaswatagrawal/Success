@@ -80,7 +80,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 7,
     prizeKey: 'prize_500_balance',
-    label: '500 Balance',
+    label: '500 Topup',
     isWin: true,
     isGrandPrize: false,
     color: '#B91C1C',
@@ -100,7 +100,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 9,
     prizeKey: 'prize_100_balance',
-    label: '100 Balance',
+    label: '100 Topup',
     isWin: true,
     isGrandPrize: false,
     color: '#DC2626',
@@ -583,8 +583,18 @@ class App {
     if (titleEl) titleEl.textContent = info.title;
     if (iconEl) {
       if (info.image) {
-        const isNote = (info.image.includes('note') || info.image.includes('rs')) && !info.image.includes('ncell') && !info.image.includes('ntc');
-        iconEl.innerHTML = `<div class="result-img-wrapper ${isNote ? 'note-wrapper' : ''}"><img src="${info.image}" alt="${info.prizeName}" class="result-won-img ${isNote ? 'is-note' : ''}" /></div>`;
+        const isTelecom = info.image.includes('telecom') || info.image.includes('topup') || info.image.includes('ncell') || info.image.includes('ntc') || info.prizeName.toLowerCase().includes('topup') || info.prizeName.toLowerCase().includes('balance');
+        if (isTelecom) {
+          iconEl.innerHTML = `
+            <div class="result-telecom-dual-wrapper">
+              <div class="telecom-badge ntc-badge" title="Nepal Telecom (NTC)"><img src="/assets/ntc_logo.png" alt="NTC" class="telecom-logo-img" /></div>
+              <div class="telecom-badge ncell-badge" title="Ncell"><img src="/assets/ncell_logo.png" alt="Ncell" class="telecom-logo-img" /></div>
+            </div>
+          `;
+        } else {
+          const isNote = (info.image.includes('note') || info.image.includes('rs'));
+          iconEl.innerHTML = `<div class="result-img-wrapper ${isNote ? 'note-wrapper' : ''}"><img src="${info.image}" alt="${info.prizeName}" class="result-won-img ${isNote ? 'is-note' : ''}" /></div>`;
+        }
       } else {
         iconEl.textContent = info.isGrandPrize ? '🏆' : info.isWin ? '🎁' : '🍀';
       }

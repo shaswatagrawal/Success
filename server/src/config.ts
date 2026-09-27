@@ -106,11 +106,11 @@ export const SLOTS: readonly SlotConfig[] = [
     textColor: '#FFFFFF',
   },
 
-  // === NORMAL PRIZE: 500 Balance ===
+  // === NORMAL PRIZE: 500 Topup ===
   {
     index: 7,
     prizeKey: 'prize_500_balance',
-    label: '500 Balance',
+    label: '500 Topup',
     weight: 5,
     isWin: true,
     isGrandPrize: false,
@@ -132,11 +132,11 @@ export const SLOTS: readonly SlotConfig[] = [
     textColor: '#FFFFFF',
   },
 
-  // === NORMAL PRIZE: 100 Balance ===
+  // === NORMAL PRIZE: 100 Topup ===
   {
     index: 9,
     prizeKey: 'prize_100_balance',
-    label: '100 Balance',
+    label: '100 Topup',
     weight: 6,
     isWin: true,
     isGrandPrize: false,

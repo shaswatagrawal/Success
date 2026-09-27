@@ -44,6 +44,26 @@ export class Wheel {
   }
 
   private preloadImages(): void {
+    const essentialImages = [
+      '/assets/ntc_logo.png',
+      '/assets/ncell_logo.png',
+      '/assets/mobile_flagship.jpg',
+      '/assets/earpods_pro.jpg',
+      '/assets/powerbank_pro.jpg',
+      '/assets/mystery_box.png',
+    ];
+    for (const src of essentialImages) {
+      if (!this.imageCache.has(src)) {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          this.imageCache.set(src, img);
+          this.draw();
+        };
+        this.imageCache.set(src, img);
+      }
+    }
+
     for (const slot of this.slots) {
       if (slot.image && !this.imageCache.has(slot.image)) {
         const img = new Image();
@@ -182,8 +202,9 @@ export class Wheel {
       this.ctx.rotate(midAngle);
 
       const isMobile = width < 460;
-      const iconDist = radius * (isMobile ? 0.50 : 0.52);
-      const textDist = radius * (isMobile ? 0.81 : 0.82);
+      // Position swapped: Pictures at outer portion (wider wedge), Text at inner portion
+      const iconDist = radius * (isMobile ? 0.72 : 0.74);
+      const textDist = radius * (isMobile ? 0.40 : 0.43);
 
       // Available width at icon distance based on the slice gap/angle
       const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
@@ -250,108 +271,180 @@ export class Wheel {
 
         this.ctx.restore();
       } else if (slot.image && this.imageCache.has(slot.image)) {
-        const img = this.imageCache.get(slot.image);
-        if (img && img.complete && img.naturalWidth > 0) {
+        const isTelecom =
+          slot.image.includes('ncell') ||
+          slot.image.includes('ntc') ||
+          slot.image.includes('topup') ||
+          slot.label.toLowerCase().includes('topup') ||
+          slot.label.toLowerCase().includes('balance');
+
+        this.ctx.save();
+        this.ctx.translate(iconDist, 0);
+
+        if (isTelecom) {
+          // Both NTC (Nepal Telecom) and Ncell logos side-by-side in dual glowing circular badges
+          this.ctx.rotate(Math.PI / 2);
+          const dualBadgeRadius = isMobile ? 18 : 24;
+          const separation = dualBadgeRadius * 1.05;
+
+          const ntcImg = this.imageCache.get('/assets/ntc_logo.png') || this.imageCache.get(slot.image);
+          const ncellImg = this.imageCache.get('/assets/ncell_logo.png');
+
+          // --- 1. Left Badge: NTC (Namaste) ---
           this.ctx.save();
-          this.ctx.translate(iconDist, 0);
+          this.ctx.translate(-separation, 0);
 
-          const isNote = (slot.image.includes('note') || slot.image.includes('rs')) && !slot.image.includes('ncell') && !slot.image.includes('ntc');
-          const isTelecom = slot.image.includes('ncell') || slot.image.includes('ntc');
-          const isGadget =
-            slot.image.includes('mobile') ||
-            slot.image.includes('phone') ||
-            slot.image.includes('earpod') ||
-            slot.image.includes('powerbank') ||
-            slot.image.includes('charger') ||
-            isTelecom;
+          // NTC Blue background disc
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
+          this.ctx.fillStyle = '#044C8C';
+          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+          this.ctx.shadowBlur = 6;
+          this.ctx.shadowOffsetY = 2;
+          this.ctx.fill();
 
-          if (isGadget) {
-            // Flagship Mobile Phone, Earpods, Powerbank & Telecom Logos
-            this.ctx.rotate(Math.PI / 2);
-            const baseBadgeRadius = isMobile ? 26 : 38;
-            const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
-            const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
-
-            // Draw glowing backdrop disc with 3D shadow
+          if (ntcImg && ntcImg.complete && ntcImg.naturalWidth > 0) {
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.fillStyle = isTelecom
-              ? (slot.image.includes('ncell') ? '#FFFFFF' : '#044C8C')
-              : 'rgba(15, 23, 42, 0.95)';
-            this.ctx.shadowColor = slot.isGrandPrize
-              ? 'rgba(245, 158, 11, 0.95)'
-              : 'rgba(0, 0, 0, 0.85)';
-            this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
-            this.ctx.shadowOffsetY = 2;
-            this.ctx.fill();
-
-            // Clip and draw image cleanly inside circular badge
-            this.ctx.beginPath();
-            this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
+            this.ctx.arc(0, 0, Math.max(1, dualBadgeRadius - 1), 0, 2 * Math.PI);
             this.ctx.clip();
-            const iconSize = isTelecom ? badgeRadius * 1.95 : badgeRadius * 2.2;
-            this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+            const iconSize = dualBadgeRadius * 1.95;
+            this.ctx.drawImage(ntcImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
             this.ctx.restore();
-
-            // 3D Metallic Gold Rim
-            this.ctx.beginPath();
-            this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.lineWidth = slot.isGrandPrize ? Math.max(2.4, badgeRadius * 0.15) : 2;
-            this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(254, 240, 138, 0.9)';
-            this.ctx.stroke();
-          } else if (isNote) {
-            // Nepalese Banknote: Prominent large rectangular card
-            this.ctx.rotate(-Math.PI / 2);
-            const baseNoteW = isMobile ? 54 : 76;
-            const maxNoteW = Math.max(28, Math.min(baseNoteW, availableWidthAtIcon * 0.96));
-            const noteW = maxNoteW;
-            const noteH = noteW * 0.58;
-
-            // Draw soft 3D shadow & card border
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            this.ctx.shadowBlur = 10;
-            this.ctx.shadowOffsetY = 3;
-
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            this.roundRect(-noteW / 2 - 2, -noteH / 2 - 2, noteW + 4, noteH + 4, 4);
-            this.ctx.fill();
-
-            // Clip to rounded rectangle
-            this.ctx.save();
-            this.ctx.beginPath();
-            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
-            this.ctx.clip();
-            this.ctx.drawImage(img, -noteW / 2, -noteH / 2, noteW, noteH);
-            this.ctx.restore();
-
-            // Polished Gold border
-            this.ctx.beginPath();
-            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = '#FDE047';
-            this.ctx.stroke();
-          } else {
-            // Graphic icon
-            this.ctx.rotate(Math.PI / 2);
-            const baseSize = isMobile ? 48 : 68;
-            const kiteSize = Math.max(24, Math.min(baseSize, availableWidthAtIcon * 0.92));
-
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            this.ctx.shadowBlur = 8;
-            this.ctx.shadowOffsetY = 3;
-
-            this.ctx.drawImage(
-              img,
-              -kiteSize / 2,
-              -kiteSize / 2,
-              kiteSize,
-              kiteSize
-            );
           }
 
+          // NTC Gold Rim
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
+          this.ctx.lineWidth = Math.max(1.8, dualBadgeRadius * 0.12);
+          this.ctx.strokeStyle = '#FDE047';
+          this.ctx.stroke();
           this.ctx.restore();
+
+          // --- 2. Right Badge: Ncell ---
+          this.ctx.save();
+          this.ctx.translate(separation, 0);
+
+          // Ncell White background disc
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
+          this.ctx.fillStyle = '#FFFFFF';
+          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+          this.ctx.shadowBlur = 6;
+          this.ctx.shadowOffsetY = 2;
+          this.ctx.fill();
+
+          if (ncellImg && ncellImg.complete && ncellImg.naturalWidth > 0) {
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, Math.max(1, dualBadgeRadius - 1), 0, 2 * Math.PI);
+            this.ctx.clip();
+            const iconSize = dualBadgeRadius * 1.9;
+            this.ctx.drawImage(ncellImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+            this.ctx.restore();
+          }
+
+          // Ncell Gold Rim
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
+          this.ctx.lineWidth = Math.max(1.8, dualBadgeRadius * 0.12);
+          this.ctx.strokeStyle = '#FDE047';
+          this.ctx.stroke();
+          this.ctx.restore();
+        } else {
+          const img = this.imageCache.get(slot.image);
+          if (img && img.complete && img.naturalWidth > 0) {
+            const isNote = (slot.image.includes('note') || slot.image.includes('rs'));
+            const isGadget =
+              slot.image.includes('mobile') ||
+              slot.image.includes('phone') ||
+              slot.image.includes('earpod') ||
+              slot.image.includes('powerbank') ||
+              slot.image.includes('charger');
+
+            if (isGadget) {
+              // Flagship Mobile Phone, Earpods, Powerbank
+              this.ctx.rotate(Math.PI / 2);
+              const baseBadgeRadius = isMobile ? 26 : 38;
+              const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
+              const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
+
+              // Draw glowing backdrop disc with 3D shadow
+              this.ctx.save();
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+              this.ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+              this.ctx.shadowColor = slot.isGrandPrize
+                ? 'rgba(245, 158, 11, 0.95)'
+                : 'rgba(0, 0, 0, 0.85)';
+              this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
+              this.ctx.shadowOffsetY = 2;
+              this.ctx.fill();
+
+              // Clip and draw image cleanly inside circular badge
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
+              this.ctx.clip();
+              const iconSize = badgeRadius * 2.2;
+              this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+              this.ctx.restore();
+
+              // 3D Metallic Gold Rim
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+              this.ctx.lineWidth = slot.isGrandPrize ? Math.max(2.4, badgeRadius * 0.15) : 2;
+              this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(254, 240, 138, 0.9)';
+              this.ctx.stroke();
+            } else if (isNote) {
+              // Banknote
+              this.ctx.rotate(-Math.PI / 2);
+              const baseNoteW = isMobile ? 54 : 76;
+              const maxNoteW = Math.max(28, Math.min(baseNoteW, availableWidthAtIcon * 0.96));
+              const noteW = maxNoteW;
+              const noteH = noteW * 0.58;
+
+              this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+              this.ctx.shadowBlur = 10;
+              this.ctx.shadowOffsetY = 3;
+
+              this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+              this.roundRect(-noteW / 2 - 2, -noteH / 2 - 2, noteW + 4, noteH + 4, 4);
+              this.ctx.fill();
+
+              this.ctx.save();
+              this.ctx.beginPath();
+              this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
+              this.ctx.clip();
+              this.ctx.drawImage(img, -noteW / 2, -noteH / 2, noteW, noteH);
+              this.ctx.restore();
+
+              this.ctx.beginPath();
+              this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
+              this.ctx.lineWidth = 2;
+              this.ctx.strokeStyle = '#FDE047';
+              this.ctx.stroke();
+            } else {
+              // Graphic icon
+              this.ctx.rotate(Math.PI / 2);
+              const baseSize = isMobile ? 48 : 68;
+              const kiteSize = Math.max(24, Math.min(baseSize, availableWidthAtIcon * 0.92));
+
+              this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+              this.ctx.shadowBlur = 8;
+              this.ctx.shadowOffsetY = 3;
+
+              this.ctx.drawImage(
+                img,
+                -kiteSize / 2,
+                -kiteSize / 2,
+                kiteSize,
+                kiteSize
+              );
+            }
+          }
         }
+
+        this.ctx.restore();
       }
 
       // B) Draw Slot Text Label
@@ -362,7 +455,7 @@ export class Wheel {
 
       if (isBetterLuck) {
         // Better Luck Next Time: Draw bold high-contrast 2-line text
-        const textCenterDist = radius * (isMobile ? 0.64 : 0.65);
+        const textCenterDist = radius * (isMobile ? 0.58 : 0.60);
         const availableW = 2 * textCenterDist * Math.tan(sliceAngle / 2) * 0.96;
 
         let lineFontSize = isMobile ? 12 : 16;
@@ -402,7 +495,7 @@ export class Wheel {
 
         this.ctx.restore();
       } else {
-        // Prize Slot Label: Prominent bold typography with dark outline
+        // Prize Slot Label: Prominent bold typography with dark outline at textDist
         const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.96;
         let displayLabel = slot.label;
         if (slot.isGrandPrize && !displayLabel.includes('⭐')) {
@@ -410,63 +503,63 @@ export class Wheel {
         }
 
         const words = displayLabel.split(' ');
-        const shouldSplit = words.length === 2 && (displayLabel.length > 8 || availableTextWidth < 90);
+        const shouldSplit = words.length === 2 && (displayLabel.length > 7 || availableTextWidth < 90);
 
         this.ctx.save();
         this.ctx.translate(textDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
         if (shouldSplit) {
-          // Render as 2 compact stacked lines with larger font
-          let lineSize = slot.isGrandPrize ? (isMobile ? 13.5 : 18) : (isMobile ? 12.5 : 16);
+          // Render as 2 compact stacked lines with bold font
+          let lineSize = slot.isGrandPrize ? (isMobile ? 12 : 15.5) : (isMobile ? 11 : 14.5);
           this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
           let mw1 = this.ctx.measureText(words[0]!);
           let mw2 = this.ctx.measureText(words[1]!);
-          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 9) {
+          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 8.5) {
             lineSize -= 0.5;
             this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
             mw1 = this.ctx.measureText(words[0]!);
             mw2 = this.ctx.measureText(words[1]!);
           }
 
-          const lineSpacing = lineSize * 0.74;
+          const lineSpacing = lineSize * 0.76;
 
           this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.lineWidth = 4;
+          this.ctx.lineWidth = 3.5;
           this.ctx.lineJoin = 'round';
           this.ctx.strokeText(words[0]!, 0, -lineSpacing, availableTextWidth);
           this.ctx.strokeText(words[1]!, 0, lineSpacing, availableTextWidth);
 
           this.ctx.fillStyle = slot.isGrandPrize ? '#FEF08A' : (slot.textColor || '#FFFFFF');
           this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.shadowBlur = 6;
-          this.ctx.shadowOffsetX = 1.5;
-          this.ctx.shadowOffsetY = 1.5;
+          this.ctx.shadowBlur = 5;
+          this.ctx.shadowOffsetX = 1.2;
+          this.ctx.shadowOffsetY = 1.2;
           this.ctx.fillText(words[0]!, 0, -lineSpacing, availableTextWidth);
           this.ctx.fillText(words[1]!, 0, lineSpacing, availableTextWidth);
         } else {
           // Single-line label
-          let fontSize = slot.isGrandPrize ? (isMobile ? 13.5 : 18) : (isMobile ? 12.5 : 16.5);
+          let fontSize = slot.isGrandPrize ? (isMobile ? 12 : 15.5) : (isMobile ? 11 : 14.5);
           this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
           let textMetrics = this.ctx.measureText(displayLabel);
-          while (textMetrics.width > availableTextWidth && fontSize > 9) {
+          while (textMetrics.width > availableTextWidth && fontSize > 8.5) {
             fontSize -= 0.5;
             this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
             textMetrics = this.ctx.measureText(displayLabel);
           }
 
           this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.lineWidth = 4;
+          this.ctx.lineWidth = 3.5;
           this.ctx.lineJoin = 'round';
           this.ctx.strokeText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
 
           this.ctx.fillStyle = slot.isGrandPrize ? '#FEF08A' : (slot.textColor || '#FFFFFF');
           this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.shadowBlur = 6;
-          this.ctx.shadowOffsetX = 1.5;
-          this.ctx.shadowOffsetY = 1.5;
+          this.ctx.shadowBlur = 5;
+          this.ctx.shadowOffsetX = 1.2;
+          this.ctx.shadowOffsetY = 1.2;
           this.ctx.fillText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
         }
 

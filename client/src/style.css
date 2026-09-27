@@ -941,6 +941,45 @@ body {
   position: relative;
 }
 
+.result-telecom-dual-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.telecom-badge {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fde047;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 16px rgba(253, 224, 71, 0.45);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.telecom-badge:hover {
+  transform: scale(1.08);
+}
+
+.telecom-badge.ntc-badge {
+  background: #044c8c;
+}
+
+.telecom-badge.ncell-badge {
+  background: #ffffff;
+}
+
+.telecom-logo-img {
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+}
+
 .result-won-img {
   max-width: 140px;
   max-height: 100px;
