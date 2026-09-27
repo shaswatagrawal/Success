@@ -278,81 +278,87 @@ export class Wheel {
 
           this.ctx.restore();
         }
-      } else if (!slot.isWin) {
-        // Better Luck Stylized Vector Reload Arrow Icon sized to gap
-        this.ctx.save();
-        this.ctx.translate(iconDist, 0);
-        this.ctx.rotate(Math.PI / 2);
-
-        const baseIconR = isMobile ? 10 : 12;
-        const iconR = Math.max(6, Math.min(baseIconR, (availableWidthAtIcon * 0.42) / 2));
-
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, iconR, -Math.PI * 0.7, Math.PI * 0.9);
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = isMobile ? 2.0 : 2.5;
-        this.ctx.lineCap = 'round';
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        this.ctx.shadowBlur = 3;
-        this.ctx.stroke();
-
-        // Arrow head on reload circle
-        const arrowHeadX = Math.cos(Math.PI * 0.9) * iconR;
-        const arrowHeadY = Math.sin(Math.PI * 0.9) * iconR;
-        const headSize = Math.max(2.5, iconR * 0.35);
-        this.ctx.beginPath();
-        this.ctx.moveTo(arrowHeadX - headSize, arrowHeadY - headSize);
-        this.ctx.lineTo(arrowHeadX, arrowHeadY);
-        this.ctx.lineTo(arrowHeadX + headSize + 1, arrowHeadY - 1);
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fill();
-        this.ctx.restore();
       }
 
       // B) Draw Slot Text Label
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
 
-      const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.88;
-      let displayLabel = slot.label;
-      if (slot.isGrandPrize) {
-        if (sliceAngle >= 0.35 && !displayLabel.includes('⭐')) {
-          displayLabel = `⭐ ${slot.label}`;
+      const isBetterLuck = !slot.isWin || slot.label.toLowerCase().includes('better luck');
+
+      if (isBetterLuck) {
+        // Better Luck Next Time: Draw clean 2-line centered text with 3D drop shadow
+        const textCenterDist = radius * (isMobile ? 0.62 : 0.64);
+        const availableW = 2 * textCenterDist * Math.tan(sliceAngle / 2) * 0.92;
+
+        let lineFontSize = isMobile ? 9.5 : 11;
+        this.ctx.font = `800 ${lineFontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+
+        // Check if fits, shrink slightly if needed
+        let m1 = this.ctx.measureText('Better Luck');
+        let m2 = this.ctx.measureText('Next Time');
+        while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 7) {
+          lineFontSize -= 0.5;
+          this.ctx.font = `800 ${lineFontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+          m1 = this.ctx.measureText('Better Luck');
+          m2 = this.ctx.measureText('Next Time');
         }
-      }
 
-      let fontSize = slot.isGrandPrize
-        ? (isMobile ? 11 : 13)
-        : (isMobile ? 10 : 12);
+        this.ctx.fillStyle = slot.textColor || '#FFFFFF';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+        this.ctx.shadowBlur = 6;
+        this.ctx.shadowOffsetX = 1.5;
+        this.ctx.shadowOffsetY = 1.5;
 
-      this.ctx.font = slot.isGrandPrize
-        ? `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`
-        : `700 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+        this.ctx.save();
+        this.ctx.translate(textCenterDist, 0);
+        this.ctx.rotate(Math.PI / 2);
 
-      // Dynamically shrink font size if text exceeds available slice width
-      let textMetrics = this.ctx.measureText(displayLabel);
-      while (textMetrics.width > availableTextWidth && fontSize > 6.5) {
-        fontSize -= 0.5;
+        const lineSpacing = lineFontSize * 0.75;
+        this.ctx.fillText('Better Luck', 0, -lineSpacing, availableW);
+        this.ctx.fillText('Next Time', 0, lineSpacing, availableW);
+        this.ctx.restore();
+      } else {
+        // Prize Slot Label
+        const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.88;
+        let displayLabel = slot.label;
+        if (slot.isGrandPrize) {
+          if (sliceAngle >= 0.35 && !displayLabel.includes('⭐')) {
+            displayLabel = `⭐ ${slot.label}`;
+          }
+        }
+
+        let fontSize = slot.isGrandPrize
+          ? (isMobile ? 11 : 13)
+          : (isMobile ? 10 : 12);
+
         this.ctx.font = slot.isGrandPrize
           ? `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`
           : `700 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
-        textMetrics = this.ctx.measureText(displayLabel);
+
+        // Dynamically shrink font size if text exceeds available slice width
+        let textMetrics = this.ctx.measureText(displayLabel);
+        while (textMetrics.width > availableTextWidth && fontSize > 6.5) {
+          fontSize -= 0.5;
+          this.ctx.font = slot.isGrandPrize
+            ? `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`
+            : `700 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+          textMetrics = this.ctx.measureText(displayLabel);
+        }
+
+        this.ctx.fillStyle = slot.textColor || '#FFFFFF';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+        this.ctx.shadowBlur = 6;
+        this.ctx.shadowOffsetX = 1.5;
+        this.ctx.shadowOffsetY = 1.5;
+
+        // Draw label rotated outward with maxWidth safety
+        this.ctx.save();
+        this.ctx.translate(textDist, 0);
+        this.ctx.rotate(Math.PI / 2);
+        this.ctx.fillText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
+        this.ctx.restore();
       }
-
-      this.ctx.fillStyle = slot.textColor || '#FFFFFF';
-
-      // 3D Text Shadow for Maximum Contrast & Readability
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-      this.ctx.shadowBlur = 6;
-      this.ctx.shadowOffsetX = 1.5;
-      this.ctx.shadowOffsetY = 1.5;
-
-      // Draw label rotated outward with maxWidth safety
-      this.ctx.save();
-      this.ctx.translate(textDist, 0);
-      this.ctx.rotate(Math.PI / 2);
-      this.ctx.fillText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
-      this.ctx.restore();
 
       this.ctx.restore();
     }

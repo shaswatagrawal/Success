@@ -22,7 +22,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 1,
     prizeKey: 'better_luck_1',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',
@@ -31,7 +31,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 2,
     prizeKey: 'better_luck_2',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1E40AF',
@@ -51,7 +51,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 4,
     prizeKey: 'better_luck_3',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',
@@ -71,7 +71,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 6,
     prizeKey: 'better_luck_4',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1E40AF',
@@ -91,7 +91,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 8,
     prizeKey: 'better_luck_5',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',
@@ -111,7 +111,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 10,
     prizeKey: 'better_luck_6',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1E40AF',
@@ -120,7 +120,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 11,
     prizeKey: 'better_luck_7',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',

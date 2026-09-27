@@ -32,11 +32,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/mobile_flagship.jpg',
   },
 
-  // === BETTER LUCK ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 1,
     prizeKey: 'better_luck_1',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
@@ -46,7 +46,7 @@ export const SLOTS: readonly SlotConfig[] = [
   {
     index: 2,
     prizeKey: 'better_luck_2',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
@@ -68,11 +68,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/earpods_pro.jpg',
   },
 
-  // === BETTER LUCK ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 4,
     prizeKey: 'better_luck_3',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
@@ -94,11 +94,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/powerbank_pro.jpg',
   },
 
-  // === BETTER LUCK ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 6,
     prizeKey: 'better_luck_4',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
@@ -120,11 +120,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/rs500_note.jpg',
   },
 
-  // === BETTER LUCK ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 8,
     prizeKey: 'better_luck_5',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
@@ -146,11 +146,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/rs100_note.jpg',
   },
 
-  // === BETTER LUCK ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 10,
     prizeKey: 'better_luck_6',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
@@ -160,7 +160,7 @@ export const SLOTS: readonly SlotConfig[] = [
   {
     index: 11,
     prizeKey: 'better_luck_7',
-    label: 'Better Luck',
+    label: 'Better Luck Next Time',
     weight: 11,
     isWin: false,
     isGrandPrize: false,
