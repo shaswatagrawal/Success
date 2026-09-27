@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPIN ROYALE | Festive Spin to Win Real Cash & Kite Rewards</title>
+    <meta
+      name="description"
+      content="Participate in our exclusive Spin Royale festival promotion. Enter for a chance to win the Grand Prize Rs. 500 cash, Rs. 100 vouchers, Rainbow Kites, and Duo Kites!"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- Background visual glow accents -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+
+    <div id="app" class="app-container">
+      <!-- Main Promotion View -->
+      <main id="main-view" class="view-section active">
+        <!-- Navigation Bar -->
+        <header class="navbar">
+          <div class="brand">
+            <span class="brand-icon">👑</span>
+            <div class="brand-text">
+              <span class="brand-title">SPIN ROYALE</span>
+              <span class="brand-subtitle">Official Festive Lucky Wheel</span>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <button
+              id="sound-toggle-btn"
+              class="icon-btn"
+              type="button"
+              aria-label="Toggle Sound Effects"
+              title="Toggle Sound Effects"
+            >
+              <span id="sound-icon">🔊</span>
+            </button>
+            <button
+              id="admin-nav-btn"
+              class="btn btn-secondary btn-sm"
+              type="button"
+            >
+              Admin Portal
+            </button>
+          </div>
+        </header>
+
+        <!-- Main Game Content -->
+        <div class="hero-content">
+          <div class="hero-headline">
+            <div class="hero-badge">✨ FESTIVE LUCKY DRAW ✨</div>
+            <h1 class="hero-title">
+              Spin to Win <span class="gradient-text">Cash & Festive Kites!</span>
+            </h1>
+            <p class="hero-desc">
+              Spin the Royale wheel for a chance to win Rs. 500 Grand Cash, Rs. 100 Rewards, Rainbow Sky Kites, and Duo Changa!
+              1 free spin per verified participant!
+            </p>
+          </div>
+
+          <!-- Game Wheel Board -->
+          <div class="wheel-stage">
+            <div class="wheel-outer-glow"></div>
+            
+            <div class="wheel-wrapper">
+              <!-- Wheel Pointer Pin -->
+              <div class="wheel-pointer-container">
+                <div class="wheel-pointer" id="wheel-pointer">
+                  <div class="pointer-arrow"></div>
+                  <div class="pointer-jewel"></div>
+                </div>
+              </div>
+
+              <!-- Interactive Canvas -->
+              <canvas id="wheel-canvas" width="600" height="600"></canvas>
+
+              <!-- Center Hub Spin Button -->
+              <button
+                id="spin-center-btn"
+                class="wheel-hub-btn"
+                type="button"
+                aria-label="Spin the Wheel"
+              >
+                <div class="hub-inner">
+                  <span class="hub-spin-text">SPIN</span>
+                  <span class="hub-sub-text">NOW</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Participant Status Card -->
+          <div class="status-card-container">
+            <div id="user-status-card" class="glass-card status-card">
+              <div class="status-info">
+                <div class="user-greeting">
+                  <span id="participant-name-display" class="participant-name">Welcome, Guest!</span>
+                  <span class="verified-tag">✓ Verified Entry</span>
+                </div>
+                <div class="spins-badge-wrapper">
+                  <span class="spins-label">Spins Remaining:</span>
+                  <span id="spins-count-badge" class="badge badge-accent">1 / 1</span>
+                </div>
+              </div>
+              <div class="status-actions">
+                <button id="change-user-btn" class="btn btn-outline btn-sm" type="button">
+                  Switch User
+                </button>
+                <button id="view-rules-btn" class="btn btn-text btn-sm" type="button">
+                  Official Rules
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Admin Portal View -->
+      <section id="admin-view" class="view-section">
+        <header class="admin-header">
+          <div class="admin-header-title">
+            <button id="back-to-wheel-btn" class="btn btn-secondary btn-sm" type="button">
+              ← Return to Wheel
+            </button>
+            <h2>Promotion Management Dashboard</h2>
+          </div>
+          <button id="admin-logout-btn" class="btn btn-outline btn-sm" type="button">
+            Log Out
+          </button>
+        </header>
+
+        <!-- Admin Content (shown when logged in) -->
+        <div id="admin-authenticated-content" class="admin-dashboard-layout">
+          <!-- KPI Cards -->
+          <div class="stats-grid">
+            <div class="glass-card stat-card">
+              <span class="stat-icon">🎯</span>
+              <div class="stat-data">
+                <span class="stat-label">Total Spins Recorded</span>
+                <span id="stat-total-spins" class="stat-value">0</span>
+              </div>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-icon">👥</span>
+              <div class="stat-data">
+                <span class="stat-label">Unique Participants</span>
+                <span id="stat-unique-users" class="stat-value">0</span>
+              </div>
+            </div>
+            <div class="glass-card stat-card highlight-gold">
+              <span class="stat-icon">🏆</span>
+              <div class="stat-data">
+                <span class="stat-label">Grand Prize Winners</span>
+                <span id="stat-grand-prizes" class="stat-value">0</span>
+              </div>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-icon">🎁</span>
+              <div class="stat-data">
+                <span class="stat-label">Total Prizes Won</span>
+                <span id="stat-total-wins" class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actual vs Expected Distribution Chart & Custom Prize Editor -->
+          <div class="admin-two-col">
+            <!-- Distribution Chart Card -->
+            <div class="glass-card dashboard-panel">
+              <div class="panel-header">
+                <h3>Probability Audit: Actual vs. Expected Distribution</h3>
+                <span class="panel-tag">Monte Carlo Engine Verification</span>
+              </div>
+              <div id="distribution-chart-container" class="chart-container">
+                <!-- Injected dynamically by admin.ts -->
+              </div>
+            </div>
+
+            <!-- Prize Names Editor Card -->
+            <div class="glass-card dashboard-panel">
+              <div class="panel-header">
+                <h3>Customize Prize Labels</h3>
+                <span class="panel-tag">Persisted to SQLite</span>
+              </div>
+              <p class="panel-desc">
+                Update display labels for the 5 normal prize slots without altering backend probabilities.
+              </p>
+              <form id="prize-editor-form" class="prize-editor-list">
+                <!-- Dynamically populated -->
+                <div id="prize-inputs-container" class="inputs-grid"></div>
+                <div class="panel-actions">
+                  <button type="submit" id="save-prizes-btn" class="btn btn-primary">
+                    Save Prize Names
+                  </button>
+                  <span id="prize-save-msg" class="save-status-msg"></span>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Spin Records History Table -->
+          <div class="glass-card dashboard-panel">
+            <div class="panel-header table-panel-header">
+              <div>
+                <h3>Participant Spin Log</h3>
+                <p class="panel-desc">Real-time audit log of all recorded promotional spins.</p>
+              </div>
+              <button id="export-csv-btn" class="btn btn-secondary" type="button">
+                📥 Export CSV
+              </button>
+            </div>
+
+            <!-- Table Filters -->
+            <div class="table-filters-bar">
+              <div class="filter-group search-input-group">
+                <input
+                  type="text"
+                  id="admin-search-input"
+                  class="form-control"
+                  placeholder="Search by participant, email, phone, or claim code..."
+                />
+              </div>
+              <div class="filter-group">
+                <select id="admin-prize-filter" class="form-control">
+                  <option value="all">All Spin Results</option>
+                  <option value="grand">Grand Prize Only</option>
+                  <option value="win">Winning Normal Prizes</option>
+                  <option value="loss">Try Again Later</option>
+                </select>
+              </div>
+              <button id="refresh-table-btn" class="btn btn-outline" type="button">
+                ↻ Refresh
+              </button>
+            </div>
+
+            <!-- Spins Data Table -->
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Date & Time</th>
+                    <th>Participant</th>
+                    <th>Contact</th>
+                    <th>User Spin</th>
+                    <th>Result Won</th>
+                    <th>Claim Code</th>
+                    <th>Hashed IP</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-spins-table-body">
+                  <tr>
+                    <td colspan="8" class="text-center text-muted py-4">Loading spin history...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="pagination-bar">
+              <span id="pagination-info" class="pagination-info">Showing 0-0 of 0</span>
+              <div class="pagination-controls">
+                <button id="prev-page-btn" class="btn btn-outline btn-sm" type="button" disabled>
+                  Previous
+                </button>
+                <span id="current-page-num" class="page-indicator">1</span>
+                <button id="next-page-btn" class="btn btn-outline btn-sm" type="button" disabled>
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- User Registration Modal -->
+    <div id="registration-modal" class="modal-backdrop">
+      <div class="modal-dialog glass-card">
+        <button id="back-reg-btn" class="modal-back-btn" type="button" aria-label="Back to Wheel">
+          ← Back
+        </button>
+        <button id="close-reg-btn" class="modal-close-btn" type="button" aria-label="Close Registration">
+          ✕
+        </button>
+        <div class="modal-header">
+          <div class="modal-icon">🎁</div>
+          <h2 class="modal-title">Enter to Spin & Win!</h2>
+          <p class="modal-subtitle">
+            Fill in your details below to claim your 1 free promotional spin.
+          </p>
+        </div>
+        <form id="registration-form" class="modal-form" novalidate>
+          <div class="form-group">
+            <label for="reg-name" class="form-label">Full Name</label>
+            <input
+              type="text"
+              id="reg-name"
+              class="form-control"
+              placeholder="e.g. Alex Johnson"
+              required
+              autocomplete="name"
+            />
+            <span class="field-error" id="name-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-contact" class="form-label">Email Address or Phone Number</label>
+            <input
+              type="text"
+              id="reg-contact"
+              class="form-control"
+              placeholder="e.g. alex@example.com or +1 555-0199"
+              required
+              autocomplete="email"
+            />
+            <span class="field-error" id="contact-error"></span>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="reg-consent" required />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-text">
+                I agree to my data being collected for this promotion and verify I am of legal age.
+              </span>
+            </label>
+            <span class="field-error" id="consent-error"></span>
+          </div>
+
+          <div id="reg-general-error" class="alert-box alert-error" style="display: none;"></div>
+
+          <div class="modal-footer">
+            <button type="submit" id="start-spinning-submit-btn" class="btn btn-primary btn-block btn-lg">
+              Unlock My 1 Free Spin ✨
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Spin Result Modal -->
+    <div id="result-modal" class="modal-backdrop">
+      <div class="modal-dialog glass-card result-dialog">
+        <!-- Confetti Canvas -->
+        <canvas id="confetti-canvas"></canvas>
+
+        <div class="result-header">
+          <div id="result-badge" class="result-badge">RESULT</div>
+          <h2 id="result-title" class="result-title">Spin Result</h2>
+        </div>
+
+        <div class="result-body">
+          <div id="result-prize-icon" class="result-prize-icon">🎉</div>
+          <div id="result-prize-name" class="result-prize-name">Prize Name</div>
+          <p id="result-desc" class="result-desc">Result description</p>
+
+          <!-- Grand Prize Claim Code Display -->
+          <div id="claim-code-container" class="claim-box" style="display: none;">
+            <span class="claim-label">OFFICIAL CLAIM CODE:</span>
+            <div class="claim-code-row">
+              <code id="claim-code-value" class="claim-code">GP-XXXX-XXXX</code>
+              <button
+                id="copy-claim-btn"
+                class="btn btn-secondary btn-sm"
+                type="button"
+                title="Copy claim code to clipboard"
+              >
+                Copy
+              </button>
+            </div>
+            <span class="claim-note">Save this code. You will need it to claim your grand prize!</span>
+          </div>
+
+          <div class="result-spins-left">
+            <span id="result-spins-left-text">Spins remaining: 0</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="result-close-btn" class="btn btn-primary btn-block btn-lg" type="button">
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="modal-backdrop">
+      <div class="modal-dialog glass-card admin-login-dialog">
+        <button id="close-admin-login-btn" class="modal-close-btn" type="button">✕</button>
+        <div class="modal-header">
+          <div class="modal-icon">🔐</div>
+          <h2 class="modal-title">Admin Authentication</h2>
+          <p class="modal-subtitle">Enter administrator password to access promotion controls.</p>
+        </div>
+        <form id="admin-login-form" class="modal-form">
+          <div class="form-group">
+            <label for="admin-password-input" class="form-label">Password</label>
+            <input
+              type="password"
+              id="admin-password-input"
+              class="form-control"
+              placeholder="Enter admin password..."
+              required
+              autocomplete="current-password"
+            />
+            <span class="field-error" id="admin-login-error"></span>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" id="admin-login-submit-btn" class="btn btn-primary btn-block btn-lg">
+              Unlock Portal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="modal-backdrop">
+      <div class="modal-dialog glass-card rules-dialog">
+        <button id="close-rules-btn" class="modal-close-btn" type="button">✕</button>
+        <div class="modal-header">
+          <div class="modal-icon">📜</div>
+          <h2 class="modal-title">Official Promotion Rules</h2>
+        </div>
+        <div class="modal-body rules-content">
+          <p><strong>1. Eligibility:</strong> Open to all eligible participants. One registration per individual.</p>
+          <p><strong>2. Spin Allocation:</strong> Each participant is allotted exactly 1 promotional spin.</p>
+          <p><strong>3. Random Selection:</strong> Wheel results are generated server-side using cryptographically secure hardware RNG.</p>
+          <p><strong>4. Grand Prize Claim:</strong> Grand prize winners receive a unique cryptographic claim code. Present this code to claim your prize.</p>
+          <p><strong>5. Fair Play:</strong> Any automated, scripted, or fraudulent entries will be voided.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="rules-agree-btn" class="btn btn-secondary btn-block" type="button">
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

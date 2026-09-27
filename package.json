@@ -1,0 +1,43 @@
+{
+  "name": "spin-the-wheel-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-grade Spin the Wheel promotional web application in strict TypeScript",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n SERVER,CLIENT -c cyan.bold,magenta.bold npm:dev:server npm:dev:client",
+    "dev:server": "tsx watch server/src/index.ts",
+    "dev:client": "vite client --port 5173",
+    "build": "npm run build:shared && npm run build:server && npm run build:client",
+    "build:shared": "tsc -p shared",
+    "build:server": "tsc -p server",
+    "build:client": "vite build client",
+    "start": "node server/dist/server/src/index.js",
+    "simulate": "tsx server/src/simulate.ts",
+    "typecheck": "tsc -p shared --noEmit && tsc -p server --noEmit && tsc -p client --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "mongodb": "^7.6.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.13.5",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.7"
+  }
+}
