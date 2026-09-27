@@ -14,6 +14,8 @@ import {
   findUserByIdentifier,
   getCustomPrizeNames,
   getGlobalSpinCount,
+  getGrandPrizeWonCount,
+  getPrizeWonCount,
   getUserRecentSpins,
   getUserSpinCount,
   insertSpin,
@@ -116,10 +118,11 @@ export async function executeSpin(
   const userSpinNumber = currentSpins + 1;
   const globalSpinNumber = (await getGlobalSpinCount()) + 1;
 
-  // 4. Controlled spin distribution:
-  // - Grand Prize every 60 spins (60, 120, 180, ...)
-  // - Normal Prize every 10 spins (10, 20, 30, 40, 50, 70, ...)
-  // - Better Luck for all other spins (randomly distributed among Better Luck slices)
+  // 4. Controlled spin distribution with strict 1-winner cap for Grand Prize & Mystery Box:
+  // - Grand Prize: max 1 global winner
+  // - Mystery Box: max 1 global winner
+  // - Normal Prize: every 10 spins
+  // - Better Luck: all other spins
   let winningSlot: (typeof SLOTS)[number];
 
   const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
@@ -127,11 +130,17 @@ export async function executeSpin(
   const normalSlots = SLOTS.filter((s) => s.isWin && !s.isGrandPrize && s.prizeKey !== 'prize_mystery_box');
   const lossSlots = SLOTS.filter((s) => !s.isWin);
 
-  if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_INTERVAL === 0) {
-    // Grand Prize milestone (every 60 spins)
+  const grandPrizeWonCount = await getGrandPrizeWonCount();
+  const mysteryBoxWonCount = await getPrizeWonCount('prize_mystery_box');
+
+  const canWinGrand = grandPrizeWonCount < 1;
+  const canWinMystery = mysteryBoxWonCount < 1;
+
+  if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_INTERVAL === 0 && canWinGrand) {
+    // Grand Prize milestone (strictly 1 winner globally)
     winningSlot = grandSlot;
-  } else if (mysterySlot && globalSpinNumber > 0 && globalSpinNumber % ENV.MYSTERY_BOX_INTERVAL === 0) {
-    // Rare Mystery Box milestone (every 40 spins)
+  } else if (mysterySlot && globalSpinNumber > 0 && globalSpinNumber % ENV.MYSTERY_BOX_INTERVAL === 0 && canWinMystery) {
+    // Mystery Box milestone (strictly 1 winner globally)
     winningSlot = mysterySlot;
   } else if (globalSpinNumber > 0 && globalSpinNumber % ENV.NORMAL_PRIZE_INTERVAL === 0) {
     // Normal Prize milestone (every 10 spins)

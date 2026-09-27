@@ -178,6 +178,30 @@ export async function getGlobalSpinCount(): Promise<number> {
   return localDb.data.spins.length;
 }
 
+export async function getPrizeWonCount(prizeKey: string): Promise<number> {
+  if (isMongoConnected()) {
+    try {
+      return await getDb().collection<SpinDoc>('spins').countDocuments({ prizeKey });
+    } catch {
+      // Fallback
+    }
+  }
+  return localDb.data.spins.filter((s) => s.prizeKey === prizeKey).length;
+}
+
+export async function getGrandPrizeWonCount(): Promise<number> {
+  if (isMongoConnected()) {
+    try {
+      return await getDb().collection<SpinDoc>('spins').countDocuments({
+        $or: [{ isGrandPrize: true }, { prizeKey: 'grand_prize' }],
+      });
+    } catch {
+      // Fallback
+    }
+  }
+  return localDb.data.spins.filter((s) => s.isGrandPrize || s.prizeKey === 'grand_prize').length;
+}
+
 export async function insertSpin(params: {
   readonly userId: string;
   readonly userName: string;
