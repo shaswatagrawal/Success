@@ -24,9 +24,9 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 2.5,
     isWin: true,
     isGrandPrize: true,
-    color: '#B45309', // Radiant rich gold
-    textColor: '#FEF3C7',
-    accentColor: '#FBBF24',
+    color: '#DC2626', // Vibrant Crimson Red
+    textColor: '#FFFFFF',
+    accentColor: '#EF4444',
     image: '/assets/powerbank_pro.jpg',
   },
   {
@@ -36,8 +36,8 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 15.0,
     isWin: false,
     isGrandPrize: false,
-    color: '#1E1B4B', // Slate dark navy
-    textColor: '#94A3B8',
+    color: '#1D4ED8', // Electric Royal Blue
+    textColor: '#FFFFFF',
   },
   {
     index: 2,
@@ -46,9 +46,9 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 7.5,
     isWin: true,
     isGrandPrize: false,
-    color: '#BE185D', // Royal magenta
-    textColor: '#FDF2F8',
-    accentColor: '#F472B6',
+    color: '#B91C1C', // Deep Crimson Red
+    textColor: '#FFFFFF',
+    accentColor: '#F87171',
     image: '/assets/earpods_pro.jpg',
   },
   {
@@ -58,8 +58,8 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 15.0,
     isWin: false,
     isGrandPrize: false,
-    color: '#312E81', // Deep royal indigo
-    textColor: '#CBD5E1',
+    color: '#1E40AF', // Deep Sapphire Blue
+    textColor: '#FFFFFF',
   },
   {
     index: 4,
@@ -68,9 +68,9 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 7.5,
     isWin: true,
     isGrandPrize: false,
-    color: '#047857', // Emerald green
-    textColor: '#ECFDF5',
-    accentColor: '#34D399',
+    color: '#DC2626', // Vibrant Crimson Red
+    textColor: '#FFFFFF',
+    accentColor: '#EF4444',
     image: '/assets/rs500_note.jpg',
   },
   {
@@ -80,8 +80,8 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 15.0,
     isWin: false,
     isGrandPrize: false,
-    color: '#1E1B4B', // Slate dark navy
-    textColor: '#94A3B8',
+    color: '#1D4ED8', // Electric Royal Blue
+    textColor: '#FFFFFF',
   },
   {
     index: 6,
@@ -90,9 +90,9 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 7.5,
     isWin: true,
     isGrandPrize: false,
-    color: '#6D28D9', // Royal violet
-    textColor: '#F5F3FF',
-    accentColor: '#A78BFA',
+    color: '#B91C1C', // Deep Crimson Red
+    textColor: '#FFFFFF',
+    accentColor: '#F87171',
     image: '/assets/mobile_flagship.jpg',
   },
   {
@@ -102,8 +102,8 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 15.0,
     isWin: false,
     isGrandPrize: false,
-    color: '#312E81', // Deep royal indigo
-    textColor: '#CBD5E1',
+    color: '#1E40AF', // Deep Sapphire Blue
+    textColor: '#FFFFFF',
   },
   {
     index: 8,
@@ -112,9 +112,9 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 7.5,
     isWin: true,
     isGrandPrize: false,
-    color: '#0E7490', // Vibrant ocean cyan
-    textColor: '#ECFEFF',
-    accentColor: '#22D3EE',
+    color: '#DC2626', // Vibrant Crimson Red
+    textColor: '#FFFFFF',
+    accentColor: '#EF4444',
     image: '/assets/rs100_note.jpg',
   },
   {
@@ -124,9 +124,9 @@ export const SLOTS: readonly SlotConfig[] = [
     weight: 7.5,
     isWin: true,
     isGrandPrize: false,
-    color: '#C026D3', // Fuchsia
-    textColor: '#FDF4FF',
-    accentColor: '#E879F9',
+    color: '#1D4ED8', // Electric Royal Blue
+    textColor: '#FFFFFF',
+    accentColor: '#60A5FA',
   },
 ];
 

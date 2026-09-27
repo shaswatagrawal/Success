@@ -83,30 +83,31 @@ body {
 }
 
 .bg-glow-1 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, #EF4444 0%, transparent 70%);
   top: -100px;
   left: -100px;
+  opacity: 0.35;
 }
 
 .bg-glow-2 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #F59E0B 0%, transparent 70%);
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, #2563EB 0%, transparent 70%);
   bottom: -150px;
   right: -150px;
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
 .bg-glow-3 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, #06B6D4 0%, transparent 70%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #DC2626 0%, transparent 70%);
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  opacity: 0.15;
+  opacity: 0.2;
 }
 
 /* App Container */
@@ -289,10 +290,10 @@ body {
 
 .wheel-outer-glow {
   position: absolute;
-  inset: -15px;
+  inset: -20px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 75%);
-  filter: blur(20px);
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.35) 0%, rgba(37, 99, 235, 0.3) 55%, transparent 75%);
+  filter: blur(24px);
   z-index: 1;
   pointer-events: none;
 }

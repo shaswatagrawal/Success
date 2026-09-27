@@ -107,35 +107,31 @@ export class Wheel {
       this.ctx.arc(0, 0, radius, startAngle, endAngle);
       this.ctx.closePath();
 
-      // Radial Gradient per Slice
-      if (slot.isGrandPrize) {
-        const grad = this.ctx.createRadialGradient(0, 0, radius * 0.15, 0, 0, radius);
-        grad.addColorStop(0, '#FEF08A');
-        grad.addColorStop(0.3, '#F59E0B');
-        grad.addColorStop(0.7, '#D97706');
-        grad.addColorStop(1, '#92400E');
-        this.ctx.fillStyle = grad;
-      } else if (slot.isWin) {
-        const grad = this.ctx.createRadialGradient(0, 0, 20, 0, 0, radius);
-        grad.addColorStop(0, slot.accentColor ?? '#A78BFA');
-        grad.addColorStop(0.6, slot.color);
-        grad.addColorStop(1, this.darkenHex(slot.color, 0.3));
-        this.ctx.fillStyle = grad;
-      } else {
-        const grad = this.ctx.createRadialGradient(0, 0, 20, 0, 0, radius);
-        grad.addColorStop(0, '#2D3748');
-        grad.addColorStop(0.7, slot.color || '#1A202C');
-        grad.addColorStop(1, '#0F172A');
-        this.ctx.fillStyle = grad;
-      }
+      // Radial Gradient per Slice strictly in Red and Blue theme
+      const isRed = i % 2 === 0;
+      const grad = this.ctx.createRadialGradient(0, 0, 20, 0, 0, radius);
 
+      if (isRed) {
+        // Radiant Crimson Red Slice
+        grad.addColorStop(0, '#EF4444');
+        grad.addColorStop(0.4, '#DC2626');
+        grad.addColorStop(0.75, '#991B1B');
+        grad.addColorStop(1, '#500724');
+      } else {
+        // Electric Royal Blue Slice
+        grad.addColorStop(0, '#60A5FA');
+        grad.addColorStop(0.4, '#2563EB');
+        grad.addColorStop(0.75, '#1E3A8A');
+        grad.addColorStop(1, '#0F172A');
+      }
+      this.ctx.fillStyle = grad;
       this.ctx.fill();
 
-      // Slice Outer Border / Separator Line
+      // Slice Outer Border / Golden Separator Line
       this.ctx.lineWidth = 2.5;
       this.ctx.strokeStyle = slot.isGrandPrize
-        ? 'rgba(254, 240, 138, 0.6)'
-        : 'rgba(255, 255, 255, 0.2)';
+        ? 'rgba(254, 240, 138, 0.9)'
+        : 'rgba(255, 255, 255, 0.28)';
       this.ctx.stroke();
 
       // Draw Inner Concentric Highlight Ring
@@ -243,23 +239,28 @@ export class Wheel {
           this.ctx.restore();
         }
       } else if (!slot.isWin) {
-        // Try Again Stylized Icon
+        // Try Again Stylized Vector Reload Arrow Icon matching the wheel image
         this.ctx.save();
         this.ctx.translate(iconDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
+        const iconR = isMobile ? 10 : 12;
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, isMobile ? 12 : 14, 0, 2 * Math.PI);
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        this.ctx.fill();
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        this.ctx.lineWidth = 1;
+        this.ctx.arc(0, 0, iconR, -Math.PI * 0.7, Math.PI * 0.9);
+        this.ctx.strokeStyle = '#FFFFFF';
+        this.ctx.lineWidth = isMobile ? 2.2 : 2.8;
+        this.ctx.lineCap = 'round';
         this.ctx.stroke();
 
-        this.ctx.font = `${isMobile ? 12 : 14}px sans-serif`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText('🍀', 0, 0);
+        // Arrow head on reload circle
+        const arrowHeadX = Math.cos(Math.PI * 0.9) * iconR;
+        const arrowHeadY = Math.sin(Math.PI * 0.9) * iconR;
+        this.ctx.beginPath();
+        this.ctx.moveTo(arrowHeadX - 4, arrowHeadY - 4);
+        this.ctx.lineTo(arrowHeadX, arrowHeadY);
+        this.ctx.lineTo(arrowHeadX + 5, arrowHeadY - 1);
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fill();
         this.ctx.restore();
       }
 
