@@ -21,7 +21,7 @@ export const SLOTS: readonly SlotConfig[] = [
     index: 0,
     prizeKey: 'grand_prize',
     label: 'Powerbank Pro',
-    weight: 0.5,
+    weight: 2.5,
     isWin: true,
     isGrandPrize: true,
     color: '#B45309', // Radiant rich gold
@@ -32,8 +32,8 @@ export const SLOTS: readonly SlotConfig[] = [
   {
     index: 1,
     prizeKey: 'try_again_1',
-    label: 'Try Again',
-    weight: 18.0,
+    label: 'Try Again Later',
+    weight: 15.0,
     isWin: false,
     isGrandPrize: false,
     color: '#1E1B4B', // Slate dark navy
@@ -43,7 +43,7 @@ export const SLOTS: readonly SlotConfig[] = [
     index: 2,
     prizeKey: 'prize_earpods_1',
     label: 'Earpods Pro',
-    weight: 2.5,
+    weight: 7.5,
     isWin: true,
     isGrandPrize: false,
     color: '#BE185D', // Royal magenta
@@ -54,8 +54,8 @@ export const SLOTS: readonly SlotConfig[] = [
   {
     index: 3,
     prizeKey: 'try_again_2',
-    label: 'Better Luck',
-    weight: 18.0,
+    label: 'Try Again Later',
+    weight: 15.0,
     isWin: false,
     isGrandPrize: false,
     color: '#312E81', // Deep royal indigo
@@ -65,7 +65,7 @@ export const SLOTS: readonly SlotConfig[] = [
     index: 4,
     prizeKey: 'prize_rs500_1',
     label: 'Rs. 500 Cash',
-    weight: 2.5,
+    weight: 7.5,
     isWin: true,
     isGrandPrize: false,
     color: '#047857', // Emerald green
@@ -76,8 +76,8 @@ export const SLOTS: readonly SlotConfig[] = [
   {
     index: 5,
     prizeKey: 'try_again_3',
-    label: 'Try Again',
-    weight: 18.0,
+    label: 'Try Again Later',
+    weight: 15.0,
     isWin: false,
     isGrandPrize: false,
     color: '#1E1B4B', // Slate dark navy
@@ -87,7 +87,7 @@ export const SLOTS: readonly SlotConfig[] = [
     index: 6,
     prizeKey: 'prize_mobile_a',
     label: 'Mobile Phone',
-    weight: 0.5,
+    weight: 7.5,
     isWin: true,
     isGrandPrize: false,
     color: '#6D28D9', // Royal violet
@@ -98,8 +98,8 @@ export const SLOTS: readonly SlotConfig[] = [
   {
     index: 7,
     prizeKey: 'try_again_4',
-    label: 'Spin Again',
-    weight: 18.0,
+    label: 'Try Again Later',
+    weight: 15.0,
     isWin: false,
     isGrandPrize: false,
     color: '#312E81', // Deep royal indigo
@@ -109,7 +109,7 @@ export const SLOTS: readonly SlotConfig[] = [
     index: 8,
     prizeKey: 'prize_rs100_b',
     label: 'Rs. 100 Bonus',
-    weight: 4.0,
+    weight: 7.5,
     isWin: true,
     isGrandPrize: false,
     color: '#0E7490', // Vibrant ocean cyan
@@ -119,13 +119,14 @@ export const SLOTS: readonly SlotConfig[] = [
   },
   {
     index: 9,
-    prizeKey: 'try_again_5',
-    label: 'Better Luck',
-    weight: 18.0,
-    isWin: false,
+    prizeKey: 'prize_voucher_c',
+    label: 'Gift Voucher',
+    weight: 7.5,
+    isWin: true,
     isGrandPrize: false,
-    color: '#1E1B4B', // Slate dark navy
-    textColor: '#CBD5E1',
+    color: '#C026D3', // Fuchsia
+    textColor: '#FDF4FF',
+    accentColor: '#E879F9',
   },
 ];
 

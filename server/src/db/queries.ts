@@ -8,6 +8,8 @@ import type {
 } from '../../../shared/types.js';
 import {
   generateId,
+  getDb,
+  isMongoConnected,
   localDb,
   PrizeNameDoc,
   SpinDoc,
@@ -16,11 +18,27 @@ import {
 } from './index.js';
 
 export async function findUserByIdentifier(identifier: string): Promise<UserDoc | null> {
+  if (isMongoConnected()) {
+    try {
+      const user = await getDb().collection<UserDoc>('users').findOne({ identifier });
+      if (user) return user;
+    } catch {
+      // Fallback to local store
+    }
+  }
   const user = localDb.data.users.find((u) => u.identifier === identifier);
   return user || null;
 }
 
 export async function findUserById(id: string): Promise<UserDoc | null> {
+  if (isMongoConnected()) {
+    try {
+      const user = await getDb().collection<UserDoc>('users').findOne({ _id: id });
+      if (user) return user;
+    } catch {
+      // Fallback
+    }
+  }
   const user = localDb.data.users.find((u) => u._id === id);
   return user || null;
 }
@@ -42,12 +60,27 @@ export async function createUser(
     createdAt: new Date().toISOString(),
   };
 
+  if (isMongoConnected()) {
+    try {
+      await getDb().collection<UserDoc>('users').insertOne(doc);
+    } catch (err) {
+      console.warn('MongoDB insert error, saving to local store:', err);
+    }
+  }
+
   localDb.data.users.push(doc);
   localDb.save();
   return doc;
 }
 
 export async function getUserSpinCount(userId: string): Promise<number> {
+  if (isMongoConnected()) {
+    try {
+      return await getDb().collection<SpinDoc>('spins').countDocuments({ userId });
+    } catch {
+      // Fallback
+    }
+  }
   return localDb.data.spins.filter((s) => s.userId === userId).length;
 }
 
@@ -55,6 +88,19 @@ export async function getUserRecentSpins(
   userId: string,
   limit = 5
 ): Promise<readonly SpinDoc[]> {
+  if (isMongoConnected()) {
+    try {
+      const docs = await getDb()
+        .collection<SpinDoc>('spins')
+        .find({ userId })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .toArray();
+      if (docs.length > 0) return docs;
+    } catch {
+      // Fallback
+    }
+  }
   return localDb.data.spins
     .filter((s) => s.userId === userId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -78,16 +124,41 @@ export async function createSpinToken(
     createdAt: Date.now(),
   };
 
+  if (isMongoConnected()) {
+    try {
+      await getDb().collection<SpinTokenDoc>('spin_tokens').insertOne(doc);
+    } catch (err) {
+      console.warn('MongoDB token error:', err);
+    }
+  }
+
   localDb.data.spin_tokens.push(doc);
   localDb.save();
 }
 
 export async function findSpinToken(token: string): Promise<SpinTokenDoc | null> {
+  if (isMongoConnected()) {
+    try {
+      const t = await getDb().collection<SpinTokenDoc>('spin_tokens').findOne({ token });
+      if (t) return t;
+    } catch {
+      // Fallback
+    }
+  }
   const t = localDb.data.spin_tokens.find((item) => item.token === token);
   return t || null;
 }
 
 export async function markSpinTokenUsed(tokenId: string): Promise<void> {
+  if (isMongoConnected()) {
+    try {
+      await getDb()
+        .collection<SpinTokenDoc>('spin_tokens')
+        .updateOne({ _id: tokenId }, { $set: { used: true, usedAt: Date.now() } });
+    } catch {
+      // Fallback
+    }
+  }
   const token = localDb.data.spin_tokens.find((item) => item._id === tokenId);
   if (token) {
     token.used = true;
@@ -97,6 +168,13 @@ export async function markSpinTokenUsed(tokenId: string): Promise<void> {
 }
 
 export async function getGlobalSpinCount(): Promise<number> {
+  if (isMongoConnected()) {
+    try {
+      return await getDb().collection<SpinDoc>('spins').countDocuments({});
+    } catch {
+      // Fallback
+    }
+  }
   return localDb.data.spins.length;
 }
 
@@ -132,6 +210,14 @@ export async function insertSpin(params: {
     createdAt: new Date().toISOString(),
   };
 
+  if (isMongoConnected()) {
+    try {
+      await getDb().collection<SpinDoc>('spins').insertOne(doc);
+    } catch (err) {
+      console.warn('MongoDB spin insert error:', err);
+    }
+  }
+
   localDb.data.spins.push(doc);
   localDb.save();
   return id;
@@ -139,6 +225,17 @@ export async function insertSpin(params: {
 
 export async function getCustomPrizeNames(): Promise<Record<number, string>> {
   const map: Record<number, string> = {};
+  if (isMongoConnected()) {
+    try {
+      const docs = await getDb().collection<PrizeNameDoc>('prize_names').find({}).toArray();
+      for (const doc of docs) {
+        map[doc.slotIndex] = doc.customName;
+      }
+      if (docs.length > 0) return map;
+    } catch {
+      // Fallback
+    }
+  }
   for (const doc of localDb.data.prize_names) {
     map[doc.slotIndex] = doc.customName;
   }
@@ -149,6 +246,19 @@ export async function saveCustomPrizeNames(customNames: Record<number, string>):
   for (const [key, value] of Object.entries(customNames)) {
     const slotIndex = Number(key);
     if (!Number.isNaN(slotIndex) && value.trim()) {
+      if (isMongoConnected()) {
+        try {
+          await getDb()
+            .collection<PrizeNameDoc>('prize_names')
+            .updateOne(
+              { slotIndex },
+              { $set: { customName: value.trim(), updatedAt: new Date().toISOString() } },
+              { upsert: true }
+            );
+        } catch {
+          // Fallback
+        }
+      }
       const existing = localDb.data.prize_names.find((p) => p.slotIndex === slotIndex);
       if (existing) {
         existing.customName = value.trim();
@@ -167,7 +277,15 @@ export async function saveCustomPrizeNames(customNames: Record<number, string>):
 }
 
 export async function getAdminStats(configuredSlots: readonly SlotConfig[]): Promise<AdminStats> {
-  const spins = localDb.data.spins;
+  let spins = localDb.data.spins;
+  if (isMongoConnected()) {
+    try {
+      spins = await getDb().collection<SpinDoc>('spins').find({}).toArray();
+    } catch {
+      spins = localDb.data.spins;
+    }
+  }
+
   const totalSpins = spins.length;
   const uniqueUsers = new Set(spins.map((s) => s.userId)).size;
   const grandPrizeWinners = spins.filter((s) => s.isGrandPrize).length;
@@ -216,6 +334,13 @@ export async function getAdminStats(configuredSlots: readonly SlotConfig[]): Pro
 
 export async function getAdminSpins(query: AdminSpinQuery): Promise<AdminSpinListResponse> {
   let list = [...localDb.data.spins];
+  if (isMongoConnected()) {
+    try {
+      list = await getDb().collection<SpinDoc>('spins').find({}).toArray();
+    } catch {
+      list = [...localDb.data.spins];
+    }
+  }
 
   if (query.search && query.search.trim()) {
     const term = query.search.trim().toLowerCase();
@@ -283,7 +408,16 @@ export async function getAdminSpins(query: AdminSpinQuery): Promise<AdminSpinLis
 }
 
 export async function getAllSpinsForExport(): Promise<readonly SpinRecord[]> {
-  return localDb.data.spins
+  let list = localDb.data.spins;
+  if (isMongoConnected()) {
+    try {
+      list = await getDb().collection<SpinDoc>('spins').find({}).toArray();
+    } catch {
+      list = localDb.data.spins;
+    }
+  }
+
+  return list
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     .map((doc) => ({
       id: doc._id,

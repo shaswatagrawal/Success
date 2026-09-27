@@ -1,13 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
-import { Collection, Db, MongoClient, ObjectId } from 'mongodb';
+import { Collection, Db, MongoClient } from 'mongodb';
 import { ENV } from '../config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(__dirname, '../../data');
+
+// In serverless environments (Vercel / Lambda), filesystem outside os.tmpdir() is strictly read-only
+const isServerless = Boolean(process.env['VERCEL'] || process.env['AWS_LAMBDA_FUNCTION_NAME']);
+const DATA_DIR = isServerless
+  ? path.join(os.tmpdir(), 'spin_the_wheel_data')
+  : path.resolve(__dirname, '../../data');
 const STORE_PATH = path.join(DATA_DIR, 'wheel_store.json');
 
 export interface UserDoc {
@@ -96,8 +102,8 @@ class LocalDatabase {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
       fs.writeFileSync(STORE_PATH, JSON.stringify(this.store, null, 2), 'utf-8');
-    } catch (err) {
-      console.warn('Could not save local store to disk:', err);
+    } catch {
+      // In read-only environments, keep in-memory without throwing error
     }
   }
 
@@ -120,20 +126,31 @@ export const mongoClient = new MongoClient(ENV.MONGODB_URI, {
 });
 
 let isMongoReady = false;
+let connectPromise: Promise<void> | null = null;
 
 export function isMongoConnected(): boolean {
   return isMongoReady;
 }
 
+export function getDb(): Db {
+  return mongoClient.db(ENV.DATABASE_NAME);
+}
+
 export async function initDatabase(): Promise<void> {
-  try {
-    await mongoClient.connect();
-    isMongoReady = true;
-    console.log(`🍃 Connected to MongoDB Atlas (${ENV.DATABASE_NAME})`);
-  } catch (err) {
-    isMongoReady = false;
-    console.log(`💾 Using High-Performance Local Persistent Engine (${STORE_PATH})`);
+  if (isMongoReady) return;
+  if (!connectPromise) {
+    connectPromise = (async () => {
+      try {
+        await mongoClient.connect();
+        isMongoReady = true;
+        console.log(`🍃 Connected to MongoDB Atlas (${ENV.DATABASE_NAME})`);
+      } catch (err) {
+        isMongoReady = false;
+        console.warn('⚠️ MongoDB Atlas connection note:', err instanceof Error ? err.message : err);
+      }
+    })();
   }
+  return connectPromise;
 }
 
 export async function closeDatabase(): Promise<void> {
@@ -145,5 +162,6 @@ export async function closeDatabase(): Promise<void> {
       // Ignored on teardown
     }
     isMongoReady = false;
+    connectPromise = null;
   }
 }
