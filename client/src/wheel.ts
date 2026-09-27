@@ -169,6 +169,9 @@ export class Wheel {
       const iconDist = radius * (isMobile ? 0.46 : 0.48);
       const textDist = radius * (isMobile ? 0.82 : 0.80);
 
+      // Available width at icon distance based on the slice gap/angle
+      const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
+
       // A) Draw Image Asset if available
       if (slot.image && this.imageCache.has(slot.image)) {
         const img = this.imageCache.get(slot.image);
@@ -176,75 +179,84 @@ export class Wheel {
           this.ctx.save();
           this.ctx.translate(iconDist, 0);
 
-          const isNote = slot.image.includes('note') || slot.image.includes('rs');
-          const isMobilePhone = slot.image.includes('mobile') || slot.image.includes('phone');
-          const isEarpods = slot.image.includes('earpod');
+          const isNote = slot.image.includes('note') || slot.image.includes('rs') || slot.label.toLowerCase().includes('balance');
+          const isGadget =
+            slot.image.includes('mobile') ||
+            slot.image.includes('phone') ||
+            slot.image.includes('earpod') ||
+            slot.image.includes('powerbank') ||
+            slot.image.includes('charger');
 
-          if (isMobilePhone || isEarpods) {
-            // Flagship Mobile Phone & Tech Gadgets
+          if (isGadget) {
+            // Flagship Mobile Phone, Earpods, Powerbank & Tech Gadgets
             this.ctx.rotate(Math.PI / 2);
-            const badgeRadius = isMobile ? 18 : 22;
+            const baseBadgeRadius = isMobile ? 18 : 22;
+            const maxAllowedRadius = (availableWidthAtIcon * 0.76) / 2;
+            const badgeRadius = Math.max(9, Math.min(baseBadgeRadius, maxAllowedRadius));
 
             // Draw glowing backdrop disc
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
             this.ctx.shadowColor = slot.isGrandPrize ? 'rgba(245, 158, 11, 0.9)' : 'rgba(0, 0, 0, 0.7)';
-            this.ctx.shadowBlur = slot.isGrandPrize ? 12 : 8;
+            this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(4, badgeRadius * 0.5) : 6;
             this.ctx.fill();
 
-            // Clip and draw image
+            // Clip and draw image cleanly inside circular badge
             this.ctx.beginPath();
-            this.ctx.arc(0, 0, badgeRadius - 1, 0, 2 * Math.PI);
+            this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
             this.ctx.clip();
-            const iconSize = badgeRadius * 2.15;
+            const iconSize = badgeRadius * 2.1;
             this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
             this.ctx.restore();
 
             // Gold / Accent rim
             this.ctx.beginPath();
             this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-            this.ctx.lineWidth = slot.isGrandPrize ? 2.5 : 1.5;
+            this.ctx.lineWidth = slot.isGrandPrize ? Math.max(1.5, badgeRadius * 0.12) : 1.5;
             this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(255, 255, 255, 0.45)';
             this.ctx.stroke();
           } else if (isNote) {
-            // Nepalese Banknote: Rotate 90 degrees CCW so it lies horizontally along the radial slice
+            // Nepalese Banknote: Proportional to gap width
             this.ctx.rotate(-Math.PI / 2);
-            const noteW = isMobile ? 38 : 46;
-            const noteH = isMobile ? 22 : 26;
+            const baseNoteW = isMobile ? 36 : 44;
+            const maxNoteW = Math.max(18, Math.min(baseNoteW, availableWidthAtIcon * 0.78));
+            const noteW = maxNoteW;
+            const noteH = noteW * 0.56;
 
             // Draw soft shadow & card border
             this.ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-            this.ctx.shadowBlur = 6;
+            this.ctx.shadowBlur = 5;
             this.ctx.shadowOffsetY = 2;
 
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            this.roundRect(-noteW / 2 - 2, -noteH / 2 - 2, noteW + 4, noteH + 4, 4);
+            this.roundRect(-noteW / 2 - 1.5, -noteH / 2 - 1.5, noteW + 3, noteH + 3, 3);
             this.ctx.fill();
 
             // Clip to rounded rectangle
             this.ctx.save();
             this.ctx.beginPath();
-            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3);
+            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 2.5);
             this.ctx.clip();
             this.ctx.drawImage(img, -noteW / 2, -noteH / 2, noteW, noteH);
             this.ctx.restore();
 
             // Gold border
             this.ctx.beginPath();
-            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3);
-            this.ctx.lineWidth = 1.5;
+            this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 2.5);
+            this.ctx.lineWidth = 1.2;
             this.ctx.strokeStyle = '#FDE047';
             this.ctx.stroke();
           } else {
-            // Kite or graphic icon: Draw oriented towards outer rim
+            // Graphic icon: Proportional to gap
             this.ctx.rotate(Math.PI / 2);
-            const kiteSize = isMobile ? 34 : 42;
+            const baseSize = isMobile ? 32 : 38;
+            const kiteSize = Math.max(16, Math.min(baseSize, availableWidthAtIcon * 0.75));
 
             this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.shadowBlur = 8;
-            this.ctx.shadowOffsetY = 3;
+            this.ctx.shadowBlur = 6;
+            this.ctx.shadowOffsetY = 2;
 
             this.ctx.drawImage(
               img,
@@ -258,26 +270,29 @@ export class Wheel {
           this.ctx.restore();
         }
       } else if (!slot.isWin) {
-        // Try Again Stylized Vector Reload Arrow Icon matching the wheel image
+        // Better Luck Stylized Vector Reload Arrow Icon sized to gap
         this.ctx.save();
         this.ctx.translate(iconDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
-        const iconR = isMobile ? 10 : 12;
+        const baseIconR = isMobile ? 10 : 12;
+        const iconR = Math.max(6, Math.min(baseIconR, (availableWidthAtIcon * 0.42) / 2));
+
         this.ctx.beginPath();
         this.ctx.arc(0, 0, iconR, -Math.PI * 0.7, Math.PI * 0.9);
         this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = isMobile ? 2.2 : 2.8;
+        this.ctx.lineWidth = isMobile ? 2.0 : 2.5;
         this.ctx.lineCap = 'round';
         this.ctx.stroke();
 
         // Arrow head on reload circle
         const arrowHeadX = Math.cos(Math.PI * 0.9) * iconR;
         const arrowHeadY = Math.sin(Math.PI * 0.9) * iconR;
+        const headSize = Math.max(2.5, iconR * 0.35);
         this.ctx.beginPath();
-        this.ctx.moveTo(arrowHeadX - 4, arrowHeadY - 4);
+        this.ctx.moveTo(arrowHeadX - headSize, arrowHeadY - headSize);
         this.ctx.lineTo(arrowHeadX, arrowHeadY);
-        this.ctx.lineTo(arrowHeadX + 5, arrowHeadY - 1);
+        this.ctx.lineTo(arrowHeadX + headSize + 1, arrowHeadY - 1);
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fill();
         this.ctx.restore();
@@ -287,17 +302,31 @@ export class Wheel {
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
 
-      const fontSize = slot.isGrandPrize
-        ? isMobile
-          ? 11
-          : 13
-        : isMobile
-        ? 10
-        : 12;
+      const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.88;
+      let displayLabel = slot.label;
+      if (slot.isGrandPrize) {
+        if (sliceAngle >= 0.35 && !displayLabel.includes('⭐')) {
+          displayLabel = `⭐ ${slot.label}`;
+        }
+      }
+
+      let fontSize = slot.isGrandPrize
+        ? (isMobile ? 11 : 13)
+        : (isMobile ? 10 : 12);
 
       this.ctx.font = slot.isGrandPrize
         ? `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`
         : `700 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+
+      // Dynamically shrink font size if text exceeds available slice width
+      let textMetrics = this.ctx.measureText(displayLabel);
+      while (textMetrics.width > availableTextWidth && fontSize > 6.5) {
+        fontSize -= 0.5;
+        this.ctx.font = slot.isGrandPrize
+          ? `900 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`
+          : `700 ${fontSize}px var(--font-heading, 'Outfit', sans-serif)`;
+        textMetrics = this.ctx.measureText(displayLabel);
+      }
 
       this.ctx.fillStyle = slot.textColor || '#FFFFFF';
 
@@ -307,16 +336,13 @@ export class Wheel {
       this.ctx.shadowOffsetX = 1;
       this.ctx.shadowOffsetY = 1;
 
-      let displayLabel = slot.label;
-      if (slot.isGrandPrize && !displayLabel.includes('⭐')) {
-        displayLabel = `⭐ ${slot.label}`;
-      }
-
-      // Draw label rotated outward
+      // Draw label rotated outward with maxWidth safety
       this.ctx.save();
       this.ctx.translate(textDist, 0);
       this.ctx.rotate(Math.PI / 2);
-      this.ctx.fillText(displayLabel, 0, 0);
+      this.ctx.fillText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
+      this.ctx.restore();
+
       this.ctx.restore();
 
       this.ctx.restore();
