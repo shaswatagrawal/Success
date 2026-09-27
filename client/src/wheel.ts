@@ -57,6 +57,26 @@ export class Wheel {
     }
   }
 
+  /**
+   * Compute start/end angles for each slot based on visualWeight.
+   * Slots without visualWeight default to 1.
+   */
+  private computeSliceAngles(): { start: number; end: number; angle: number }[] {
+    const totalVisualWeight = this.slots.reduce(
+      (sum, s) => sum + (s.visualWeight ?? 1),
+      0
+    );
+    const result: { start: number; end: number; angle: number }[] = [];
+    let cumulative = 0;
+    for (const slot of this.slots) {
+      const w = slot.visualWeight ?? 1;
+      const sliceAngle = (w / totalVisualWeight) * 2 * Math.PI;
+      result.push({ start: cumulative, end: cumulative + sliceAngle, angle: sliceAngle });
+      cumulative += sliceAngle;
+    }
+    return result;
+  }
+
   public updateSlots(newSlots: readonly PublicSlotConfig[]): void {
     this.slots = newSlots;
     this.preloadImages();
@@ -89,7 +109,7 @@ export class Wheel {
 
     if (this.slots.length === 0) return;
 
-    const sliceAngle = (2 * Math.PI) / this.slots.length;
+    const sliceAngles = this.computeSliceAngles();
 
     this.ctx.save();
     this.ctx.translate(centerX, centerY);
@@ -98,8 +118,7 @@ export class Wheel {
     // 1. Draw Each Slot Slice Wedge & Content
     for (let i = 0; i < this.slots.length; i++) {
       const slot = this.slots[i]!;
-      const startAngle = i * sliceAngle;
-      const endAngle = startAngle + sliceAngle;
+      const { start: startAngle, end: endAngle, angle: sliceAngle } = sliceAngles[i]!;
 
       // Slice Background Wedge
       this.ctx.beginPath();
@@ -335,7 +354,7 @@ export class Wheel {
     // 4. Draw Edge Pins (Ticking Pegs) on the Rim (rotating with the wheel)
     this.ctx.rotate(this.currentRotation);
     for (let i = 0; i < this.slots.length; i++) {
-      const pinAngle = i * sliceAngle;
+      const pinAngle = sliceAngles[i]!.start;
       const pinX = Math.cos(pinAngle) * (radius + 2);
       const pinY = Math.sin(pinAngle) * (radius + 2);
 
@@ -418,17 +437,17 @@ export class Wheel {
     this.onSpinStart?.();
 
     return new Promise((resolve) => {
-      const totalSlots = this.slots.length;
-      const sliceAngle = (2 * Math.PI) / totalSlots;
+      const sliceAngles = this.computeSliceAngles();
 
       // Pointer is stationary at top: -PI/2 radians (270 degrees)
       const pointerAngle = -Math.PI / 2;
 
-      // Center angle of target slot inside unrotated wheel:
-      const targetCenterAngle = (targetSlotIndex + 0.5) * sliceAngle;
+      // Center angle of target slot inside unrotated wheel (using proportional angles):
+      const targetSlice = sliceAngles[targetSlotIndex]!;
+      const targetCenterAngle = targetSlice.start + targetSlice.angle / 2;
 
       // Slight natural jitter inside slot slice ([-20%, +20%] of slice width)
-      const jitter = (Math.random() - 0.5) * sliceAngle * 0.4;
+      const jitter = (Math.random() - 0.5) * targetSlice.angle * 0.4;
 
       // We want: (targetRotation + targetCenterAngle + jitter) % (2 * PI) = pointerAngle
       const currentNorm = this.currentRotation % (2 * Math.PI);
@@ -454,12 +473,16 @@ export class Wheel {
 
         this.currentRotation = startRotation + (finalRotation - startRotation) * easedProgress;
 
-        // Check if pointer crossed a pin
-        const currentSliceUnderPointer = Math.floor(
-          (((pointerAngle - this.currentRotation) % (2 * Math.PI) + 2 * Math.PI) %
-            (2 * Math.PI)) /
-            sliceAngle
-        );
+        // Check if pointer crossed a pin (using proportional slice boundaries)
+        const angleUnderPointer =
+          ((pointerAngle - this.currentRotation) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        let currentSliceUnderPointer = 0;
+        for (let s = 0; s < sliceAngles.length; s++) {
+          if (angleUnderPointer >= sliceAngles[s]!.start && angleUnderPointer < sliceAngles[s]!.end) {
+            currentSliceUnderPointer = s;
+            break;
+          }
+        }
 
         if (currentSliceUnderPointer !== this.lastTickedSlice) {
           this.lastTickedSlice = currentSliceUnderPointer;

@@ -9,124 +9,163 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 /**
- * Slot Configuration: exactly 10 slots.
- * - 4 slots: "Try Again Later" (15% each = 60% total)
- * - 1 slot: "GRAND PRIZE" (2.5%)
- * - 5 slots: normal prizes (7.5% each = 37.5% total)
+ * Slot Configuration: exactly 12 slots.
+ * - 1 slot: "GRAND PRIZE" — Smart Phone (2%)
+ * - 4 slots: normal prizes (5% + 5% + 5% + 6% = 21% total)
+ * - 7 slots: "Better Luck" (11% each = 77% total)
  *
- * Sum = 60 + 2.5 + 37.5 = 100%
+ * Sum = 2 + 21 + 77 = 100%
  */
 export const SLOTS: readonly SlotConfig[] = [
+  // === GRAND PRIZE ===
   {
     index: 0,
     prizeKey: 'grand_prize',
-    label: 'Powerbank Pro',
-    weight: 2.5,
+    label: 'Smart Phone',
+    weight: 2,
+    visualWeight: 0.4,
     isWin: true,
     isGrandPrize: true,
-    color: '#DC2626', // Vibrant Crimson Red
+    color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
-    image: '/assets/powerbank_pro.jpg',
+    image: '/assets/mobile_flagship.jpg',
   },
+
+  // === BETTER LUCK ===
   {
     index: 1,
-    prizeKey: 'try_again_1',
-    label: 'Try Again Later',
-    weight: 15.0,
+    prizeKey: 'better_luck_1',
+    label: 'Better Luck',
+    weight: 11,
     isWin: false,
     isGrandPrize: false,
-    color: '#1D4ED8', // Electric Royal Blue
+    color: '#1D4ED8',
     textColor: '#FFFFFF',
   },
   {
     index: 2,
-    prizeKey: 'prize_earpods_1',
-    label: 'Earpods Pro',
-    weight: 7.5,
+    prizeKey: 'better_luck_2',
+    label: 'Better Luck',
+    weight: 11,
+    isWin: false,
+    isGrandPrize: false,
+    color: '#1E40AF',
+    textColor: '#FFFFFF',
+  },
+
+  // === NORMAL PRIZE: Earpods ===
+  {
+    index: 3,
+    prizeKey: 'prize_earpods',
+    label: 'Earpods',
+    weight: 5,
     isWin: true,
     isGrandPrize: false,
-    color: '#B91C1C', // Deep Crimson Red
+    color: '#B91C1C',
     textColor: '#FFFFFF',
     accentColor: '#F87171',
     image: '/assets/earpods_pro.jpg',
   },
-  {
-    index: 3,
-    prizeKey: 'try_again_2',
-    label: 'Try Again Later',
-    weight: 15.0,
-    isWin: false,
-    isGrandPrize: false,
-    color: '#1E40AF', // Deep Sapphire Blue
-    textColor: '#FFFFFF',
-  },
+
+  // === BETTER LUCK ===
   {
     index: 4,
-    prizeKey: 'prize_rs500_1',
-    label: 'Rs. 500 Cash',
-    weight: 7.5,
-    isWin: true,
+    prizeKey: 'better_luck_3',
+    label: 'Better Luck',
+    weight: 11,
+    isWin: false,
     isGrandPrize: false,
-    color: '#DC2626', // Vibrant Crimson Red
+    color: '#1D4ED8',
     textColor: '#FFFFFF',
-    accentColor: '#EF4444',
-    image: '/assets/rs500_note.jpg',
   },
+
+  // === NORMAL PRIZE: Powerbank ===
   {
     index: 5,
-    prizeKey: 'try_again_3',
-    label: 'Try Again Later',
-    weight: 15.0,
-    isWin: false,
+    prizeKey: 'prize_powerbank',
+    label: 'Powerbank',
+    weight: 5,
+    isWin: true,
     isGrandPrize: false,
-    color: '#1D4ED8', // Electric Royal Blue
+    color: '#DC2626',
     textColor: '#FFFFFF',
+    accentColor: '#EF4444',
+    image: '/assets/powerbank_pro.jpg',
   },
+
+  // === BETTER LUCK ===
   {
     index: 6,
-    prizeKey: 'prize_mobile_a',
-    label: 'Mobile Phone',
-    weight: 7.5,
-    isWin: true,
-    isGrandPrize: false,
-    color: '#B91C1C', // Deep Crimson Red
-    textColor: '#FFFFFF',
-    accentColor: '#F87171',
-    image: '/assets/mobile_flagship.jpg',
-  },
-  {
-    index: 7,
-    prizeKey: 'try_again_4',
-    label: 'Try Again Later',
-    weight: 15.0,
+    prizeKey: 'better_luck_4',
+    label: 'Better Luck',
+    weight: 11,
     isWin: false,
     isGrandPrize: false,
-    color: '#1E40AF', // Deep Sapphire Blue
+    color: '#1E40AF',
     textColor: '#FFFFFF',
   },
+
+  // === NORMAL PRIZE: 500 Balance ===
   {
-    index: 8,
-    prizeKey: 'prize_rs100_b',
-    label: 'Rs. 100 Bonus',
-    weight: 7.5,
+    index: 7,
+    prizeKey: 'prize_500_balance',
+    label: '500 Balance',
+    weight: 5,
     isWin: true,
     isGrandPrize: false,
-    color: '#DC2626', // Vibrant Crimson Red
+    color: '#B91C1C',
+    textColor: '#FFFFFF',
+    accentColor: '#F87171',
+    image: '/assets/rs500_note.jpg',
+  },
+
+  // === BETTER LUCK ===
+  {
+    index: 8,
+    prizeKey: 'better_luck_5',
+    label: 'Better Luck',
+    weight: 11,
+    isWin: false,
+    isGrandPrize: false,
+    color: '#1D4ED8',
+    textColor: '#FFFFFF',
+  },
+
+  // === NORMAL PRIZE: 100 Balance ===
+  {
+    index: 9,
+    prizeKey: 'prize_100_balance',
+    label: '100 Balance',
+    weight: 6,
+    isWin: true,
+    isGrandPrize: false,
+    color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
     image: '/assets/rs100_note.jpg',
   },
+
+  // === BETTER LUCK ===
   {
-    index: 9,
-    prizeKey: 'prize_voucher_c',
-    label: 'Gift Voucher',
-    weight: 7.5,
-    isWin: true,
+    index: 10,
+    prizeKey: 'better_luck_6',
+    label: 'Better Luck',
+    weight: 11,
+    isWin: false,
     isGrandPrize: false,
-    color: '#1D4ED8', // Electric Royal Blue
+    color: '#1E40AF',
     textColor: '#FFFFFF',
-    accentColor: '#60A5FA',
+  },
+  {
+    index: 11,
+    prizeKey: 'better_luck_7',
+    label: 'Better Luck',
+    weight: 11,
+    isWin: false,
+    isGrandPrize: false,
+    color: '#1D4ED8',
+    textColor: '#FFFFFF',
   },
 ];
 
@@ -135,8 +174,8 @@ export const SLOTS: readonly SlotConfig[] = [
  * Throws immediately if invalid to protect system integrity.
  */
 export function validateWeights(slots: readonly SlotConfig[]): void {
-  if (slots.length !== 10) {
-    throw new Error(`Wheel must have exactly 10 slots, found ${slots.length}`);
+  if (slots.length !== 12) {
+    throw new Error(`Wheel must have exactly 12 slots, found ${slots.length}`);
   }
   const sum = slots.reduce((acc, slot) => acc + slot.weight, 0);
   if (Math.abs(sum - 100) > 0.0001) {

@@ -57,19 +57,46 @@
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
-  background-image: 
-    radial-gradient(circle at 50% 40%, rgba(15, 23, 42, 0.72) 0%, rgba(7, 9, 19, 0.88) 60%, rgba(4, 6, 14, 0.96) 100%),
-    url('/assets/dasra_puja_bg.jpg');
-  background-size: cover;
-  background-position: center center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Fullscreen Video Background */
+.video-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  overflow: hidden;
+}
+
+.video-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.video-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 9, 19, 0.65) 0%,
+    rgba(7, 9, 19, 0.50) 40%,
+    rgba(7, 9, 19, 0.60) 70%,
+    rgba(7, 9, 19, 0.75) 100%
+  );
+  z-index: 1;
 }
 
 /* Background Ambient Glows */
@@ -160,8 +187,12 @@ body {
   gap: 0.75rem;
 }
 
-.brand-icon {
-  font-size: 1.75rem;
+.brand-logo {
+  height: 48px;
+  width: auto;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .brand-text {
@@ -174,16 +205,17 @@ body {
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: 0.05em;
-  background: linear-gradient(135deg, #FFF 30%, #F59E0B 100%);
+  background: linear-gradient(135deg, #E31B23 0%, #1A56DB 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .brand-subtitle {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #E31B23;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-weight: 600;
 }
 
 .nav-actions {
@@ -194,7 +226,7 @@ body {
 
 /* Typography & Badges */
 .gradient-text {
-  background: linear-gradient(135deg, #F59E0B 0%, #EC4899 50%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #E31B23 0%, #FFFFFF 50%, #1A56DB 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -250,9 +282,9 @@ body {
 .hero-badge {
   display: inline-block;
   padding: 0.35rem 1rem;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  color: #C4B5FD;
+  background: rgba(227, 27, 35, 0.15);
+  border: 1px solid rgba(227, 27, 35, 0.4);
+  color: #FFFFFF;
   border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 700;
@@ -268,6 +300,7 @@ body {
   line-height: 1.15;
   margin-bottom: 1rem;
   letter-spacing: -0.02em;
+  color: #FFFFFF;
 }
 
 .hero-desc {

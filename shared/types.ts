@@ -19,6 +19,7 @@ export interface SlotConfig {
   readonly prizeKey: string;
   readonly label: string;
   readonly weight: number; // Percentage, e.g. 15 for 15%
+  readonly visualWeight?: number; // Controls visual slice size on the wheel (relative proportion)
   readonly isWin: boolean;
   readonly isGrandPrize: boolean;
   readonly color: string;
@@ -31,6 +32,7 @@ export interface PublicSlotConfig {
   readonly index: number;
   readonly prizeKey: string;
   readonly label: string;
+  readonly visualWeight?: number; // Controls visual slice size on the wheel (relative proportion)
   readonly isWin: boolean;
   readonly isGrandPrize: boolean;
   readonly color: string;

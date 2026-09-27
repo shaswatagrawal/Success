@@ -277,6 +277,7 @@ export async function getPublicWheelConfig(): Promise<readonly PublicSlotConfig[
       index: slot.index,
       prizeKey: slot.prizeKey,
       label,
+      visualWeight: slot.visualWeight,
       isWin: slot.isWin,
       isGrandPrize: slot.isGrandPrize,
       color: slot.color,
