@@ -443,10 +443,11 @@ export class Wheel {
   }
 
   /**
-   * Smooth quintic deceleration easing function.
+   * Dramatic suspense deceleration easing function.
+   * Starts high speed, gradually slows down, and slowly clicks across the last few slots for high tension.
    */
-  private easeOutQuint(t: number): number {
-    return 1 - Math.pow(1 - t, 5);
+  private easeOutSuspense(t: number): number {
+    return 1 - Math.pow(1 - t, 4.6);
   }
 
   /**
@@ -480,12 +481,13 @@ export class Wheel {
         angleDiff += 2 * Math.PI;
       }
 
-      // 6 full 360-degree rotations
-      const fullRotations = 6 * (2 * Math.PI);
+      // 9 full 360-degree rotations for a thrilling fast start
+      const fullRotations = 9 * (2 * Math.PI);
       const startRotation = this.currentRotation;
       const finalRotation = this.currentRotation + fullRotations + angleDiff;
 
-      const durationMs = 5400; // 5.4 seconds
+      // 9.2 seconds total duration for intense suspense build-up
+      const durationMs = 9200;
       const startTime = performance.now();
 
       const pointerEl = document.getElementById('wheel-pointer');
@@ -493,7 +495,7 @@ export class Wheel {
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(1, elapsed / durationMs);
-        const easedProgress = this.easeOutQuint(progress);
+        const easedProgress = this.easeOutSuspense(progress);
 
         this.currentRotation = startRotation + (finalRotation - startRotation) * easedProgress;
 
