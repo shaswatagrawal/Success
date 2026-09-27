@@ -47,6 +47,7 @@ export class Wheel {
     const essentialImages = [
       '/assets/ntc_logo.png',
       '/assets/ncell_logo.png',
+      '/assets/clover.png',
       '/assets/mobile_flagship.jpg',
       '/assets/earpods_pro.jpg',
       '/assets/powerbank_pro.jpg',
@@ -202,6 +203,7 @@ export class Wheel {
       this.ctx.rotate(midAngle);
 
       const isMobile = width < 460;
+      const isBetterLuck = !slot.isWin || slot.label.toLowerCase().includes('better luck');
       // Position swapped: Pictures at outer portion (wider wedge), Text at inner-mid portion clear of center hub
       const iconDist = radius * (isMobile ? 0.73 : 0.75);
       const textDist = radius * (isMobile ? 0.46 : 0.48);
@@ -352,18 +354,20 @@ export class Wheel {
           this.ctx.stroke();
           this.ctx.restore();
         } else {
-          const img = this.imageCache.get(slot.image);
+          const img = this.imageCache.get(slot.image) || (isBetterLuck ? this.imageCache.get('/assets/clover.png') : null);
           if (img && img.complete && img.naturalWidth > 0) {
             const isNote = (slot.image.includes('note') || slot.image.includes('rs'));
+            const isClover = slot.image.includes('clover') || isBetterLuck;
             const isGadget =
               slot.image.includes('mobile') ||
               slot.image.includes('phone') ||
               slot.image.includes('earpod') ||
               slot.image.includes('powerbank') ||
-              slot.image.includes('charger');
+              slot.image.includes('charger') ||
+              isClover;
 
             if (isGadget) {
-              // Flagship Mobile Phone, Earpods, Powerbank
+              // Flagship Mobile Phone, Earpods, Powerbank, Lucky Clover
               this.ctx.rotate(Math.PI / 2);
               const baseBadgeRadius = isMobile ? 26 : 38;
               const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
@@ -373,11 +377,13 @@ export class Wheel {
               this.ctx.save();
               this.ctx.beginPath();
               this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-              this.ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+              this.ctx.fillStyle = isClover ? 'rgba(5, 30, 20, 0.95)' : 'rgba(15, 23, 42, 0.95)';
               this.ctx.shadowColor = slot.isGrandPrize
                 ? 'rgba(245, 158, 11, 0.95)'
+                : isClover
+                ? 'rgba(16, 185, 129, 0.85)'
                 : 'rgba(0, 0, 0, 0.85)';
-              this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
+              this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : (isClover ? 9 : 8);
               this.ctx.shadowOffsetY = 2;
               this.ctx.fill();
 
@@ -385,7 +391,7 @@ export class Wheel {
               this.ctx.beginPath();
               this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
               this.ctx.clip();
-              const iconSize = badgeRadius * 2.2;
+              const iconSize = isClover ? badgeRadius * 2.05 : badgeRadius * 2.2;
               this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
               this.ctx.restore();
 
@@ -451,19 +457,16 @@ export class Wheel {
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
 
-      const isBetterLuck = !slot.isWin || slot.label.toLowerCase().includes('better luck');
-
       if (isBetterLuck) {
-        // Better Luck Next Time: Draw extra-large bold high-contrast 2-line text
-        const textCenterDist = radius * (isMobile ? 0.56 : 0.58);
-        const availableW = 2 * textCenterDist * Math.tan(sliceAngle / 2) * 0.98;
+        // Better Luck Next Time: Draw bold high-contrast 2-line text below the clover badge
+        const availableW = 2 * textDist * Math.tan(sliceAngle / 2) * 0.98;
 
-        let lineFontSize = isMobile ? 14.5 : 20;
+        let lineFontSize = isMobile ? 14 : 19.5;
         this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
         let m1 = this.ctx.measureText('Better Luck');
         let m2 = this.ctx.measureText('Next Time');
-        while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 10) {
+        while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 9.5) {
           lineFontSize -= 0.5;
           this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
           m1 = this.ctx.measureText('Better Luck');
@@ -471,7 +474,7 @@ export class Wheel {
         }
 
         this.ctx.save();
-        this.ctx.translate(textCenterDist, 0);
+        this.ctx.translate(textDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
         const lineSpacing = lineFontSize * 0.78;

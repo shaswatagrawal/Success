@@ -26,6 +26,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
   {
     index: 2,
@@ -35,6 +36,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1E40AF',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
   {
     index: 3,
@@ -55,6 +57,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
   {
     index: 5,
@@ -75,6 +78,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1E40AF',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
   {
     index: 7,
@@ -95,6 +99,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
   {
     index: 9,
@@ -126,6 +131,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
 ];
 

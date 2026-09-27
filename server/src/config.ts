@@ -41,6 +41,7 @@ export const SLOTS: readonly SlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
   {
     index: 2,
@@ -51,6 +52,7 @@ export const SLOTS: readonly SlotConfig[] = [
     isGrandPrize: false,
     color: '#1E40AF',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
 
   // === NORMAL PRIZE: Earpods ===
@@ -77,6 +79,7 @@ export const SLOTS: readonly SlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
 
   // === NORMAL PRIZE: Powerbank ===
@@ -103,6 +106,7 @@ export const SLOTS: readonly SlotConfig[] = [
     isGrandPrize: false,
     color: '#1E40AF',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
 
   // === NORMAL PRIZE: 500 Topup ===
@@ -129,6 +133,7 @@ export const SLOTS: readonly SlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
 
   // === NORMAL PRIZE: 100 Topup ===
@@ -167,6 +172,7 @@ export const SLOTS: readonly SlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
+    image: '/assets/clover.png',
   },
 ];
 
