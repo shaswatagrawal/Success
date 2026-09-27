@@ -412,12 +412,6 @@ class App {
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      const startResult = await api.startSpin({
-        name: parsed.data.name,
-        contact: parsed.data.contact,
-        consent: parsed.data.consent,
-      });
-
       this.currentUser = {
         name: parsed.data.name,
         contact: parsed.data.contact,
@@ -426,15 +420,12 @@ class App {
       };
 
       localStorage.setItem('wheel_user_info', JSON.stringify(this.currentUser));
-      this.spinsLeft = startResult.spinsLeft;
-      this.spinsUsed = startResult.spinsUsed;
-      this.spinLimit = startResult.spinLimit;
+
+      // Fetch user status to get remaining spins
+      await this.refreshUserStatus();
 
       this.closeRegistrationModal();
       this.updateUserDisplay();
-
-      // Proceed immediately to spin with the issued token!
-      await this.triggerSpinWithToken(startResult.token);
     } catch (err) {
       if (genError) {
         genError.style.display = 'block';
