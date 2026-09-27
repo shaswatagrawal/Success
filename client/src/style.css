@@ -272,50 +272,16 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: 0.5rem 0 2rem 0;
 }
 
-.hero-headline {
-  max-width: 680px;
-  margin-bottom: 2rem;
-}
-
-.hero-badge {
-  display: inline-block;
-  padding: 0.35rem 1rem;
-  background: rgba(227, 27, 35, 0.15);
-  border: 1px solid rgba(227, 27, 35, 0.4);
-  color: #FFFFFF;
-  border-radius: var(--radius-full);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-}
-
-.hero-title {
-  font-family: var(--font-heading);
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
-  font-weight: 900;
-  line-height: 1.15;
-  margin-bottom: 1rem;
-  letter-spacing: -0.02em;
-  color: #FFFFFF;
-}
-
-.hero-desc {
-  font-size: 1.05rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-/* Wheel Stage Container */
+/* Wheel Stage Container - Grand Centerpiece */
 .wheel-stage {
   position: relative;
   width: 100%;
-  max-width: 540px;
+  max-width: 680px;
   aspect-ratio: 1 / 1;
-  margin: 1rem auto 2.5rem auto;
+  margin: 0.5rem auto 2.5rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,10 +289,10 @@ body {
 
 .wheel-outer-glow {
   position: absolute;
-  inset: -25px;
+  inset: -32px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, rgba(37, 99, 235, 0.35) 50%, rgba(245, 158, 11, 0.15) 70%, transparent 80%);
-  filter: blur(28px);
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.45) 0%, rgba(37, 99, 235, 0.4) 50%, rgba(245, 158, 11, 0.2) 70%, transparent 80%);
+  filter: blur(35px);
   z-index: 1;
   pointer-events: none;
 }
@@ -337,9 +303,9 @@ body {
   height: 100%;
   border-radius: 50%;
   box-shadow: 
-    0 25px 60px rgba(0, 0, 0, 0.95),
-    0 0 35px rgba(245, 158, 11, 0.3),
-    inset 0 0 20px rgba(0, 0, 0, 0.8);
+    0 30px 70px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(245, 158, 11, 0.35),
+    inset 0 0 24px rgba(0, 0, 0, 0.8);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -352,13 +318,13 @@ body {
   display: block;
   border-radius: 50%;
   cursor: grab;
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.75));
 }
 
 /* Wheel Pointer / Stopper */
 .wheel-pointer-container {
   position: absolute;
-  top: -20px;
+  top: -24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -367,14 +333,14 @@ body {
 
 .wheel-pointer {
   position: relative;
-  width: 46px;
-  height: 56px;
+  width: 52px;
+  height: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.85));
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.9));
   transition: transform 0.08s ease-out;
-  transform-origin: 50% 12px;
+  transform-origin: 50% 14px;
 }
 
 .wheel-pointer.ticking {
@@ -384,34 +350,34 @@ body {
 .pointer-arrow {
   width: 0;
   height: 0;
-  border-left: 22px solid transparent;
-  border-right: 22px solid transparent;
-  border-top: 44px solid #F59E0B;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-top: 50px solid #F59E0B;
   position: relative;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.7));
 }
 
 .pointer-arrow::after {
   content: '';
   position: absolute;
-  top: -42px;
-  left: -18px;
+  top: -48px;
+  left: -21px;
   width: 0;
   height: 0;
-  border-left: 18px solid transparent;
-  border-right: 18px solid transparent;
-  border-top: 38px solid #FEF08A;
+  border-left: 21px solid transparent;
+  border-right: 21px solid transparent;
+  border-top: 44px solid #FEF08A;
 }
 
 .pointer-jewel {
   position: absolute;
-  top: 3px;
-  width: 18px;
-  height: 18px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
   background: radial-gradient(circle at 35% 30%, #FFF, #EF4444 60%, #991B1B 100%);
   border-radius: 50%;
   border: 1.5px solid #FEF08A;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.95), inset 0 -2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Center Hub Spin Button */
@@ -420,16 +386,16 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 114px;
-  height: 114px;
+  width: clamp(110px, 20vw, 138px);
+  height: clamp(110px, 20vw, 138px);
   border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #1E293B 0%, #0F172A 65%, #020617 100%);
   border: none;
   box-shadow:
     0 0 0 4px #F59E0B,
-    0 0 0 6px #78350F,
-    0 0 0 9px rgba(254, 240, 138, 0.5),
-    0 18px 40px rgba(0, 0, 0, 0.95),
+    0 0 0 7px #78350F,
+    0 0 0 10px rgba(254, 240, 138, 0.5),
+    0 20px 45px rgba(0, 0, 0, 0.95),
     inset 0 4px 8px rgba(255, 255, 255, 0.3),
     inset 0 -6px 14px rgba(0, 0, 0, 0.9);
   cursor: pointer;
@@ -445,10 +411,10 @@ body {
   transform: translate(-50%, -50%) scale(1.08);
   box-shadow:
     0 0 0 5px #FCD34D,
-    0 0 0 8px #92400E,
-    0 0 0 12px rgba(254, 240, 138, 0.7),
-    0 22px 45px rgba(0, 0, 0, 0.98),
-    0 0 25px rgba(245, 158, 11, 0.6),
+    0 0 0 9px #92400E,
+    0 0 0 13px rgba(254, 240, 138, 0.7),
+    0 24px 50px rgba(0, 0, 0, 0.98),
+    0 0 28px rgba(245, 158, 11, 0.65),
     inset 0 4px 8px rgba(255, 255, 255, 0.4);
 }
 
@@ -476,7 +442,7 @@ body {
 
 .hub-spin-text {
   font-family: var(--font-heading);
-  font-size: 1.55rem;
+  font-size: clamp(1.45rem, 2.8vw, 1.85rem);
   font-weight: 900;
   letter-spacing: 0.08em;
   background: linear-gradient(180deg, #FFFFFF 0%, #FEF08A 35%, #F59E0B 70%, #B45309 100%);
@@ -486,7 +452,7 @@ body {
 }
 
 .hub-sub-text {
-  font-size: 0.68rem;
+  font-size: clamp(0.68rem, 1.2vw, 0.8rem);
   font-weight: 800;
   letter-spacing: 0.16em;
   color: #FEF08A;
