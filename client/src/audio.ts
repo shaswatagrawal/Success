@@ -8,6 +8,8 @@ class SoundManager {
   private ctx: AudioContext | null = null;
   private isMuted = false;
   private englishVoice: SpeechSynthesisVoice | null = null;
+  private bgMusic: HTMLAudioElement | null = null;
+  private hasUserInteracted = false;
 
   constructor() {
     const saved = localStorage.getItem('wheel_sound_muted');
@@ -16,6 +18,56 @@ class SoundManager {
     }
 
     this.initVoice();
+    this.initBgMusic();
+  }
+
+  private initBgMusic(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      this.bgMusic = new Audio('/assets/bg_music.mp3');
+      this.bgMusic.loop = true;
+      this.bgMusic.volume = 0.38;
+      this.bgMusic.preload = 'auto';
+
+      const startMusicOnInteraction = () => {
+        if (!this.hasUserInteracted) {
+          this.hasUserInteracted = true;
+          this.initContext();
+          if (!this.isMuted) {
+            this.playBgMusic();
+          }
+        }
+      };
+
+      ['pointerdown', 'click', 'keydown', 'touchstart'].forEach((evt) => {
+        window.addEventListener(evt, startMusicOnInteraction, { once: true, passive: true });
+      });
+
+      if (!this.isMuted) {
+        this.playBgMusic();
+      }
+    } catch (err) {
+      console.warn('Failed to initialize background music:', err);
+    }
+  }
+
+  public playBgMusic(): void {
+    if (!this.bgMusic || this.isMuted) return;
+    this.bgMusic.play().catch(() => {
+      // Browser requires user interaction before playing audio
+    });
+  }
+
+  public pauseBgMusic(): void {
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+    }
+  }
+
+  public duckBgMusic(duck: boolean): void {
+    if (!this.bgMusic) return;
+    this.bgMusic.volume = duck ? 0.12 : 0.38;
   }
 
   private initVoice(): void {
@@ -64,6 +116,9 @@ class SoundManager {
     localStorage.setItem('wheel_sound_muted', String(muted));
     if (muted) {
       this.stopSpeech();
+      this.pauseBgMusic();
+    } else {
+      this.playBgMusic();
     }
   }
 
@@ -81,6 +136,7 @@ class SoundManager {
 
     try {
       window.speechSynthesis.cancel(); // Stop any pending speech
+      this.duckBgMusic(true);
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
@@ -88,17 +144,26 @@ class SoundManager {
       utterance.pitch = options?.pitch ?? 1.08;
       utterance.volume = 1.0;
 
+      utterance.onend = () => {
+        this.duckBgMusic(false);
+      };
+      utterance.onerror = () => {
+        this.duckBgMusic(false);
+      };
+
       if (this.englishVoice) {
         utterance.voice = this.englishVoice;
       }
 
       window.speechSynthesis.speak(utterance);
     } catch (err) {
+      this.duckBgMusic(false);
       console.warn('Text-to-speech error:', err);
     }
   }
 
   public stopSpeech(): void {
+    this.duckBgMusic(false);
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
