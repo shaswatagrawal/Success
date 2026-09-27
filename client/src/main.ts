@@ -179,6 +179,14 @@ class App {
       nameEl.textContent = this.currentUser ? `Welcome, ${this.currentUser.name}!` : 'Welcome, Guest!';
     }
 
+    const validLimit = Math.max(1, Number(this.spinLimit) || 1);
+    const validLeft = typeof this.spinsLeft === 'number' && !Number.isNaN(this.spinsLeft)
+      ? Math.max(0, this.spinsLeft)
+      : Math.max(0, validLimit - (Number(this.spinsUsed) || 0));
+
+    this.spinLimit = validLimit;
+    this.spinsLeft = validLeft;
+
     if (badgeEl) {
       badgeEl.textContent = `${this.spinsLeft} / ${this.spinLimit}`;
       if (this.spinsLeft === 0) {
@@ -205,9 +213,11 @@ class App {
     if (!this.currentUser) return;
     try {
       const status = await api.getUserStatus(this.currentUser.contact);
-      this.spinsUsed = status.spinsUsed;
-      this.spinsLeft = status.spinsLeft;
-      this.spinLimit = status.spinLimit;
+      this.spinsUsed = Number(status?.spinsUsed) || 0;
+      this.spinLimit = Math.max(1, Number(status?.spinLimit) || 1);
+      this.spinsLeft = typeof status?.spinsLeft === 'number' && !Number.isNaN(status.spinsLeft)
+        ? status.spinsLeft
+        : Math.max(0, this.spinLimit - this.spinsUsed);
       this.updateUserDisplay();
     } catch (err) {
       console.warn('Could not refresh user status:', err);
@@ -230,8 +240,13 @@ class App {
 
     try {
       const config = await api.getWheelConfig();
-      this.spinLimit = config.spinLimit;
-      if (config.slots && config.slots.length > 0) {
+      if (config && typeof config.spinLimit === 'number') {
+        this.spinLimit = Math.max(1, config.spinLimit);
+        if (!this.currentUser) {
+          this.spinsLeft = this.spinLimit;
+        }
+      }
+      if (config && config.slots && config.slots.length > 0) {
         this.wheel.updateSlots(config.slots);
       }
       this.updateUserDisplay();

@@ -189,11 +189,17 @@ export function validateWeights(slots: readonly SlotConfig[]): void {
 // Execute startup validation
 validateWeights(SLOTS);
 
+function parseEnvInt(val: string | undefined, defaultVal: number): number {
+  if (!val || typeof val !== 'string' || val.trim() === '') return defaultVal;
+  const parsed = Number.parseInt(val.trim(), 10);
+  return Number.isNaN(parsed) ? defaultVal : parsed;
+}
+
 /**
  * Typed environment configuration.
  */
 export const ENV = {
-  PORT: Number.parseInt(process.env['PORT'] ?? '3000', 10),
+  PORT: parseEnvInt(process.env['PORT'], 3000),
   NODE_ENV: process.env['NODE_ENV'] ?? 'development',
   MONGODB_URI:
     process.env['MONGODB_URI'] ??
@@ -203,17 +209,17 @@ export const ENV = {
   SESSION_SECRET:
     process.env['SESSION_SECRET'] ?? 'super_secret_session_key_at_least_32_bytes_long_spin_wheel',
   IP_SALT: process.env['IP_SALT'] ?? 'salt_for_hashing_ip_addresses_change_in_production_12345',
-  SPIN_LIMIT: Number.parseInt(process.env['SPIN_LIMIT'] ?? '1', 10),
-  NORMAL_PRIZE_INTERVAL: Number.parseInt(process.env['NORMAL_PRIZE_INTERVAL'] ?? '10', 10),
-  MYSTERY_BOX_INTERVAL: Number.parseInt(process.env['MYSTERY_BOX_INTERVAL'] ?? '40', 10),
-  GRAND_PRIZE_INTERVAL: Number.parseInt(process.env['GRAND_PRIZE_INTERVAL'] ?? '60', 10),
-  GRAND_PRIZE_MIN_SPINS: Number.parseInt(process.env['GRAND_PRIZE_MIN_SPINS'] ?? '60', 10),
+  SPIN_LIMIT: parseEnvInt(process.env['SPIN_LIMIT'], 1),
+  NORMAL_PRIZE_INTERVAL: parseEnvInt(process.env['NORMAL_PRIZE_INTERVAL'], 10),
+  MYSTERY_BOX_INTERVAL: parseEnvInt(process.env['MYSTERY_BOX_INTERVAL'], 40),
+  GRAND_PRIZE_INTERVAL: parseEnvInt(process.env['GRAND_PRIZE_INTERVAL'], 60),
+  GRAND_PRIZE_MIN_SPINS: parseEnvInt(process.env['GRAND_PRIZE_MIN_SPINS'], 60),
   CORS_ORIGIN: (process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:3000')
     .split(',')
     .map((s) => s.trim()),
   EMAIL_FROM: process.env['EMAIL_FROM'] ?? '"SUCCESS Education & Visa Services" <kumaripati@successedu.com.au>',
   SMTP_HOST: process.env['SMTP_HOST'] ?? '',
-  SMTP_PORT: Number.parseInt(process.env['SMTP_PORT'] ?? '587', 10),
+  SMTP_PORT: parseEnvInt(process.env['SMTP_PORT'], 587),
   SMTP_SECURE: process.env['SMTP_SECURE'] === 'true',
   SMTP_USER: process.env['SMTP_USER'] ?? '',
   SMTP_PASS: process.env['SMTP_PASS'] ?? '',

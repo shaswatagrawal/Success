@@ -50,6 +50,7 @@ export function normalizeContact(contact: string): string {
  */
 export async function startSpin(userInfo: UserInfo): Promise<StartSpinResponse> {
   const normalizedId = normalizeContact(userInfo.contact);
+  const spinLimit = Math.max(1, ENV.SPIN_LIMIT || 1);
 
   let user = await findUserByIdentifier(normalizedId);
   if (!user) {
@@ -63,22 +64,22 @@ export async function startSpin(userInfo: UserInfo): Promise<StartSpinResponse> 
   }
 
   const currentSpins = await getUserSpinCount(user._id);
-  if (currentSpins >= ENV.SPIN_LIMIT) {
+  if (currentSpins >= spinLimit) {
     throw new SpinLimitError(
-      `You have already completed your ${ENV.SPIN_LIMIT} spin allowed for this promotion.`
+      `You have already completed your ${spinLimit} spin allowed for this promotion.`
     );
   }
 
   const token = await generateSpinToken(user._id, userInfo.deviceId);
   const spinsUsed = currentSpins;
-  const spinsLeft = Math.max(0, ENV.SPIN_LIMIT - spinsUsed);
+  const spinsLeft = Math.max(0, spinLimit - spinsUsed);
 
   return {
     success: true,
     token,
     spinsLeft,
     spinsUsed,
-    spinLimit: ENV.SPIN_LIMIT,
+    spinLimit,
     userSpinNumber: currentSpins + 1,
   };
 }
@@ -259,27 +260,28 @@ export async function executeSpin(
 export async function getUserStatus(identifierRaw: string): Promise<UserStatusResponse> {
   const normalizedId = normalizeContact(identifierRaw);
   const user = await findUserByIdentifier(normalizedId);
+  const spinLimit = Math.max(1, ENV.SPIN_LIMIT || 1);
 
   if (!user) {
     return {
       identified: false,
       spinsUsed: 0,
-      spinsLeft: ENV.SPIN_LIMIT,
-      spinLimit: ENV.SPIN_LIMIT,
+      spinsLeft: spinLimit,
+      spinLimit,
       canSpin: true,
       recentSpins: [],
     };
   }
 
   const spinsUsed = await getUserSpinCount(user._id);
-  const spinsLeft = Math.max(0, ENV.SPIN_LIMIT - spinsUsed);
+  const spinsLeft = Math.max(0, spinLimit - spinsUsed);
   const recentRows = await getUserRecentSpins(user._id, 5);
 
   return {
     identified: true,
     spinsUsed,
     spinsLeft,
-    spinLimit: ENV.SPIN_LIMIT,
+    spinLimit,
     canSpin: spinsLeft > 0,
     recentSpins: recentRows.map((r) => ({
       prizeName: r.prizeName,

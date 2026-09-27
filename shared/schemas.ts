@@ -55,7 +55,7 @@ export const AdminLoginSchema = z.object({
 
 export const UpdatePrizeNamesSchema = z.object({
   customNames: z.record(
-    z.coerce.number().int().min(0).max(9),
+    z.coerce.number().int().min(0).max(11),
     z.string().trim().min(1, 'Prize label cannot be empty').max(50, 'Prize label cannot exceed 50 characters')
   ),
 });
