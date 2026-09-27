@@ -201,9 +201,12 @@ export const ENV = {
     process.env['SESSION_SECRET'] ?? 'super_secret_session_key_at_least_32_bytes_long_spin_wheel',
   IP_SALT: process.env['IP_SALT'] ?? 'salt_for_hashing_ip_addresses_change_in_production_12345',
   SPIN_LIMIT: Number.parseInt(process.env['SPIN_LIMIT'] ?? '1', 10),
-  GRAND_PRIZE_MIN_SPINS: Number.parseInt(process.env['GRAND_PRIZE_MIN_SPINS'] ?? '2000', 10),
+  NORMAL_PRIZE_INTERVAL: Number.parseInt(process.env['NORMAL_PRIZE_INTERVAL'] ?? '10', 10),
+  GRAND_PRIZE_INTERVAL: Number.parseInt(process.env['GRAND_PRIZE_INTERVAL'] ?? '60', 10),
+  GRAND_PRIZE_MIN_SPINS: Number.parseInt(process.env['GRAND_PRIZE_MIN_SPINS'] ?? '60', 10),
   CORS_ORIGIN: (process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:3000')
     .split(',')
     .map((s) => s.trim()),
 } as const;
+
 

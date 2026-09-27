@@ -19,7 +19,6 @@ import {
   insertSpin,
 } from '../db/queries.js';
 import { SpinLimitError, ValidationError } from '../errors.js';
-import { pickWinningSlot } from './rng.js';
 import { generateSpinToken, verifyAndConsumeSpinToken } from './token.js';
 
 export function hashIp(ip: string): string {
@@ -116,21 +115,27 @@ export async function executeSpin(
   const userSpinNumber = currentSpins + 1;
   const globalSpinNumber = (await getGlobalSpinCount()) + 1;
 
-  // 4. Determine winner using server-only weighted RNG with 2000-spin milestone protection
-  let winningSlot = pickWinningSlot(SLOTS);
+  // 4. Controlled spin distribution:
+  // - Grand Prize every 60 spins (60, 120, 180, ...)
+  // - Normal Prize every 10 spins (10, 20, 30, 40, 50, 70, ...)
+  // - Better Luck for all other spins (randomly distributed among Better Luck slices)
+  let winningSlot: (typeof SLOTS)[number];
 
-  // Check for 2000th spin milestone (every 2000 spins awards Grand Prize)
-  if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_MIN_SPINS === 0) {
-    const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
+  const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
+  const normalSlots = SLOTS.filter((s) => s.isWin && !s.isGrandPrize);
+  const lossSlots = SLOTS.filter((s) => !s.isWin);
+
+  if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_INTERVAL === 0) {
+    // Grand Prize milestone (every 60 spins)
     winningSlot = grandSlot;
+  } else if (globalSpinNumber > 0 && globalSpinNumber % ENV.NORMAL_PRIZE_INTERVAL === 0) {
+    // Normal Prize milestone (every 10 spins)
+    const randomNormalIndex = crypto.randomInt(0, normalSlots.length);
+    winningSlot = normalSlots[randomNormalIndex] ?? normalSlots[0]!;
   } else {
-    // If top prizes (Grand Prize or Mobile Phone) are selected before reaching 2000 spins,
-    // safely reroute to a loss slot (Try Again / Better Luck / Spin Again)
-    const isTopTier = winningSlot.isGrandPrize || winningSlot.prizeKey === 'prize_mobile_a';
-    if (isTopTier && globalSpinNumber < ENV.GRAND_PRIZE_MIN_SPINS) {
-      const lossSlots = SLOTS.filter((s) => !s.isWin);
-      winningSlot = lossSlots[Math.floor(Math.random() * lossSlots.length)] ?? SLOTS[1]!;
-    }
+    // Better Luck for all other spins
+    const randomLossIndex = crypto.randomInt(0, lossSlots.length);
+    winningSlot = lossSlots[randomLossIndex] ?? lossSlots[0]!;
   }
 
   // 5. Fetch any admin-configured custom prize labels
