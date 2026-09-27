@@ -202,9 +202,9 @@ export class Wheel {
       this.ctx.rotate(midAngle);
 
       const isMobile = width < 460;
-      // Position swapped: Pictures at outer portion (wider wedge), Text at inner portion
-      const iconDist = radius * (isMobile ? 0.72 : 0.74);
-      const textDist = radius * (isMobile ? 0.40 : 0.43);
+      // Position swapped: Pictures at outer portion (wider wedge), Text at inner-mid portion clear of center hub
+      const iconDist = radius * (isMobile ? 0.73 : 0.75);
+      const textDist = radius * (isMobile ? 0.46 : 0.48);
 
       // Available width at icon distance based on the slice gap/angle
       const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
@@ -461,7 +461,6 @@ export class Wheel {
         let lineFontSize = isMobile ? 12 : 16;
         this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
-        // Check if fits, shrink slightly if needed
         let m1 = this.ctx.measureText('Better Luck');
         let m2 = this.ctx.measureText('Next Time');
         while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 9) {
@@ -497,69 +496,68 @@ export class Wheel {
       } else {
         // Prize Slot Label: Prominent bold typography with dark outline at textDist
         const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.96;
-        let displayLabel = slot.label;
-        if (slot.isGrandPrize && !displayLabel.includes('⭐')) {
-          displayLabel = `⭐ ${slot.label}`;
-        }
-
+        const displayLabel = slot.label;
         const words = displayLabel.split(' ');
-        const shouldSplit = words.length === 2 && (displayLabel.length > 7 || availableTextWidth < 90);
+        const shouldSplit = words.length >= 2;
 
         this.ctx.save();
         this.ctx.translate(textDist, 0);
         this.ctx.rotate(Math.PI / 2);
 
         if (shouldSplit) {
-          // Render as 2 compact stacked lines with bold font
-          let lineSize = slot.isGrandPrize ? (isMobile ? 12 : 15.5) : (isMobile ? 11 : 14.5);
+          // Render as 2 compact stacked lines with large bold font
+          const line1 = words[0]!;
+          const line2 = words.slice(1).join(' ');
+
+          let lineSize = slot.isGrandPrize ? (isMobile ? 13 : 16.5) : (isMobile ? 12 : 15.5);
           this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
-          let mw1 = this.ctx.measureText(words[0]!);
-          let mw2 = this.ctx.measureText(words[1]!);
-          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 8.5) {
+          let mw1 = this.ctx.measureText(line1);
+          let mw2 = this.ctx.measureText(line2);
+          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 9) {
             lineSize -= 0.5;
             this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-            mw1 = this.ctx.measureText(words[0]!);
-            mw2 = this.ctx.measureText(words[1]!);
+            mw1 = this.ctx.measureText(line1);
+            mw2 = this.ctx.measureText(line2);
           }
 
-          const lineSpacing = lineSize * 0.76;
+          const lineSpacing = lineSize * 0.78;
 
           this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.lineWidth = 3.5;
+          this.ctx.lineWidth = 4;
           this.ctx.lineJoin = 'round';
-          this.ctx.strokeText(words[0]!, 0, -lineSpacing, availableTextWidth);
-          this.ctx.strokeText(words[1]!, 0, lineSpacing, availableTextWidth);
+          this.ctx.strokeText(line1, 0, -lineSpacing, availableTextWidth);
+          this.ctx.strokeText(line2, 0, lineSpacing, availableTextWidth);
 
           this.ctx.fillStyle = slot.isGrandPrize ? '#FEF08A' : (slot.textColor || '#FFFFFF');
           this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.shadowBlur = 5;
-          this.ctx.shadowOffsetX = 1.2;
-          this.ctx.shadowOffsetY = 1.2;
-          this.ctx.fillText(words[0]!, 0, -lineSpacing, availableTextWidth);
-          this.ctx.fillText(words[1]!, 0, lineSpacing, availableTextWidth);
+          this.ctx.shadowBlur = 6;
+          this.ctx.shadowOffsetX = 1.5;
+          this.ctx.shadowOffsetY = 1.5;
+          this.ctx.fillText(line1, 0, -lineSpacing, availableTextWidth);
+          this.ctx.fillText(line2, 0, lineSpacing, availableTextWidth);
         } else {
           // Single-line label
-          let fontSize = slot.isGrandPrize ? (isMobile ? 12 : 15.5) : (isMobile ? 11 : 14.5);
+          let fontSize = slot.isGrandPrize ? (isMobile ? 13 : 16.5) : (isMobile ? 12 : 15.5);
           this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
 
           let textMetrics = this.ctx.measureText(displayLabel);
-          while (textMetrics.width > availableTextWidth && fontSize > 8.5) {
+          while (textMetrics.width > availableTextWidth && fontSize > 9) {
             fontSize -= 0.5;
             this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
             textMetrics = this.ctx.measureText(displayLabel);
           }
 
           this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.lineWidth = 3.5;
+          this.ctx.lineWidth = 4;
           this.ctx.lineJoin = 'round';
           this.ctx.strokeText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
 
           this.ctx.fillStyle = slot.isGrandPrize ? '#FEF08A' : (slot.textColor || '#FFFFFF');
           this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.shadowBlur = 5;
-          this.ctx.shadowOffsetX = 1.2;
-          this.ctx.shadowOffsetY = 1.2;
+          this.ctx.shadowBlur = 6;
+          this.ctx.shadowOffsetX = 1.5;
+          this.ctx.shadowOffsetY = 1.5;
           this.ctx.fillText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
         }
 
