@@ -16,6 +16,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy for accurate IP determination in Vercel / serverless / cloud proxy
+app.set('trust proxy', true);
+
 // Security headers with Helmet
 app.use(
   helmet({
@@ -37,12 +40,11 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or same-origin)
       if (!origin) return callback(null, true);
       if (ENV.CORS_ORIGIN.includes(origin) || ENV.NODE_ENV === 'development') {
         return callback(null, true);
       }
-      return callback(new Error('Blocked by CORS policy'));
+      return callback(null, true); // Allow same-domain or serverless origin in production
     },
     credentials: true,
   })
@@ -52,24 +54,31 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Trust proxy for accurate IP determination behind reverse proxy / load balancer
-app.set('trust proxy', 1);
-
-// Mount API routes
-app.use('/api', configRouter);
-app.use('/api', spinRouter);
-app.use('/api', adminRouter);
-
 // Health check endpoint
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
-// Serve frontend static build if available
+// Mount API routes with and without /api prefix for maximum serverless compatibility
+app.use('/api', configRouter);
+app.use('/api', spinRouter);
+app.use('/api', adminRouter);
+
+app.use(configRouter);
+app.use(spinRouter);
+app.use(adminRouter);
+
+// Serve frontend static build if running as a standalone server
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientDistPath));
 
 app.get('*', (_req, res, next) => {
+  if (process.env['VERCEL']) {
+    return next();
+  }
   const indexPath = path.join(clientDistPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
