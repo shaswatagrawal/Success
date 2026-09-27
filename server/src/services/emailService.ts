@@ -73,6 +73,31 @@ export async function sendSpinResultEmail(options: SendSpinEmailOptions): Promis
         </p>
       </div>
     `;
+  } else if (isWin && (prizeName.toLowerCase().includes('mystery') || prizeName.toLowerCase().includes('box'))) {
+    prizeSectionHtml = `
+      <div style="background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%); border-radius: 12px; padding: 24px; text-align: center; color: #FFFFFF; margin: 24px 0; border: 2px solid #FDE047;">
+        <span style="font-size: 36px; display: block; margin-bottom: 8px;">🎁 ⏳</span>
+        <h2 style="margin: 0 0 8px 0; font-size: 22px; color: #FDE047; text-transform: uppercase;">EXCLUSIVE MYSTERY BOX UNLOCKED!</h2>
+        <p style="font-size: 20px; font-weight: bold; margin: 4px 0 16px 0; color: #FFFFFF;">${prizeName}</p>
+        
+        <div style="background: rgba(0, 0, 0, 0.45); border: 1.5px dashed #FDE047; border-radius: 8px; padding: 14px; margin: 12px auto; max-width: 480px;">
+          <div style="font-size: 12px; font-weight: 800; color: #FEF08A; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">✨ SPECIAL NOTIFICATION:</div>
+          <div style="font-size: 15px; font-weight: bold; color: #FFFFFF; line-height: 1.4;">
+            The prize inside the MYSTERY BOX will be decided after 3 weeks.
+          </div>
+        </div>
+
+        ${claimCode ? `
+        <div style="background: rgba(0, 0, 0, 0.35); border-radius: 6px; padding: 8px 14px; display: inline-block; margin-top: 10px;">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #E9D5FF;">Your Claim Code:</span>
+          <span style="font-size: 16px; font-family: monospace; font-weight: bold; color: #FDE047; letter-spacing: 1px; margin-left: 6px;">${claimCode}</span>
+        </div>` : ''}
+
+        <p style="font-size: 13px; color: #E9D5FF; margin-top: 14px; margin-bottom: 0;">
+          Keep this confirmation email safe. Our team at SUCCESS Education & Visa Services will announce the revealed prize after 3 weeks!
+        </p>
+      </div>
+    `;
   } else if (isWin) {
     prizeSectionHtml = `
       <div style="background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%); border-radius: 12px; padding: 24px; text-align: center; color: #FFFFFF; margin: 24px 0; border: 1px solid rgba(255,255,255,0.2);">

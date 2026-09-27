@@ -222,7 +222,7 @@ export async function executeSpin(
       if (winningSlot.isGrandPrize) {
         message = '🎉 CONGRATULATIONS! YOU WON THE GRAND PRIZE! 🎉';
       } else if (winningSlot.prizeKey === 'prize_mystery_box') {
-        message = '🎁 WOW! YOU UNLOCKED THE EXCLUSIVE MYSTERY BOX! 🎁';
+        message = '🎁 WOW! YOU UNLOCKED THE EXCLUSIVE MYSTERY BOX! The prize inside the MYSTERY BOX will be decided after 3 weeks.';
       } else if (winningSlot.isWin) {
         message = `🎉 Congratulations! You won: ${prizeLabel}!`;
       }

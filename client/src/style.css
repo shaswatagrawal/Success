@@ -1020,6 +1020,66 @@ body {
   margin-bottom: 1.5rem;
 }
 
+/* Special Mystery Box Notice Box */
+.mystery-notice-box {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(88, 28, 135, 0.5) 100%);
+  border: 1.5px solid #FDE047;
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  margin: 1.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.45), inset 0 0 15px rgba(253, 224, 71, 0.15);
+  animation: pulseMysteryNotice 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseMysteryNotice {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.45), inset 0 0 15px rgba(253, 224, 71, 0.15);
+    border-color: #FDE047;
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.75), inset 0 0 25px rgba(253, 224, 71, 0.3);
+    border-color: #FEF08A;
+  }
+}
+
+.mystery-notice-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mystery-notice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mystery-notice-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #FDE047;
+  text-transform: uppercase;
+}
+
+.mystery-notice-text {
+  font-size: 0.95rem;
+  color: #F3E8FF;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.mystery-notice-text strong {
+  color: #FFFFFF;
+  font-weight: 800;
+}
+
 /* Claim Box for Grand Prize */
 .claim-box {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));

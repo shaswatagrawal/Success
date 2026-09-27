@@ -592,6 +592,12 @@ class App {
     if (prizeEl) prizeEl.textContent = info.prizeName;
     if (descEl) descEl.textContent = info.desc;
 
+    const isMystery = info.prizeName.toLowerCase().includes('mystery') || info.title.toLowerCase().includes('mystery');
+    const mysteryNotice = document.getElementById('mystery-box-notice');
+    if (mysteryNotice) {
+      mysteryNotice.style.display = isMystery ? 'flex' : 'none';
+    }
+
     if (claimBox && claimVal) {
       if (info.claimCode) {
         claimBox.style.display = 'flex';
