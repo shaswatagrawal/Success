@@ -356,18 +356,36 @@ export class Wheel {
         } else {
           const img = this.imageCache.get(slot.image) || (isBetterLuck ? this.imageCache.get('/assets/clover.png') : null);
           if (img && img.complete && img.naturalWidth > 0) {
-            const isNote = (slot.image.includes('note') || slot.image.includes('rs'));
-            const isClover = slot.image.includes('clover') || isBetterLuck;
-            const isGadget =
-              slot.image.includes('mobile') ||
-              slot.image.includes('phone') ||
-              slot.image.includes('earpod') ||
-              slot.image.includes('powerbank') ||
-              slot.image.includes('charger') ||
-              isClover;
+            const isNote = (slot.image?.includes('note') || slot.image?.includes('rs'));
+            const isClover = Boolean(slot.image?.includes('clover') || isBetterLuck);
+            const isGadget = Boolean(
+              slot.image?.includes('mobile') ||
+              slot.image?.includes('phone') ||
+              slot.image?.includes('earpod') ||
+              slot.image?.includes('powerbank') ||
+              slot.image?.includes('charger')
+            );
 
-            if (isGadget) {
-              // Flagship Mobile Phone, Earpods, Powerbank, Lucky Clover
+            if (isClover) {
+              // Pure transparent lucky clover floating directly on the wheel slice with natural 3D drop shadow
+              this.ctx.rotate(Math.PI / 2);
+              const baseSize = isMobile ? 46 : 66;
+              const cloverSize = Math.max(24, Math.min(baseSize, availableWidthAtIcon * 0.92));
+
+              this.ctx.save();
+              this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+              this.ctx.shadowBlur = 8;
+              this.ctx.shadowOffsetY = 3;
+              this.ctx.drawImage(
+                img,
+                -cloverSize / 2,
+                -cloverSize / 2,
+                cloverSize,
+                cloverSize
+              );
+              this.ctx.restore();
+            } else if (isGadget) {
+              // Flagship Mobile Phone, Earpods, Powerbank
               this.ctx.rotate(Math.PI / 2);
               const baseBadgeRadius = isMobile ? 26 : 38;
               const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
@@ -377,13 +395,11 @@ export class Wheel {
               this.ctx.save();
               this.ctx.beginPath();
               this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-              this.ctx.fillStyle = isClover ? 'rgba(5, 30, 20, 0.95)' : 'rgba(15, 23, 42, 0.95)';
+              this.ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
               this.ctx.shadowColor = slot.isGrandPrize
                 ? 'rgba(245, 158, 11, 0.95)'
-                : isClover
-                ? 'rgba(16, 185, 129, 0.85)'
                 : 'rgba(0, 0, 0, 0.85)';
-              this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : (isClover ? 9 : 8);
+              this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
               this.ctx.shadowOffsetY = 2;
               this.ctx.fill();
 
@@ -391,7 +407,7 @@ export class Wheel {
               this.ctx.beginPath();
               this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
               this.ctx.clip();
-              const iconSize = isClover ? badgeRadius * 2.05 : badgeRadius * 2.2;
+              const iconSize = badgeRadius * 2.2;
               this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
               this.ctx.restore();
 
