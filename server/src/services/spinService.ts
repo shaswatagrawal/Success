@@ -19,6 +19,7 @@ import {
   insertSpin,
 } from '../db/queries.js';
 import { SpinLimitError, ValidationError } from '../errors.js';
+import { sendSpinResultEmail } from './emailService.js';
 import { generateSpinToken, verifyAndConsumeSpinToken } from './token.js';
 
 export function hashIp(ip: string): string {
@@ -198,6 +199,20 @@ export async function executeSpin(
         message = '🎉 CONGRATULATIONS! YOU WON THE GRAND PRIZE! 🎉';
       } else if (winningSlot.isWin) {
         message = `🎉 Congratulations! You won: ${prizeLabel}!`;
+      }
+
+      // 8. Send branded confirmation email to participant asynchronously
+      if (user.contact && user.contact.includes('@')) {
+        sendSpinResultEmail({
+          recipientEmail: user.contact,
+          recipientName: user.name,
+          prizeName: prizeLabel,
+          isWin: winningSlot.isWin,
+          isGrandPrize: winningSlot.isGrandPrize,
+          claimCode,
+        }).catch((err) => {
+          console.warn('[SpinService] Non-blocking email sending failed:', err);
+        });
       }
 
       return {
