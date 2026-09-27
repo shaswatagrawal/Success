@@ -281,13 +281,13 @@ body {
   width: 100%;
   max-width: 680px;
   aspect-ratio: 1 / 1;
-  margin: 0.5rem auto 3.5rem auto;
+  margin: 1rem auto 6rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 3D Luxury Casino Wheel Stand Structure */
+/* 3D Luxury Casino Standing Rig */
 .wheel-stand-structure {
   position: absolute;
   inset: 0;
@@ -299,154 +299,231 @@ body {
   justify-content: flex-end;
 }
 
-/* Realistic Ground Cast Shadow */
+/* Realistic Ground Contact Shadow */
 .stand-floor-shadow {
   position: absolute;
-  bottom: -62px;
+  bottom: -98px;
   left: 50%;
   transform: translateX(-50%);
-  width: 88%;
-  max-width: 580px;
-  height: 46px;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.65) 45%, rgba(0, 0, 0, 0.2) 70%, transparent 85%);
-  filter: blur(10px);
+  width: 95%;
+  max-width: 640px;
+  height: 42px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0.25) 70%, transparent 88%);
+  filter: blur(12px);
   z-index: 0;
 }
 
-/* Triangular A-Frame Support Struts */
-.stand-support-leg {
+/* Rear A-Frame Triangular Support Struts */
+.stand-leg {
   position: absolute;
-  top: 46%;
-  bottom: -32px;
-  width: 24px;
-  background: linear-gradient(135deg, #475569 0%, #1E293B 35%, #0F172A 70%, #92400E 100%);
-  border-radius: 6px;
+  top: 48%;
+  bottom: -68px;
+  width: 30px;
+  background: linear-gradient(135deg, 
+    #64748B 0%, 
+    #334155 20%, 
+    #1E293B 45%, 
+    #0F172A 70%, 
+    #D97706 90%, 
+    #FEF08A 100%
+  );
+  border-radius: 8px;
   box-shadow: 
-    0 12px 28px rgba(0, 0, 0, 0.9),
-    inset 2px 0 4px rgba(254, 240, 138, 0.45),
-    inset -2px 0 4px rgba(0, 0, 0, 0.85);
-  border: 1.5px solid rgba(245, 158, 11, 0.65);
+    0 16px 36px rgba(0, 0, 0, 0.95),
+    inset 2.5px 0 5px rgba(254, 240, 138, 0.5),
+    inset -2.5px 0 5px rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(245, 158, 11, 0.75);
   z-index: 1;
 }
 
 .stand-leg-left {
-  left: 22%;
-  transform: rotate(26deg);
+  left: 14%;
+  transform: rotate(24deg);
   transform-origin: top center;
 }
 
 .stand-leg-right {
-  right: 22%;
-  transform: rotate(-26deg);
+  right: 14%;
+  transform: rotate(-24deg);
   transform-origin: top center;
 }
 
-/* Central Heavy Mast / Spine */
-.stand-central-post {
+/* Horizontal Cross-Brace Bar */
+.stand-crossbar {
   position: absolute;
-  top: 44%;
-  bottom: -32px;
-  width: 58px;
+  bottom: -18px;
+  left: 20%;
+  right: 20%;
+  height: 18px;
+  background: linear-gradient(180deg, 
+    #FEF08A 0%, 
+    #F59E0B 35%, 
+    #B45309 70%, 
+    #451A03 100%
+  );
+  border-radius: 5px;
+  border: 1.5px solid #FDE047;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.9),
+    inset 0 1.5px 2px #FFFBEB;
+  z-index: 2;
+}
+
+.stand-crossbar::before,
+.stand-crossbar::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFF, #D97706 60%, #451A03 100%);
+  border: 1px solid #FEF08A;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.stand-crossbar::before {
+  left: 12px;
+}
+
+.stand-crossbar::after {
+  right: 12px;
+}
+
+/* Central Axle Mast Column */
+.stand-central-mast {
+  position: absolute;
+  top: 48%;
+  bottom: -68px;
+  width: 52px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 2;
 }
 
-.stand-post-shaft {
-  width: 44px;
+.mast-shaft {
+  width: 38px;
   flex: 1;
   background: linear-gradient(90deg, 
     #0F172A 0%, 
     #334155 18%, 
-    #64748B 38%, 
+    #94A3B8 38%, 
     #FEF08A 50%, 
     #D97706 62%, 
     #1E293B 85%, 
     #0F172A 100%
   );
   box-shadow: 
-    0 12px 28px rgba(0, 0, 0, 0.9),
-    inset 0 0 10px rgba(0, 0, 0, 0.75);
-  border-left: 2px solid rgba(254, 240, 138, 0.6);
-  border-right: 2px solid rgba(217, 119, 6, 0.8);
+    0 14px 30px rgba(0, 0, 0, 0.92),
+    inset 0 0 10px rgba(0, 0, 0, 0.8);
+  border-left: 2px solid rgba(254, 240, 138, 0.65);
+  border-right: 2px solid rgba(217, 119, 6, 0.85);
 }
 
-.stand-post-collar {
-  width: 62px;
-  height: 14px;
-  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 40%, #B45309 75%, #78350F 100%);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85), inset 0 1px 2px #FFFBEB;
+.mast-bracket {
+  width: 58px;
+  height: 16px;
+  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 40%, #B45309 75%, #451A03 100%);
+  border-radius: 5px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.9), inset 0 1.5px 2px #FFFBEB;
   border: 1.5px solid #FDE047;
 }
 
-/* Heavy Weighted Base Podium */
+/* Heavy Weighted Base Podium Platform */
 .stand-base-podium {
   position: absolute;
-  bottom: -46px;
+  bottom: -78px;
   left: 50%;
   transform: translateX(-50%);
-  width: 66%;
-  max-width: 440px;
-  height: 40px;
+  width: 74%;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 3;
 }
 
-.podium-top-bevel {
-  width: 84%;
-  height: 12px;
-  background: linear-gradient(90deg, #78350F 0%, #D97706 20%, #FEF08A 50%, #F59E0B 80%, #78350F 100%);
-  border-radius: 5px 5px 0 0;
-  box-shadow: inset 0 1.5px 3px #FFFBEB, 0 -2px 6px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(254, 240, 138, 0.8);
+.podium-bevel {
+  width: 86%;
+  height: 14px;
+  background: linear-gradient(90deg, 
+    #78350F 0%, 
+    #D97706 18%, 
+    #FEF08A 50%, 
+    #F59E0B 82%, 
+    #78350F 100%
+  );
+  border-radius: 6px 6px 0 0;
+  box-shadow: inset 0 2px 4px #FFFBEB, 0 -3px 8px rgba(0, 0, 0, 0.7);
+  border: 1.5px solid rgba(254, 240, 138, 0.9);
   border-bottom: none;
 }
 
-.podium-body {
+.podium-main-plate {
   width: 100%;
-  height: 26px;
-  background: linear-gradient(180deg, #1E293B 0%, #0F172A 60%, #050B14 100%);
-  border-radius: 6px;
+  height: 32px;
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 55%, #050B14 100%);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #F59E0B;
   box-shadow: 
-    0 16px 40px rgba(0, 0, 0, 0.95),
-    0 0 20px rgba(245, 158, 11, 0.4),
-    inset 0 2px 5px rgba(254, 240, 138, 0.55);
+    0 20px 48px rgba(0, 0, 0, 0.98),
+    0 0 24px rgba(245, 158, 11, 0.4),
+    inset 0 2px 6px rgba(254, 240, 138, 0.6);
   position: relative;
 }
 
-.podium-gold-bar {
-  width: 72%;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, #FEF08A, #F59E0B, #FEF08A, transparent);
-  border-radius: 2px;
-  box-shadow: 0 0 10px rgba(254, 240, 138, 0.8);
+.podium-bolt {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFF, #F59E0B 60%, #78350F 100%);
+  border: 1px solid #FEF08A;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.podium-bolt.bolt-l {
+  left: 16px;
+}
+
+.podium-bolt.bolt-r {
+  right: 16px;
+}
+
+.podium-brand-plate {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #FEF08A;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 158, 11, 0.8);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.25) 0%, rgba(120, 53, 15, 0.4) 100%);
+  padding: 2px 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(254, 240, 138, 0.6);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.podium-feet-track {
+  width: 96%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1px;
 }
 
 .podium-foot {
-  position: absolute;
-  bottom: -6px;
-  width: 42px;
-  height: 8px;
-  background: #0B1120;
+  width: 48px;
+  height: 9px;
+  background: #070B14;
   border-radius: 3px;
   border: 1.5px solid #78350F;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.95);
-}
-
-.podium-foot.foot-left {
-  left: 14px;
-}
-
-.podium-foot.foot-right {
-  right: 14px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.95);
 }
 
 .wheel-outer-glow {
