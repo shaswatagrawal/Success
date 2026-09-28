@@ -21,6 +21,8 @@ export interface UserDoc {
   identifier: string;
   name: string;
   contact: string;
+  email?: string;
+  phone?: string;
   deviceId: string;
   consent: boolean;
   createdAt: string;

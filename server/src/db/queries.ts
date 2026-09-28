@@ -20,16 +20,36 @@ import {
   UserDoc,
 } from './index.js';
 
-export async function findUserByIdentifier(identifier: string): Promise<UserDoc | null> {
+export async function findUserByIdentifier(identifier: string, email?: string, phone?: string): Promise<UserDoc | null> {
+  const normIdent = identifier.trim().toLowerCase();
+  const normEmail = (email || '').trim().toLowerCase();
+  const normPhone = (phone || '').trim().replace(/[\s-]/g, '');
+
   if (isMongoConnected()) {
     try {
-      const user = await getDb().collection<UserDoc>('users').findOne({ identifier });
+      const orList: any[] = [{ identifier: normIdent }];
+      if (normEmail) orList.push({ email: normEmail }, { identifier: normEmail });
+      if (normPhone) orList.push({ phone: normPhone }, { identifier: normPhone });
+      const user = await getDb().collection<UserDoc>('users').findOne({ $or: orList });
       if (user) return user;
     } catch {
       // Fallback to local store
     }
   }
-  const user = localDb.data.users.find((u) => u.identifier === identifier);
+
+  const user = localDb.data.users.find((u) => {
+    const uIdent = (u.identifier || '').trim().toLowerCase();
+    const uEmail = (u.email || '').trim().toLowerCase();
+    const uPhone = (u.phone || '').trim().replace(/[\s-]/g, '');
+    const uContact = (u.contact || '').trim().toLowerCase();
+
+    return (
+      uIdent === normIdent ||
+      (normEmail && (uEmail === normEmail || uIdent === normEmail || uContact.includes(normEmail))) ||
+      (normPhone && (uPhone === normPhone || uIdent === normPhone || uContact.includes(normPhone)))
+    );
+  });
+
   return user || null;
 }
 
@@ -51,12 +71,16 @@ export async function createUser(
   name: string,
   contact: string,
   deviceId: string,
-  consent: boolean
+  consent: boolean,
+  email?: string,
+  phone?: string
 ): Promise<UserDoc> {
   const doc: UserDoc = {
     _id: generateId(),
     identifier,
     name,
+    email: email ? email.trim().toLowerCase() : undefined,
+    phone: phone ? phone.trim() : undefined,
     contact,
     deviceId,
     consent,

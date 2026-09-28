@@ -49,14 +49,18 @@ export interface WheelConfigResponse {
 
 export interface UserInfo {
   readonly name: string;
-  readonly contact: string; // Phone number or email
+  readonly email?: string;
+  readonly phone?: string;
+  readonly contact?: string; // Backwards compatible fallback
   readonly consent: boolean;
   readonly deviceId: string;
 }
 
 export interface StartSpinRequest {
   readonly name: string;
-  readonly contact: string;
+  readonly email?: string;
+  readonly phone?: string;
+  readonly contact?: string;
   readonly consent: boolean;
   readonly deviceId: string;
 }

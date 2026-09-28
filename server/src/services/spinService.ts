@@ -50,17 +50,22 @@ export function normalizeContact(contact: string): string {
  * and issues a single-use signed spin token valid for 60s.
  */
 export async function startSpin(userInfo: UserInfo): Promise<StartSpinResponse> {
-  const normalizedId = normalizeContact(userInfo.contact);
+  const email = (userInfo.email || '').trim().toLowerCase();
+  const phone = (userInfo.phone || '').trim();
+  const contact = userInfo.contact || (email && phone ? `${email} | ${phone}` : email || phone || '');
+  const normalizedId = normalizeContact(email || phone || contact);
   const spinLimit = Math.max(1, ENV.SPIN_LIMIT || 1);
 
-  let user = await findUserByIdentifier(normalizedId);
+  let user = await findUserByIdentifier(normalizedId, email, phone);
   if (!user) {
     user = await createUser(
       normalizedId,
       userInfo.name.trim(),
-      userInfo.contact.trim(),
+      contact.trim(),
       userInfo.deviceId.trim(),
-      userInfo.consent
+      userInfo.consent,
+      email,
+      phone
     );
   }
 

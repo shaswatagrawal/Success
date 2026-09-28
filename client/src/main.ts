@@ -395,16 +395,19 @@ class App {
 
   private async handleRegistrationSubmit(): Promise<void> {
     const nameInput = document.getElementById('reg-name') as HTMLInputElement | null;
-    const contactInput = document.getElementById('reg-contact') as HTMLInputElement | null;
+    const emailInput = document.getElementById('reg-email') as HTMLInputElement | null;
+    const phoneInput = document.getElementById('reg-phone') as HTMLInputElement | null;
     const consentInput = document.getElementById('reg-consent') as HTMLInputElement | null;
 
     const nameError = document.getElementById('name-error');
-    const contactError = document.getElementById('contact-error');
+    const emailError = document.getElementById('email-error');
+    const phoneError = document.getElementById('phone-error');
     const consentError = document.getElementById('consent-error');
     const genError = document.getElementById('reg-general-error');
 
     if (nameError) nameError.textContent = '';
-    if (contactError) contactError.textContent = '';
+    if (emailError) emailError.textContent = '';
+    if (phoneError) phoneError.textContent = '';
     if (consentError) consentError.textContent = '';
     if (genError) {
       genError.style.display = 'none';
@@ -413,7 +416,9 @@ class App {
 
     const payload = {
       name: nameInput?.value.trim() ?? '',
-      contact: contactInput?.value.trim() ?? '',
+      email: emailInput?.value.trim() ?? '',
+      phone: phoneInput?.value.trim() ?? '',
+      contact: `${emailInput?.value.trim() ?? ''} | ${phoneInput?.value.trim() ?? ''}`.trim(),
       consent: Boolean(consentInput?.checked),
       deviceId: 'device-id-placeholder-replaced-by-api',
     };
@@ -423,7 +428,8 @@ class App {
     if (!parsed.success) {
       for (const err of parsed.error.errors) {
         if (err.path[0] === 'name' && nameError) nameError.textContent = err.message;
-        if (err.path[0] === 'contact' && contactError) contactError.textContent = err.message;
+        if (err.path[0] === 'email' && emailError) emailError.textContent = err.message;
+        if (err.path[0] === 'phone' && phoneError) phoneError.textContent = err.message;
         if (err.path[0] === 'consent' && consentError) consentError.textContent = err.message;
       }
       return;
@@ -435,7 +441,9 @@ class App {
     try {
       this.currentUser = {
         name: parsed.data.name,
-        contact: parsed.data.contact,
+        email: parsed.data.email,
+        phone: parsed.data.phone,
+        contact: parsed.data.email || parsed.data.phone || parsed.data.contact || '',
         consent: parsed.data.consent,
         deviceId: parsed.data.deviceId,
       };
@@ -450,7 +458,7 @@ class App {
     } catch (err) {
       if (genError) {
         genError.style.display = 'block';
-        genError.textContent = err instanceof Error ? err.message : 'Registration failed. Try again.';
+        genError.textContent = err instanceof Error ? err.message : 'Verification failed. Try again.';
       }
     } finally {
       if (submitBtn) submitBtn.disabled = false;
@@ -484,6 +492,8 @@ class App {
       // Step 1: Request one-time spin token
       const startData = await api.startSpin({
         name: this.currentUser.name,
+        email: this.currentUser.email,
+        phone: this.currentUser.phone,
         contact: this.currentUser.contact,
         consent: this.currentUser.consent,
       });

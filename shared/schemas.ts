@@ -14,24 +14,53 @@ export const UserInfoSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Name must be at least 2 characters long')
-    .max(100, 'Name cannot exceed 100 characters'),
+    .min(2, 'Full Name must be at least 2 characters long')
+    .max(100, 'Full Name cannot exceed 100 characters'),
+  email: z
+    .string()
+    .trim()
+    .refine((val) => !val || contactRegex.email.test(val), {
+      message: 'Please provide a valid Gmail / Email address (e.g. yourname@gmail.com)',
+    })
+    .optional()
+    .or(z.literal('')),
+  phone: z
+    .string()
+    .trim()
+    .refine((val) => !val || contactRegex.phone.test(val), {
+      message: 'Please provide a valid mobile / phone number (at least 7 digits)',
+    })
+    .optional()
+    .or(z.literal('')),
   contact: z
     .string()
     .trim()
-    .refine((val) => contactRegex.email.test(val) || contactRegex.phone.test(val), {
-      message: 'Please provide a valid email address or phone number',
-    }),
+    .optional()
+    .or(z.literal('')),
   consent: z
     .boolean()
     .refine((val) => val === true, {
-      message: 'You must agree to promotional data collection to participate',
+      message: 'You must verify and agree to promotional terms to participate',
     }),
   deviceId: z
     .string()
     .trim()
     .min(10, 'Invalid device identifier'),
-});
+}).refine(
+  (data) => {
+    if (data.email && data.phone) {
+      return contactRegex.email.test(data.email) && contactRegex.phone.test(data.phone);
+    }
+    if (data.contact) {
+      return contactRegex.email.test(data.contact) || contactRegex.phone.test(data.contact);
+    }
+    return false;
+  },
+  {
+    message: 'Both a valid Gmail/Email address and Phone number are required',
+    path: ['email'],
+  }
+);
 
 export const StartSpinSchema = UserInfoSchema;
 
