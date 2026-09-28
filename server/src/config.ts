@@ -230,7 +230,7 @@ export const ENV = {
     process.env['MONGODB_URI'] ??
     'mongodb+srv://scarfo9989_db_user:UJFRNxglp8hiD2j1@success.hbzckgg.mongodb.net/?retryWrites=true&w=majority&appName=success',
   DATABASE_NAME: process.env['DATABASE_NAME'] ?? 'spin_the_wheel',
-  ADMIN_PASSWORD: process.env['ADMIN_PASSWORD'] ?? 'AdminSecurePass2026!',
+  ADMIN_PASSWORD: process.env['ADMIN_PASSWORD'] ?? 'SUCCESS',
   SESSION_SECRET:
     process.env['SESSION_SECRET'] ?? 'super_secret_session_key_at_least_32_bytes_long_spin_wheel',
   IP_SALT: process.env['IP_SALT'] ?? 'salt_for_hashing_ip_addresses_change_in_production_12345',

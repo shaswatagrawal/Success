@@ -140,8 +140,8 @@ cp .env.example .env
 
 Default development settings in `.env`:
 - `PORT=3000`
-- `ADMIN_PASSWORD=AdminSecurePass2026!`
-- `SPIN_LIMIT=3`
+- `ADMIN_PASSWORD=SUCCESS`
+- `SPIN_LIMIT=1`
 - `SESSION_SECRET=super_secret_session_key_at_least_32_bytes_long_spin_wheel`
 - `IP_SALT=salt_for_hashing_ip_addresses_change_in_production_12345`
 
@@ -262,7 +262,7 @@ npm run simulate
 
 Navigate to **http://localhost:5173#admin** or click **"Admin Portal"** in the top navigation.
 
-- **Default Administrator Password:** `AdminSecurePass2026!` *(configured via `ADMIN_PASSWORD` in `.env`)*
+- **Default Administrator Password:** `SUCCESS` *(configured via `ADMIN_PASSWORD` in `.env`)*
 - **Authentication:** Upon successful login, the server sets a 24-hour signed `httpOnly` cookie (`wheel_admin_session`).
 
 ### Features:
@@ -310,7 +310,7 @@ Defined in `.env`:
 | `NODE_ENV` | `development` | Runtime environment (`development`, `production`, `test`) |
 | `MONGODB_URI` | `mongodb+srv://...` | MongoDB Atlas cluster connection URI |
 | `DATABASE_NAME` | `spin_the_wheel` | Database name on MongoDB Atlas cluster |
-| `ADMIN_PASSWORD` | `AdminSecurePass2026!` | Password required to unlock admin dashboard |
+| `ADMIN_PASSWORD` | `SUCCESS` | Password required to unlock admin dashboard |
 | `SESSION_SECRET` | `super_secret_session_key_...` | HMAC secret key used to sign tokens and admin sessions |
 | `IP_SALT` | `salt_for_hashing_ip_...` | Salt used to hash IP addresses in database |
 | `SPIN_LIMIT` | `3` | Maximum allowed promotional spins per participant |
