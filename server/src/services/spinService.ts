@@ -127,36 +127,67 @@ export async function executeSpin(
   const userSpinNumber = currentSpins + 1;
   const globalSpinNumber = (await getGlobalSpinCount()) + 1;
 
-  // 4. Controlled spin distribution with strict 1-winner cap for Grand Prize & Mystery Box:
-  // - Grand Prize: max 1 global winner
-  // - Mystery Box: max 1 global winner
-  // - Normal Prize: every 10 spins
-  // - Better Luck: all other spins
+  // 4. Controlled spin distribution with strict quotas:
+  // - Grand Prize: 50 winners max
+  // - Earbud: 3 winners max
+  // - Powerbank: 2 winners max
+  // - Gift Hamper: 10 winners max
+  // - 500 Rs Topup: 5 winners max
+  // - 100 Rs Topup: 20 winners max
+  // - Better Luck Next Time: Infinite (unlimited)
   let winningSlot: (typeof SLOTS)[number];
 
   const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
-  const mysterySlot = SLOTS.find((s) => s.prizeKey === 'prize_mystery_box');
-  const normalSlots = SLOTS.filter((s) => s.isWin && !s.isGrandPrize && s.prizeKey !== 'prize_mystery_box');
+  const earbudSlot = SLOTS.find((s) => s.prizeKey === 'prize_earpods' || s.index === 3);
+  const powerbankSlot = SLOTS.find((s) => s.prizeKey === 'prize_powerbank' || s.index === 5);
+  const hamperSlot = SLOTS.find((s) => s.prizeKey === 'prize_mystery_box' || s.prizeKey === 'prize_gift_hamper' || s.index === 10);
+  const topup500Slot = SLOTS.find((s) => s.prizeKey === 'prize_500_balance' || s.index === 7);
+  const topup100Slot = SLOTS.find((s) => s.prizeKey === 'prize_100_balance' || s.index === 9);
   const lossSlots = SLOTS.filter((s) => !s.isWin);
 
-  const grandPrizeWonCount = await getGrandPrizeWonCount();
-  const mysteryBoxWonCount = await getPrizeWonCount('prize_mystery_box');
+  const [
+    grandPrizeWonCount,
+    earbudWonCount,
+    powerbankWonCount,
+    giftHamperWonCount,
+    topup500WonCount,
+    topup100WonCount,
+  ] = await Promise.all([
+    getGrandPrizeWonCount(),
+    getPrizeWonCount(['prize_earpods'], 3),
+    getPrizeWonCount(['prize_powerbank'], 5),
+    getPrizeWonCount(['prize_mystery_box', 'prize_gift_hamper'], 10),
+    getPrizeWonCount(['prize_500_balance'], 7),
+    getPrizeWonCount(['prize_100_balance'], 9),
+  ]);
 
-  const canWinGrand = grandPrizeWonCount < 1;
-  const canWinMystery = mysteryBoxWonCount < 1;
+  const canWinGrand = grandPrizeWonCount < ENV.GRAND_PRIZE_LIMIT;
+  const canWinEarbud = earbudWonCount < ENV.EARBUD_LIMIT;
+  const canWinPowerbank = powerbankWonCount < ENV.POWERBANK_LIMIT;
+  const canWinGiftHamper = giftHamperWonCount < ENV.GIFT_HAMPER_LIMIT;
+  const canWin500 = topup500WonCount < ENV.TOPUP_500_LIMIT;
+  const canWin100 = topup100WonCount < ENV.TOPUP_100_LIMIT;
+
+  // Build list of currently available normal prizes with positive quota
+  const availableNormalSlots: (typeof SLOTS)[number][] = [];
+  if (earbudSlot && canWinEarbud) availableNormalSlots.push(earbudSlot);
+  if (powerbankSlot && canWinPowerbank) availableNormalSlots.push(powerbankSlot);
+  if (hamperSlot && canWinGiftHamper) availableNormalSlots.push(hamperSlot);
+  if (topup500Slot && canWin500) availableNormalSlots.push(topup500Slot);
+  if (topup100Slot && canWin100) availableNormalSlots.push(topup100Slot);
 
   if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_INTERVAL === 0 && canWinGrand) {
-    // Grand Prize milestone (strictly 1 winner globally)
+    // Grand Prize milestone (strictly capped at ENV.GRAND_PRIZE_LIMIT = 50 winners)
     winningSlot = grandSlot;
-  } else if (mysterySlot && globalSpinNumber > 0 && globalSpinNumber % ENV.MYSTERY_BOX_INTERVAL === 0 && canWinMystery) {
-    // Mystery Box milestone (strictly 1 winner globally)
-    winningSlot = mysterySlot;
-  } else if (globalSpinNumber > 0 && globalSpinNumber % ENV.NORMAL_PRIZE_INTERVAL === 0) {
-    // Normal Prize milestone (every 10 spins)
-    const randomNormalIndex = crypto.randomInt(0, normalSlots.length);
-    winningSlot = normalSlots[randomNormalIndex] ?? normalSlots[0]!;
+  } else if (hamperSlot && globalSpinNumber > 0 && globalSpinNumber % ENV.MYSTERY_BOX_INTERVAL === 0 && canWinGiftHamper) {
+    // Gift Hamper milestone (strictly capped at ENV.GIFT_HAMPER_LIMIT = 10 winners)
+    winningSlot = hamperSlot;
+  } else if (globalSpinNumber > 0 && globalSpinNumber % ENV.NORMAL_PRIZE_INTERVAL === 0 && availableNormalSlots.length > 0) {
+    // Normal Prize milestone among available stock
+    const randomNormalIndex = crypto.randomInt(0, availableNormalSlots.length);
+    winningSlot = availableNormalSlots[randomNormalIndex] ?? availableNormalSlots[0]!;
   } else {
-    // Better Luck Next Time for all other spins
+    // Better Luck Next Time for all other spins (Infinite)
     const randomLossIndex = crypto.randomInt(0, lossSlots.length);
     winningSlot = lossSlots[randomLossIndex] ?? lossSlots[0]!;
   }
@@ -168,91 +199,96 @@ export async function executeSpin(
 
   let prizeImage = winningSlot.image;
   const lower = prizeLabel.toLowerCase();
-  if (lower.includes('powerbank') || lower.includes('power bank') || lower.includes('charger')) {
+  if (winningSlot.isGrandPrize || winningSlot.prizeKey === 'grand_prize') {
+    prizeImage = undefined;
+  } else if (lower.includes('powerbank') || lower.includes('power bank') || lower.includes('charger')) {
     prizeImage = '/assets/powerbank_pro.jpg';
-  } else if (lower.includes('mobile') || lower.includes('phone') || lower.includes('smartphone')) {
-    prizeImage = '/assets/mobile_flagship.jpg';
   } else if (lower.includes('earpod') || lower.includes('earbud') || lower.includes('airpod')) {
     prizeImage = '/assets/earpods_pro.jpg';
   } else if (lower.includes('500') || lower.includes('ntc')) {
     prizeImage = '/assets/ntc_logo.png';
   } else if (lower.includes('100') || lower.includes('ncell') || lower.includes('cash') || lower.includes('bonus')) {
     prizeImage = '/assets/ncell_logo.png';
-  } else if (lower.includes('mystery') || lower.includes('box')) {
+  } else if (lower.includes('hamper') || lower.includes('mystery') || lower.includes('box') || lower.includes('gift')) {
     prizeImage = '/assets/mystery_box.png';
   } else if (lower.includes('kite') || lower.includes('changa')) {
     prizeImage = '/assets/kite_rainbow.png';
   }
 
-  // 6. Generate claim code if grand prize winner or mystery box
-  const claimCode = (winningSlot.isGrandPrize || winningSlot.prizeKey === 'prize_mystery_box') ? generateClaimCode() : null;
+  // 6. Generate claim code for grand prize and physical/gift items
+  const isPhysicalPrize = winningSlot.isGrandPrize ||
+    winningSlot.prizeKey === 'prize_mystery_box' ||
+    winningSlot.prizeKey === 'prize_gift_hamper' ||
+    winningSlot.prizeKey === 'prize_earpods' ||
+    winningSlot.prizeKey === 'prize_powerbank';
+  const claimCode = (winningSlot.isWin && isPhysicalPrize) ? generateClaimCode() : null;
   const ipHash = hashIp(clientIp);
 
-      // 7. Persist spin record
-      await insertSpin({
-        userId: user._id,
-        userName: user.name,
-        userContact: user.contact,
-        deviceId: providedDeviceId || deviceId,
-        userSpinNumber,
-        globalSpinNumber,
-        slotIndex: winningSlot.index,
-        prizeKey: winningSlot.prizeKey,
-        prizeName: prizeLabel,
-        isGrandPrize: winningSlot.isGrandPrize,
-        claimCode,
-        ipHash,
-      });
+  // 7. Persist spin record
+  await insertSpin({
+    userId: user._id,
+    userName: user.name,
+    userContact: user.contact,
+    deviceId: providedDeviceId || deviceId,
+    userSpinNumber,
+    globalSpinNumber,
+    slotIndex: winningSlot.index,
+    prizeKey: winningSlot.prizeKey,
+    prizeName: prizeLabel,
+    isGrandPrize: winningSlot.isGrandPrize,
+    claimCode,
+    ipHash,
+  });
 
-      const spinsUsed = userSpinNumber;
-      const spinsLeft = Math.max(0, ENV.SPIN_LIMIT - spinsUsed);
+  const spinsUsed = userSpinNumber;
+  const spinsLeft = Math.max(0, ENV.SPIN_LIMIT - spinsUsed);
 
-      const prize: Prize = {
-        id: winningSlot.prizeKey,
-        label: prizeLabel,
-        isWin: winningSlot.isWin,
-        isGrandPrize: winningSlot.isGrandPrize,
-        color: winningSlot.color,
-        textColor: winningSlot.textColor,
-        accentColor: winningSlot.accentColor,
-        image: prizeImage,
-      };
+  const prize: Prize = {
+    id: winningSlot.prizeKey,
+    label: prizeLabel,
+    isWin: winningSlot.isWin,
+    isGrandPrize: winningSlot.isGrandPrize,
+    color: winningSlot.color,
+    textColor: winningSlot.textColor,
+    accentColor: winningSlot.accentColor,
+    image: prizeImage,
+  };
 
-      let message = 'Better luck next time! Thanks for participating.';
-      if (winningSlot.isGrandPrize) {
-        message = '🎉 CONGRATULATIONS! YOU WON THE GRAND PRIZE! 🎉';
-      } else if (winningSlot.prizeKey === 'prize_mystery_box') {
-        message = '🎁 WOW! YOU UNLOCKED THE EXCLUSIVE MYSTERY BOX! The prize inside the MYSTERY BOX will be decided after 3 weeks.';
-      } else if (winningSlot.isWin) {
-        message = `🎉 Congratulations! You won: ${prizeLabel}!`;
-      }
+  let message = 'Better luck next time! Thanks for participating.';
+  if (winningSlot.isGrandPrize) {
+    message = '🎉 CONGRATULATIONS! YOU WON THE GRAND PRIZE! 🎉';
+  } else if (winningSlot.prizeKey === 'prize_mystery_box' || winningSlot.prizeKey === 'prize_gift_hamper' || lower.includes('hamper')) {
+    message = `🎁 WOW! YOU UNLOCKED THE EXCLUSIVE ${prizeLabel.toUpperCase()}! 🎉`;
+  } else if (winningSlot.isWin) {
+    message = `🎉 Congratulations! You won: ${prizeLabel}!`;
+  }
 
-      // 8. Send branded confirmation email to participant asynchronously
-      if (user.contact && user.contact.includes('@')) {
-        sendSpinResultEmail({
-          recipientEmail: user.contact,
-          recipientName: user.name,
-          prizeName: prizeLabel,
-          isWin: winningSlot.isWin,
-          isGrandPrize: winningSlot.isGrandPrize,
-          claimCode,
-        }).catch((err) => {
-          console.warn('[SpinService] Non-blocking email sending failed:', err);
-        });
-      }
+  // 8. Send branded confirmation email to participant asynchronously
+  if (user.contact && user.contact.includes('@')) {
+    sendSpinResultEmail({
+      recipientEmail: user.contact,
+      recipientName: user.name,
+      prizeName: prizeLabel,
+      isWin: winningSlot.isWin,
+      isGrandPrize: winningSlot.isGrandPrize,
+      claimCode,
+    }).catch((err) => {
+      console.warn('[SpinService] Non-blocking email sending failed:', err);
+    });
+  }
 
-      return {
-        success: true,
-        slotIndex: winningSlot.index,
-        prize,
-        spinsLeft,
-        spinsUsed,
-        userSpinNumber,
-        globalSpinNumber,
-        claimCode: claimCode ?? undefined,
-        message,
-      };
-    }
+  return {
+    success: true,
+    slotIndex: winningSlot.index,
+    prize,
+    spinsLeft,
+    spinsUsed,
+    userSpinNumber,
+    globalSpinNumber,
+    claimCode: claimCode ?? undefined,
+    message,
+  };
+}
 
 /**
  * Returns user promotion status (spins used, spins left, recent spins).
@@ -306,16 +342,18 @@ export async function getPublicWheelConfig(): Promise<readonly PublicSlotConfig[
     let image = slot.image;
 
     const lower = label.toLowerCase();
-    if (lower.includes('powerbank') || lower.includes('power bank') || lower.includes('charger')) {
+    if (slot.isGrandPrize || slot.prizeKey === 'grand_prize') {
+      image = undefined;
+    } else if (lower.includes('powerbank') || lower.includes('power bank') || lower.includes('charger')) {
       image = '/assets/powerbank_pro.jpg';
-    } else if (lower.includes('mobile') || lower.includes('phone') || lower.includes('smartphone')) {
-      image = '/assets/mobile_flagship.jpg';
     } else if (lower.includes('earpod') || lower.includes('earbud') || lower.includes('airpod')) {
       image = '/assets/earpods_pro.jpg';
     } else if (lower.includes('500') || lower.includes('ntc')) {
       image = '/assets/ntc_logo.png';
     } else if (lower.includes('100') || lower.includes('ncell') || lower.includes('cash') || lower.includes('bonus')) {
       image = '/assets/ncell_logo.png';
+    } else if (lower.includes('hamper') || lower.includes('mystery') || lower.includes('box') || lower.includes('gift')) {
+      image = '/assets/mystery_box.png';
     } else if (lower.includes('kite') || lower.includes('changa')) {
       image = '/assets/kite_rainbow.png';
     }

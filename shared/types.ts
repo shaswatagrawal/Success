@@ -173,6 +173,22 @@ export interface UpdatePrizeNamesResponse {
   readonly updatedSlots: readonly PublicSlotConfig[];
 }
 
+export interface ResetStatusResponse {
+  readonly canReset: boolean;
+  readonly lastResetAt: string | null;
+  readonly nextResetAvailableAt: string | null;
+  readonly remainingSeconds: number;
+}
+
+export interface ResetSpinsResponse {
+  readonly success: boolean;
+  readonly message: string;
+  readonly lastResetAt: string;
+  readonly nextResetAvailableAt: string;
+  readonly canReset: boolean;
+  readonly totalSpinsCleared: number;
+}
+
 export interface ApiErrorResponse {
   readonly error: string;
   readonly code: string;

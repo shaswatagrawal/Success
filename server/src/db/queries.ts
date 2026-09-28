@@ -3,6 +3,8 @@ import type {
   AdminSpinQuery,
   AdminStats,
   DistributionStat,
+  ResetSpinsResponse,
+  ResetStatusResponse,
   SlotConfig,
   SpinRecord,
 } from '../../../shared/types.js';
@@ -14,6 +16,7 @@ import {
   PrizeNameDoc,
   SpinDoc,
   SpinTokenDoc,
+  SystemSettingDoc,
   UserDoc,
 } from './index.js';
 
@@ -178,28 +181,33 @@ export async function getGlobalSpinCount(): Promise<number> {
   return localDb.data.spins.length;
 }
 
-export async function getPrizeWonCount(prizeKey: string): Promise<number> {
+export async function getPrizeWonCount(prizeKey: string | readonly string[], slotIndex?: number): Promise<number> {
+  const keys = Array.isArray(prizeKey) ? prizeKey : [prizeKey];
   if (isMongoConnected()) {
     try {
-      return await getDb().collection<SpinDoc>('spins').countDocuments({ prizeKey });
+      const orClauses: any[] = [{ prizeKey: { $in: keys } }];
+      if (slotIndex !== undefined) {
+        orClauses.push({ slotIndex });
+      }
+      return await getDb().collection<SpinDoc>('spins').countDocuments({ $or: orClauses });
     } catch {
       // Fallback
     }
   }
-  return localDb.data.spins.filter((s) => s.prizeKey === prizeKey).length;
+  return localDb.data.spins.filter((s) => keys.includes(s.prizeKey) || (slotIndex !== undefined && s.slotIndex === slotIndex)).length;
 }
 
 export async function getGrandPrizeWonCount(): Promise<number> {
   if (isMongoConnected()) {
     try {
       return await getDb().collection<SpinDoc>('spins').countDocuments({
-        $or: [{ isGrandPrize: true }, { prizeKey: 'grand_prize' }],
+        $or: [{ isGrandPrize: true }, { prizeKey: 'grand_prize' }, { slotIndex: 0 }],
       });
     } catch {
       // Fallback
     }
   }
-  return localDb.data.spins.filter((s) => s.isGrandPrize || s.prizeKey === 'grand_prize').length;
+  return localDb.data.spins.filter((s) => s.isGrandPrize || s.prizeKey === 'grand_prize' || s.slotIndex === 0).length;
 }
 
 export async function insertSpin(params: {
@@ -459,4 +467,116 @@ export async function getAllSpinsForExport(): Promise<readonly SpinRecord[]> {
       ipHash: doc.ipHash,
       createdAt: doc.createdAt,
     }));
+}
+
+const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export async function getSpinResetStatus(): Promise<ResetStatusResponse> {
+  let lastResetIso: string | null = null;
+
+  if (isMongoConnected()) {
+    try {
+      const doc = await getDb()
+        .collection<SystemSettingDoc>('system_settings')
+        .findOne({ key: 'last_spin_reset' });
+      if (doc && typeof doc.value === 'string') {
+        lastResetIso = doc.value;
+      }
+    } catch {
+      // Fallback
+    }
+  }
+
+  if (!lastResetIso) {
+    const setting = (localDb.data.system_settings || []).find((s) => s.key === 'last_spin_reset');
+    if (setting && typeof setting.value === 'string') {
+      lastResetIso = setting.value;
+    }
+  }
+
+  if (!lastResetIso) {
+    return {
+      canReset: true,
+      lastResetAt: null,
+      nextResetAvailableAt: null,
+      remainingSeconds: 0,
+    };
+  }
+
+  const lastResetTime = new Date(lastResetIso).getTime();
+  const now = Date.now();
+  const elapsed = now - lastResetTime;
+  const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
+  const canReset = remainingMs === 0;
+  const nextResetAvailableAt = new Date(lastResetTime + RESET_INTERVAL_MS).toISOString();
+
+  return {
+    canReset,
+    lastResetAt: lastResetIso,
+    nextResetAvailableAt,
+    remainingSeconds: Math.ceil(remainingMs / 1000),
+  };
+}
+
+export async function resetSpinNumbers(): Promise<ResetSpinsResponse> {
+  const status = await getSpinResetStatus();
+  if (!status.canReset) {
+    const hours = Math.floor(status.remainingSeconds / 3600);
+    const minutes = Math.floor((status.remainingSeconds % 3600) / 60);
+    const seconds = status.remainingSeconds % 60;
+    throw new Error(
+      `Spin reset can only be executed once every 24 hours. Next reset available in ${hours}h ${minutes}m ${seconds}s.`
+    );
+  }
+
+  const nowIso = new Date().toISOString();
+  let totalSpinsCleared = localDb.data.spins.length;
+
+  if (isMongoConnected()) {
+    try {
+      const deleteResult = await getDb().collection<SpinDoc>('spins').deleteMany({});
+      totalSpinsCleared = deleteResult.deletedCount ?? totalSpinsCleared;
+      await getDb().collection<SpinTokenDoc>('spin_tokens').deleteMany({});
+      await getDb().collection<SystemSettingDoc>('system_settings').updateOne(
+        { key: 'last_spin_reset' },
+        { $set: { key: 'last_spin_reset', value: nowIso, updatedAt: nowIso } },
+        { upsert: true }
+      );
+    } catch (err) {
+      console.warn('MongoDB spin reset error:', err);
+    }
+  }
+
+  // Clear local database spins & tokens
+  totalSpinsCleared = Math.max(totalSpinsCleared, localDb.data.spins.length);
+  localDb.data.spins = [];
+  localDb.data.spin_tokens = [];
+
+  if (!localDb.data.system_settings) {
+    localDb.data.system_settings = [];
+  }
+  const existing = localDb.data.system_settings.find((s) => s.key === 'last_spin_reset');
+  if (existing) {
+    existing.value = nowIso;
+    existing.updatedAt = nowIso;
+  } else {
+    localDb.data.system_settings.push({
+      _id: generateId(),
+      key: 'last_spin_reset',
+      value: nowIso,
+      updatedAt: nowIso,
+    });
+  }
+  localDb.save();
+
+  const nextResetAvailableAt = new Date(Date.now() + RESET_INTERVAL_MS).toISOString();
+
+  return {
+    success: true,
+    message: `All spin numbers and records (${totalSpinsCleared} records) have been successfully reset.`,
+    lastResetAt: nowIso,
+    nextResetAvailableAt,
+    canReset: false,
+    totalSpinsCleared,
+  };
 }

@@ -148,7 +148,11 @@ export class Wheel {
       this.ctx.closePath();
 
       // Realistic 3D Radial Gradient per Slice in deep rich jewel tones
-      const isMysteryBox = slot.prizeKey === 'prize_mystery_box' || slot.label.toLowerCase().includes('mystery');
+      const isMysteryBox = slot.prizeKey === 'prize_mystery_box' ||
+        slot.prizeKey === 'prize_gift_hamper' ||
+        slot.label.toLowerCase().includes('mystery') ||
+        slot.label.toLowerCase().includes('hamper') ||
+        slot.label.toLowerCase().includes('gift');
       const isRed = i % 2 === 0;
       const grad = this.ctx.createRadialGradient(0, 0, 15, 0, 0, radius);
 
@@ -268,6 +272,41 @@ export class Wheel {
         this.ctx.beginPath();
         this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
         this.ctx.lineWidth = Math.max(2.2, badgeRadius * 0.14);
+        this.ctx.strokeStyle = '#FDE047';
+        this.ctx.stroke();
+
+        this.ctx.restore();
+      } else if (slot.isGrandPrize && !slot.image) {
+        // Grand Prize without photo: Draw glowing 3D Golden Trophy Badge
+        this.ctx.save();
+        this.ctx.translate(iconDist, 0);
+        this.ctx.rotate(Math.PI / 2);
+
+        const baseBadgeRadius = isMobile ? 26 : 38;
+        const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
+        const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
+
+        // Glowing Gold backdrop disc
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'rgba(153, 27, 27, 0.95)';
+        this.ctx.shadowColor = 'rgba(253, 224, 71, 0.95)';
+        this.ctx.shadowBlur = Math.max(12, badgeRadius * 0.75);
+        this.ctx.shadowOffsetY = 2;
+        this.ctx.fill();
+
+        // 3D Gold Trophy Icon
+        this.ctx.font = `${badgeRadius * 1.25}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('🏆', 0, 0);
+        this.ctx.restore();
+
+        // 3D Polished Gold Rim
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+        this.ctx.lineWidth = Math.max(2.4, badgeRadius * 0.15);
         this.ctx.strokeStyle = '#FDE047';
         this.ctx.stroke();
 

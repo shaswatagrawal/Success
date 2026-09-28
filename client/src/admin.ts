@@ -106,6 +106,11 @@ export class AdminDashboard {
       window.location.href = '/api/admin/export-csv';
     });
 
+    // Reset Spin Numbers Button
+    document.getElementById('admin-reset-spins-btn')?.addEventListener('click', async () => {
+      await this.handleResetSpins();
+    });
+
     // Prize Editor Form
     const prizeForm = document.getElementById('prize-editor-form') as HTMLFormElement | null;
     prizeForm?.addEventListener('submit', async (e) => {
@@ -141,7 +146,88 @@ export class AdminDashboard {
   }
 
   public async loadDashboard(): Promise<void> {
-    await Promise.all([this.loadStats(), this.loadPrizeEditor(), this.loadSpinsTable()]);
+    await Promise.all([this.loadStats(), this.loadPrizeEditor(), this.loadSpinsTable(), this.loadResetStatus()]);
+  }
+
+  private async loadResetStatus(): Promise<void> {
+    const badgeEl = document.getElementById('reset-cooldown-badge');
+    const lastResetEl = document.getElementById('last-reset-time-text');
+    const nextResetEl = document.getElementById('next-reset-time-text');
+    const resetBtn = document.getElementById('admin-reset-spins-btn') as HTMLButtonElement | null;
+
+    try {
+      const status = await api.getResetStatus();
+
+      if (lastResetEl) {
+        lastResetEl.textContent = status.lastResetAt
+          ? new Date(status.lastResetAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+          : 'Never (Ready)';
+      }
+
+      if (nextResetEl) {
+        nextResetEl.textContent = status.nextResetAvailableAt
+          ? (status.canReset ? 'Available Now' : new Date(status.nextResetAvailableAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))
+          : 'Available Now';
+      }
+
+      if (badgeEl) {
+        if (status.canReset) {
+          badgeEl.textContent = '✓ Reset Ready';
+          badgeEl.className = 'badge badge-success';
+        } else {
+          const hours = Math.floor(status.remainingSeconds / 3600);
+          const minutes = Math.floor((status.remainingSeconds % 3600) / 60);
+          badgeEl.textContent = `⏳ Locked (${hours}h ${minutes}m left)`;
+          badgeEl.className = 'badge badge-warning';
+        }
+      }
+
+      if (resetBtn) {
+        resetBtn.disabled = !status.canReset;
+      }
+    } catch (err) {
+      console.error('Failed to load reset status:', err);
+    }
+  }
+
+  private async handleResetSpins(): Promise<void> {
+    const resetBtn = document.getElementById('admin-reset-spins-btn') as HTMLButtonElement | null;
+    const msgEl = document.getElementById('reset-feedback-msg');
+
+    const confirmed = window.confirm(
+      '⚠️ ATTENTION: Are you sure you want to reset all promotional spin numbers and participant logs?\n\n' +
+      '• All spin counts will be reset to 0 so participants can spin again.\n' +
+      '• This action is strictly locked for 24 HOURS before it can be reset again.\n\n' +
+      'Do you want to proceed?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      if (resetBtn) resetBtn.disabled = true;
+      if (msgEl) {
+        msgEl.textContent = 'Resetting spin numbers...';
+        msgEl.style.color = '#F59E0B';
+      }
+
+      const res = await api.resetSpins();
+
+      if (msgEl) {
+        msgEl.textContent = `✓ ${res.message}`;
+        msgEl.style.color = '#10B981';
+        setTimeout(() => {
+          if (msgEl) msgEl.textContent = '';
+        }, 5000);
+      }
+
+      await Promise.all([this.loadStats(), this.loadSpinsTable(), this.loadResetStatus()]);
+    } catch (err: any) {
+      if (msgEl) {
+        msgEl.textContent = err?.message || 'Reset failed. Please check 24h cooldown.';
+        msgEl.style.color = '#F43F5E';
+      }
+      await this.loadResetStatus();
+    }
   }
 
   private async loadStats(): Promise<void> {

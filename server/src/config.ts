@@ -17,21 +17,20 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
  * Sum = 2 + 21 + 77 = 100%
  */
 export const SLOTS: readonly SlotConfig[] = [
-  // === GRAND PRIZE ===
+  // === GRAND PRIZE (Limit: 50) ===
   {
     index: 0,
     prizeKey: 'grand_prize',
-    label: 'Smart Phone',
+    label: 'Grand Prize',
     weight: 2,
     isWin: true,
     isGrandPrize: true,
     color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
-    image: '/assets/mobile_flagship.jpg',
   },
 
-  // === BETTER LUCK NEXT TIME ===
+  // === BETTER LUCK NEXT TIME (Infinite) ===
   {
     index: 1,
     prizeKey: 'better_luck_1',
@@ -55,11 +54,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/clover.png',
   },
 
-  // === NORMAL PRIZE: Earpods ===
+  // === NORMAL PRIZE: Earbud (Limit: 3) ===
   {
     index: 3,
     prizeKey: 'prize_earpods',
-    label: 'Earpods',
+    label: 'Earbud',
     weight: 5,
     isWin: true,
     isGrandPrize: false,
@@ -69,7 +68,7 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/earpods_pro.jpg',
   },
 
-  // === BETTER LUCK NEXT TIME ===
+  // === BETTER LUCK NEXT TIME (Infinite) ===
   {
     index: 4,
     prizeKey: 'better_luck_3',
@@ -82,7 +81,7 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/clover.png',
   },
 
-  // === NORMAL PRIZE: Powerbank ===
+  // === NORMAL PRIZE: Powerbank (Limit: 2) ===
   {
     index: 5,
     prizeKey: 'prize_powerbank',
@@ -96,7 +95,7 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/powerbank_pro.jpg',
   },
 
-  // === BETTER LUCK NEXT TIME ===
+  // === BETTER LUCK NEXT TIME (Infinite) ===
   {
     index: 6,
     prizeKey: 'better_luck_4',
@@ -109,11 +108,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/clover.png',
   },
 
-  // === NORMAL PRIZE: 500 Topup ===
+  // === NORMAL PRIZE: 500 Rs Topup (Limit: 5) ===
   {
     index: 7,
     prizeKey: 'prize_500_balance',
-    label: '500 Topup',
+    label: '500 Rs Topup',
     weight: 5,
     isWin: true,
     isGrandPrize: false,
@@ -123,7 +122,7 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/ntc_logo.png',
   },
 
-  // === BETTER LUCK NEXT TIME ===
+  // === BETTER LUCK NEXT TIME (Infinite) ===
   {
     index: 8,
     prizeKey: 'better_luck_5',
@@ -136,11 +135,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/clover.png',
   },
 
-  // === NORMAL PRIZE: 100 Topup ===
+  // === NORMAL PRIZE: 100 Rs Topup (Limit: 20) ===
   {
     index: 9,
     prizeKey: 'prize_100_balance',
-    label: '100 Topup',
+    label: '100 Rs Topup',
     weight: 6,
     isWin: true,
     isGrandPrize: false,
@@ -150,11 +149,11 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/ncell_logo.png',
   },
 
-  // === RARE MYSTERY BOX ===
+  // === GIFT HAMPER (Limit: 10) ===
   {
     index: 10,
     prizeKey: 'prize_mystery_box',
-    label: 'Mystery Box',
+    label: 'Gift Hamper',
     weight: 2,
     isWin: true,
     isGrandPrize: false,
@@ -163,6 +162,8 @@ export const SLOTS: readonly SlotConfig[] = [
     accentColor: '#FDE047',
     image: '/assets/mystery_box.png',
   },
+
+  // === BETTER LUCK NEXT TIME (Infinite) ===
   {
     index: 11,
     prizeKey: 'better_luck_6',
@@ -200,6 +201,26 @@ function parseEnvInt(val: string | undefined, defaultVal: number): number {
 }
 
 /**
+ * Prize Quota / Inventory configuration:
+ * - Earbud: 3 winners
+ * - Powerbank: 2 winners
+ * - Gift Hamper: 10 winners
+ * - 100 Rs Topup: 20 winners
+ * - 500 Rs Topup: 5 winners
+ * - Grand Prize: 50 winners
+ * - Better Luck Next Time: Infinite
+ */
+export const PRIZE_QUOTAS = {
+  grand_prize: 50,
+  prize_earpods: 3,
+  prize_powerbank: 2,
+  prize_mystery_box: 10,
+  prize_gift_hamper: 10,
+  prize_500_balance: 5,
+  prize_100_balance: 20,
+} as const;
+
+/**
  * Typed environment configuration.
  */
 export const ENV = {
@@ -218,6 +239,13 @@ export const ENV = {
   MYSTERY_BOX_INTERVAL: parseEnvInt(process.env['MYSTERY_BOX_INTERVAL'], 40),
   GRAND_PRIZE_INTERVAL: parseEnvInt(process.env['GRAND_PRIZE_INTERVAL'], 60),
   GRAND_PRIZE_MIN_SPINS: parseEnvInt(process.env['GRAND_PRIZE_MIN_SPINS'], 60),
+  // Explicit prize winner limits
+  GRAND_PRIZE_LIMIT: parseEnvInt(process.env['GRAND_PRIZE_LIMIT'], 50),
+  EARBUD_LIMIT: parseEnvInt(process.env['EARBUD_LIMIT'], 3),
+  POWERBANK_LIMIT: parseEnvInt(process.env['POWERBANK_LIMIT'], 2),
+  GIFT_HAMPER_LIMIT: parseEnvInt(process.env['GIFT_HAMPER_LIMIT'], 10),
+  TOPUP_500_LIMIT: parseEnvInt(process.env['TOPUP_500_LIMIT'], 5),
+  TOPUP_100_LIMIT: parseEnvInt(process.env['TOPUP_100_LIMIT'], 20),
   CORS_ORIGIN: (process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:3000')
     .split(',')
     .map((s) => s.trim()),

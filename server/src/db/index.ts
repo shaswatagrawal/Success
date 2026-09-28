@@ -61,11 +61,19 @@ export interface PrizeNameDoc {
   updatedAt: string;
 }
 
+export interface SystemSettingDoc {
+  _id: string;
+  key: string;
+  value: any;
+  updatedAt: string;
+}
+
 interface LocalStore {
   users: UserDoc[];
   spins: SpinDoc[];
   spin_tokens: SpinTokenDoc[];
   prize_names: PrizeNameDoc[];
+  system_settings: SystemSettingDoc[];
 }
 
 class LocalDatabase {
@@ -74,6 +82,7 @@ class LocalDatabase {
     spins: [],
     spin_tokens: [],
     prize_names: [],
+    system_settings: [],
   };
 
   constructor() {
@@ -87,12 +96,19 @@ class LocalDatabase {
       }
       if (fs.existsSync(STORE_PATH)) {
         const raw = fs.readFileSync(STORE_PATH, 'utf-8');
-        this.store = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        this.store = {
+          users: parsed.users || [],
+          spins: parsed.spins || [],
+          spin_tokens: parsed.spin_tokens || [],
+          prize_names: parsed.prize_names || [],
+          system_settings: parsed.system_settings || [],
+        };
       } else {
         this.save();
       }
     } catch {
-      this.store = { users: [], spins: [], spin_tokens: [], prize_names: [] };
+      this.store = { users: [], spins: [], spin_tokens: [], prize_names: [], system_settings: [] };
     }
   }
 

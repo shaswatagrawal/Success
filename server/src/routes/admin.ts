@@ -10,6 +10,8 @@ import type {
   AdminLoginResponse,
   AdminSpinListResponse,
   AdminStats,
+  ResetSpinsResponse,
+  ResetStatusResponse,
   UpdatePrizeNamesRequest,
   UpdatePrizeNamesResponse,
 } from '../../../shared/types.js';
@@ -18,6 +20,8 @@ import {
   getAdminSpins,
   getAdminStats,
   getAllSpinsForExport,
+  getSpinResetStatus,
+  resetSpinNumbers,
   saveCustomPrizeNames,
 } from '../db/queries.js';
 import { AuthError } from '../errors.js';
@@ -205,3 +209,45 @@ adminRouter.put(
     }
   }
 );
+
+/**
+ * GET /api/admin/reset-status
+ * Checks if a 24-hour reset cooldown has passed and when the next reset is available.
+ */
+adminRouter.get(
+  '/admin/reset-status',
+  requireAdminAuth,
+  async (_req: Request, res: Response<ResetStatusResponse>, next) => {
+    try {
+      const status = await getSpinResetStatus();
+      res.json(status);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/**
+ * POST /api/admin/reset-spins
+ * Resets all participant spin records and spin counters (rate-limited strictly to once per 24 hours).
+ */
+adminRouter.post(
+  '/admin/reset-spins',
+  requireAdminAuth,
+  async (_req: Request, res: Response<ResetSpinsResponse>, next) => {
+    try {
+      const result = await resetSpinNumbers();
+      res.json(result);
+    } catch (err: any) {
+      res.status(400).json({
+        success: false,
+        message: err instanceof Error ? err.message : 'Reset failed due to 24-hour rate limit',
+        lastResetAt: '',
+        nextResetAvailableAt: '',
+        canReset: false,
+        totalSpinsCleared: 0,
+      });
+    }
+  }
+);
+

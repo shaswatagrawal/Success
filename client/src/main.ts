@@ -10,13 +10,12 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 0,
     prizeKey: 'grand_prize',
-    label: 'Smart Phone',
+    label: 'Grand Prize',
     isWin: true,
     isGrandPrize: true,
     color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
-    image: '/assets/mobile_flagship.jpg',
   },
   {
     index: 1,
@@ -41,7 +40,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 3,
     prizeKey: 'prize_earpods',
-    label: 'Earpods',
+    label: 'Earbud',
     isWin: true,
     isGrandPrize: false,
     color: '#B91C1C',
@@ -83,7 +82,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 7,
     prizeKey: 'prize_500_balance',
-    label: '500 Topup',
+    label: '500 Rs Topup',
     isWin: true,
     isGrandPrize: false,
     color: '#B91C1C',
@@ -104,7 +103,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 9,
     prizeKey: 'prize_100_balance',
-    label: '100 Topup',
+    label: '100 Rs Topup',
     isWin: true,
     isGrandPrize: false,
     color: '#DC2626',
@@ -115,7 +114,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 10,
     prizeKey: 'prize_mystery_box',
-    label: 'Mystery Box',
+    label: 'Gift Hamper',
     isWin: true,
     isGrandPrize: false,
     color: '#7C3AED',

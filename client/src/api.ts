@@ -5,6 +5,8 @@ import type {
   AdminSpinQuery,
   AdminStats,
   ApiErrorResponse,
+  ResetSpinsResponse,
+  ResetStatusResponse,
   SpinRequest,
   SpinResponse,
   StartSpinRequest,
@@ -149,6 +151,16 @@ export const api = {
     return request<UpdatePrizeNamesResponse>('/api/admin/prizes', {
       method: 'PUT',
       body: JSON.stringify(payload),
+    });
+  },
+
+  getResetStatus(): Promise<ResetStatusResponse> {
+    return request<ResetStatusResponse>('/api/admin/reset-status');
+  },
+
+  resetSpins(): Promise<ResetSpinsResponse> {
+    return request<ResetSpinsResponse>('/api/admin/reset-spins', {
+      method: 'POST',
     });
   },
 };
