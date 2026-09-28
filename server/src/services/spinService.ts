@@ -22,6 +22,7 @@ import {
 } from '../db/queries.js';
 import { SpinLimitError, ValidationError } from '../errors.js';
 import { sendSpinResultEmail } from './emailService.js';
+import { pickWinningSlot } from './rng.js';
 import { generateSpinToken, verifyAndConsumeSpinToken } from './token.js';
 
 export function hashIp(ip: string): string {
@@ -127,14 +128,9 @@ export async function executeSpin(
   const userSpinNumber = currentSpins + 1;
   const globalSpinNumber = (await getGlobalSpinCount()) + 1;
 
-  // 4. Controlled spin distribution with strict quotas:
-  // - Grand Prize: 50 winners max
-  // - Earbud: 3 winners max
-  // - Powerbank: 2 winners max
-  // - Gift Hamper: 10 winners max
-  // - 500 Rs Topup: 5 winners max
-  // - 100 Rs Topup: 20 winners max
-  // - Better Luck Next Time: Infinite (unlimited)
+  // 4. Spin Outcome Distribution:
+  // - Phase 1 (Spins 1 to 20): Showcase distribution so all item categories (Grand Prize, Earbud, Powerbank, Gift Hamper, 500 Rs Topup, 100 Rs Topup) are won across the first 20 spins along with Better Luck Next Time.
+  // - Phase 2 (Spins 21+): Fully randomized (weighted CSPRNG) among all available prizes with remaining quota, with infinite Better Luck Next Time.
   let winningSlot: (typeof SLOTS)[number];
 
   const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
@@ -168,28 +164,74 @@ export async function executeSpin(
   const canWin500 = topup500WonCount < ENV.TOPUP_500_LIMIT;
   const canWin100 = topup100WonCount < ENV.TOPUP_100_LIMIT;
 
-  // Build list of currently available normal prizes with positive quota
-  const availableNormalSlots: (typeof SLOTS)[number][] = [];
-  if (earbudSlot && canWinEarbud) availableNormalSlots.push(earbudSlot);
-  if (powerbankSlot && canWinPowerbank) availableNormalSlots.push(powerbankSlot);
-  if (hamperSlot && canWinGiftHamper) availableNormalSlots.push(hamperSlot);
-  if (topup500Slot && canWin500) availableNormalSlots.push(topup500Slot);
-  if (topup100Slot && canWin100) availableNormalSlots.push(topup100Slot);
-
-  if (globalSpinNumber > 0 && globalSpinNumber % ENV.GRAND_PRIZE_INTERVAL === 0 && canWinGrand) {
-    // Grand Prize milestone (strictly capped at ENV.GRAND_PRIZE_LIMIT = 50 winners)
-    winningSlot = grandSlot;
-  } else if (hamperSlot && globalSpinNumber > 0 && globalSpinNumber % ENV.MYSTERY_BOX_INTERVAL === 0 && canWinGiftHamper) {
-    // Gift Hamper milestone (strictly capped at ENV.GIFT_HAMPER_LIMIT = 10 winners)
-    winningSlot = hamperSlot;
-  } else if (globalSpinNumber > 0 && globalSpinNumber % ENV.NORMAL_PRIZE_INTERVAL === 0 && availableNormalSlots.length > 0) {
-    // Normal Prize milestone among available stock
-    const randomNormalIndex = crypto.randomInt(0, availableNormalSlots.length);
-    winningSlot = availableNormalSlots[randomNormalIndex] ?? availableNormalSlots[0]!;
-  } else {
-    // Better Luck Next Time for all other spins (Infinite)
+  const getRandomLossSlot = () => {
     const randomLossIndex = crypto.randomInt(0, lossSlots.length);
-    winningSlot = lossSlots[randomLossIndex] ?? lossSlots[0]!;
+    return lossSlots[randomLossIndex] ?? lossSlots[0]!;
+  };
+
+  if (globalSpinNumber <= 20) {
+    // --- PHASE 1: First 20 spins ensure all items are awarded across the promotion start ---
+    // Spin 2:  100 Rs Topup
+    // Spin 5:  Earbud
+    // Spin 8:  Powerbank
+    // Spin 11: 500 Rs Topup
+    // Spin 14: Gift Hamper
+    // Spin 17: 100 Rs Topup
+    // Spin 20: Grand Prize
+    // Spins 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19: Better Luck Next Time
+    switch (globalSpinNumber) {
+      case 2:
+        winningSlot = topup100Slot && canWin100 ? topup100Slot : getRandomLossSlot();
+        break;
+      case 5:
+        winningSlot = earbudSlot && canWinEarbud ? earbudSlot : getRandomLossSlot();
+        break;
+      case 8:
+        winningSlot = powerbankSlot && canWinPowerbank ? powerbankSlot : getRandomLossSlot();
+        break;
+      case 11:
+        winningSlot = topup500Slot && canWin500 ? topup500Slot : getRandomLossSlot();
+        break;
+      case 14:
+        winningSlot = hamperSlot && canWinGiftHamper ? hamperSlot : getRandomLossSlot();
+        break;
+      case 17:
+        winningSlot = topup100Slot && canWin100 ? topup100Slot : getRandomLossSlot();
+        break;
+      case 20:
+        winningSlot = grandSlot && canWinGrand ? grandSlot : getRandomLossSlot();
+        break;
+      default:
+        winningSlot = getRandomLossSlot();
+        break;
+    }
+  } else {
+    // --- PHASE 2: Spins 21+ Fully Randomized ---
+    // Cryptographically secure weighted RNG across all wheel slots.
+    // If a selected prize has reached its winner quota, automatically falls back to Better Luck Next Time.
+    const selectedSlot = pickWinningSlot(SLOTS);
+
+    if (selectedSlot.isGrandPrize) {
+      winningSlot = canWinGrand ? selectedSlot : getRandomLossSlot();
+    } else if (selectedSlot.prizeKey === 'prize_earpods' || selectedSlot.index === 3) {
+      winningSlot = canWinEarbud ? selectedSlot : getRandomLossSlot();
+    } else if (selectedSlot.prizeKey === 'prize_powerbank' || selectedSlot.index === 5) {
+      winningSlot = canWinPowerbank ? selectedSlot : getRandomLossSlot();
+    } else if (selectedSlot.prizeKey === 'prize_500_balance' || selectedSlot.index === 7) {
+      winningSlot = canWin500 ? selectedSlot : getRandomLossSlot();
+    } else if (selectedSlot.prizeKey === 'prize_100_balance' || selectedSlot.index === 9) {
+      winningSlot = canWin100 ? selectedSlot : getRandomLossSlot();
+    } else if (
+      selectedSlot.prizeKey === 'prize_mystery_box' ||
+      selectedSlot.prizeKey === 'prize_gift_hamper' ||
+      selectedSlot.index === 10
+    ) {
+      winningSlot = canWinGiftHamper ? selectedSlot : getRandomLossSlot();
+    } else if (!selectedSlot.isWin) {
+      winningSlot = selectedSlot;
+    } else {
+      winningSlot = getRandomLossSlot();
+    }
   }
 
   // 5. Fetch any admin-configured custom prize labels
