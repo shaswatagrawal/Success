@@ -9,13 +9,13 @@ import { Wheel } from './wheel.js';
 const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   {
     index: 0,
-    prizeKey: 'grand_prize',
-    label: 'Grand Prize',
+    prizeKey: 'precious_gift_1',
+    label: 'Precious Voucher 1',
     isWin: true,
     isGrandPrize: true,
     color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#EF4444',
+    accentColor: '#FDE047',
   },
   {
     index: 1,
@@ -29,6 +29,27 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   },
   {
     index: 2,
+    prizeKey: 'prize_1000_card',
+    label: 'NPR 1,000 Balance',
+    isWin: true,
+    isGrandPrize: false,
+    color: '#DC2626',
+    textColor: '#FFFFFF',
+    accentColor: '#FDE047',
+  },
+  {
+    index: 3,
+    prizeKey: 'precious_gift_2',
+    label: 'Precious Voucher 2',
+    isWin: true,
+    isGrandPrize: true,
+    color: '#B91C1C',
+    textColor: '#FFFFFF',
+    accentColor: '#FDE047',
+    image: '/assets/earpods_pro.jpg',
+  },
+  {
+    index: 4,
     prizeKey: 'better_luck_2',
     label: 'Better Luck Next Time',
     isWin: false,
@@ -38,18 +59,17 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     image: '/assets/clover.png',
   },
   {
-    index: 3,
-    prizeKey: 'prize_earpods',
-    label: 'Earbud',
+    index: 5,
+    prizeKey: 'prize_500_card',
+    label: 'NPR 500 Balance',
     isWin: true,
     isGrandPrize: false,
-    color: '#B91C1C',
+    color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#F87171',
-    image: '/assets/earpods_pro.jpg',
+    accentColor: '#EF4444',
   },
   {
-    index: 4,
+    index: 6,
     prizeKey: 'better_luck_3',
     label: 'Better Luck Next Time',
     isWin: false,
@@ -59,18 +79,17 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     image: '/assets/clover.png',
   },
   {
-    index: 5,
-    prizeKey: 'prize_powerbank',
-    label: 'Powerbank',
+    index: 7,
+    prizeKey: 'precious_gift_3',
+    label: 'Precious Voucher 3',
     isWin: true,
-    isGrandPrize: false,
-    color: '#DC2626',
+    isGrandPrize: true,
+    color: '#7C3AED',
     textColor: '#FFFFFF',
-    accentColor: '#EF4444',
-    image: '/assets/powerbank_pro.jpg',
+    accentColor: '#FDE047',
   },
   {
-    index: 6,
+    index: 8,
     prizeKey: 'better_luck_4',
     label: 'Better Luck Next Time',
     isWin: false,
@@ -80,40 +99,18 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     image: '/assets/clover.png',
   },
   {
-    index: 7,
-    prizeKey: 'prize_500_balance',
-    label: '500 Rs Topup',
-    isWin: true,
-    isGrandPrize: false,
-    color: '#B91C1C',
-    textColor: '#FFFFFF',
-    accentColor: '#F87171',
-    image: '/assets/ntc_logo.png',
-  },
-  {
-    index: 8,
-    prizeKey: 'better_luck_5',
-    label: 'Better Luck Next Time',
-    isWin: false,
-    isGrandPrize: false,
-    color: '#1D4ED8',
-    textColor: '#FFFFFF',
-    image: '/assets/clover.png',
-  },
-  {
     index: 9,
-    prizeKey: 'prize_100_balance',
-    label: '100 Rs Topup',
+    prizeKey: 'prize_1000_card_2',
+    label: 'NPR 1,000 Balance',
     isWin: true,
     isGrandPrize: false,
     color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#EF4444',
-    image: '/assets/ncell_logo.png',
+    accentColor: '#FDE047',
   },
   {
     index: 10,
-    prizeKey: 'prize_mystery_box',
+    prizeKey: 'prize_gift_hamper',
     label: 'Gift Hamper',
     isWin: true,
     isGrandPrize: false,
@@ -124,7 +121,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
   },
   {
     index: 11,
-    prizeKey: 'better_luck_6',
+    prizeKey: 'better_luck_5',
     label: 'Better Luck Next Time',
     isWin: false,
     isGrandPrize: false,
@@ -215,7 +212,8 @@ class App {
   private async refreshUserStatus(): Promise<void> {
     if (!this.currentUser) return;
     try {
-      const status = await api.getUserStatus(this.currentUser.contact);
+      const contactVal = this.currentUser.contact || this.currentUser.email || this.currentUser.phone || '';
+      const status = await api.getUserStatus(contactVal);
       this.spinsUsed = Number(status?.spinsUsed) || 0;
       this.spinLimit = Math.max(1, Number(status?.spinLimit) || 1);
       this.spinsLeft = typeof status?.spinsLeft === 'number' && !Number.isNaN(status.spinsLeft)
@@ -397,6 +395,9 @@ class App {
     const nameInput = document.getElementById('reg-name') as HTMLInputElement | null;
     const emailInput = document.getElementById('reg-email') as HTMLInputElement | null;
     const phoneInput = document.getElementById('reg-phone') as HTMLInputElement | null;
+    const intakeInput = document.getElementById('reg-intake') as HTMLSelectElement | null;
+    const countryInput = document.getElementById('reg-country') as HTMLSelectElement | null;
+    const counselledInput = document.getElementById('reg-counselled') as HTMLInputElement | null;
     const consentInput = document.getElementById('reg-consent') as HTMLInputElement | null;
 
     const nameError = document.getElementById('name-error');
@@ -419,6 +420,9 @@ class App {
       email: emailInput?.value.trim() ?? '',
       phone: phoneInput?.value.trim() ?? '',
       contact: `${emailInput?.value.trim() ?? ''} | ${phoneInput?.value.trim() ?? ''}`.trim(),
+      intake: intakeInput?.value.trim() || 'jan_2027',
+      isCounselled: counselledInput ? Boolean(counselledInput.checked) : true,
+      preferredCountry: countryInput?.value.trim() || 'Australia',
       consent: Boolean(consentInput?.checked),
       deviceId: 'device-id-placeholder-replaced-by-api',
     };
@@ -444,6 +448,9 @@ class App {
         email: parsed.data.email,
         phone: parsed.data.phone,
         contact: parsed.data.email || parsed.data.phone || parsed.data.contact || '',
+        intake: parsed.data.intake,
+        isCounselled: parsed.data.isCounselled,
+        preferredCountry: parsed.data.preferredCountry,
         consent: parsed.data.consent,
         deviceId: parsed.data.deviceId,
       };
@@ -495,6 +502,9 @@ class App {
         email: this.currentUser.email,
         phone: this.currentUser.phone,
         contact: this.currentUser.contact,
+        intake: this.currentUser.intake,
+        isCounselled: this.currentUser.isCounselled,
+        preferredCountry: this.currentUser.preferredCountry,
         consent: this.currentUser.consent,
       });
 
@@ -581,12 +591,18 @@ class App {
     const spinsRemainingEl = document.getElementById('result-spins-left-text');
 
     if (badgeEl) {
-      badgeEl.textContent = info.isGrandPrize
+      const isPrecious = info.prizeName.toLowerCase().includes('precious');
+      const isCard = info.prizeName.toLowerCase().includes('card');
+      badgeEl.textContent = isPrecious
+        ? '🏆 PRECIOUS GIFT VOUCHER 🏆'
+        : isCard
+        ? '💳 OFFICIAL GIFT CARD'
+        : info.isGrandPrize
         ? '⭐ GRAND PRIZE ⭐'
         : info.isWin
         ? 'WINNER'
         : 'RESULT';
-      badgeEl.className = info.isGrandPrize
+      badgeEl.className = (isPrecious || info.isGrandPrize)
         ? 'result-badge badge-accent'
         : info.isWin
         ? 'result-badge badge-success'

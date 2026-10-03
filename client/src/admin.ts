@@ -421,12 +421,26 @@ export class AdminDashboard {
 
           const ipShort = s.ipHash ? `${s.ipHash.slice(0, 10)}...` : '—';
 
+          const intakeDisplay = s.intake === 'jan_2027' || s.intake?.includes('2027')
+            ? '<span class="badge badge-accent" style="font-size: 0.76rem;">⭐ Jan 2027 Visa</span>'
+            : `<span class="badge badge-outline" style="font-size: 0.74rem;">${escapeHtml(s.intake || 'Counseling')}</span>`;
+
+          const counselledTag = s.isCounselled !== false
+            ? '<span style="font-size: 0.74rem; color: #10B981;">✓ In-Office</span>'
+            : '<span style="font-size: 0.74rem; color: #94A3B8;">—</span>';
+
           return `
             <tr>
               <td><strong>#${s.globalSpinNumber}</strong></td>
               <td>${dateStr}</td>
               <td><strong>${escapeHtml(s.userName)}</strong></td>
               <td>${escapeHtml(s.userContact)}</td>
+              <td>
+                <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                  ${intakeDisplay}
+                  ${counselledTag}
+                </div>
+              </td>
               <td>${s.userSpinNumber}</td>
               <td>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -441,7 +455,7 @@ export class AdminDashboard {
         })
         .join('');
     } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">Error loading records: ${err instanceof Error ? err.message : 'Unknown'}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-4">Error loading records: ${err instanceof Error ? err.message : 'Unknown'}</td></tr>`;
     }
   }
 }

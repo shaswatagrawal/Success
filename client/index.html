@@ -58,35 +58,6 @@
       <div class="hero-content">
         <!-- Game Wheel Board (Main Focal Point) -->
         <div class="wheel-stage">
-          <!-- Overhead Luxury Suspension Rig (Anchored from Above behind the wheel) -->
-          <div class="wheel-overhead-rig" aria-hidden="true">
-            <!-- Top Gantry Ceiling Anchor -->
-            <div class="overhead-ceiling-mount">
-              <div class="ceiling-anchor-plate">
-                <div class="anchor-bolt bolt-l"></div>
-                <div class="anchor-brand-plate">★ SUCCESS FORTUNE WHEEL ★</div>
-                <div class="anchor-bolt bolt-r"></div>
-              </div>
-            </div>
-
-            <!-- Dual Suspension Steel Tension Rods -->
-            <div class="overhead-rod rod-left"></div>
-            <div class="overhead-rod rod-right"></div>
-
-            <!-- Central Heavy-Duty Articulated Suspension Arm -->
-            <div class="overhead-spine-arm">
-              <div class="spine-top-clamp"></div>
-              <div class="spine-beam"></div>
-              <div class="spine-mid-coupler"></div>
-              <div class="spine-lower-beam"></div>
-              <div class="spine-hub-mount"></div>
-            </div>
-
-            <!-- Mid-Air Floating Levitation Field & Ambient Ring -->
-            <div class="floating-levitation-ring"></div>
-            <div class="floating-midair-shadow"></div>
-          </div>
-
           <div class="wheel-outer-glow"></div>
 
           <div class="wheel-wrapper">
@@ -294,6 +265,7 @@
                   <th>Date & Time</th>
                   <th>Participant</th>
                   <th>Contact</th>
+                  <th>Intake & Counseling</th>
                   <th>User Spin</th>
                   <th>Result Won</th>
                   <th>Claim Code</th>
@@ -302,7 +274,7 @@
               </thead>
               <tbody id="admin-spins-table-body">
                 <tr>
-                  <td colspan="8" class="text-center text-muted py-4">Loading spin history...</td>
+                  <td colspan="9" class="text-center text-muted py-4">Loading spin history...</td>
                 </tr>
               </tbody>
             </table>
@@ -336,12 +308,18 @@
         ✕
       </button>
       <div class="modal-header">
-        <div class="modal-icon">🎁</div>
-        <h2 class="modal-title">Enter to Spin & Win!</h2>
+        <div class="modal-icon">🏢 🎁</div>
+        <h2 class="modal-title">In-Office Counseling Lucky Draw</h2>
         <p class="modal-subtitle">
-          Fill in your details below to claim your 1 free promotional spin.
+          Success Education & Visa Services — Complete in-office counseling to claim your promotional spin!
         </p>
       </div>
+
+      <div class="counseling-highlight-banner" style="background: rgba(220, 38, 38, 0.18); border: 1px solid rgba(253, 224, 71, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #FEF08A; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.25rem;">✨</span>
+        <span><strong>Jan 2027 Visa Special:</strong> First 3 students appearing for Visa Jan 2027 intake receive <strong>Precious Gift Vouchers</strong>! Other participants win <strong>NPR 500 & 1,000 Gift Cards</strong>!</span>
+      </div>
+
       <form id="registration-form" class="modal-form" novalidate>
         <div class="form-group">
           <label for="reg-name" class="form-label">Full Name</label>
@@ -364,6 +342,39 @@
           <span class="field-error" id="phone-error"></span>
         </div>
 
+        <div class="form-group">
+          <label for="reg-intake" class="form-label">Target Visa Intake</label>
+          <select id="reg-intake" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
+            <option value="jan_2027" selected>⭐ January 2027 Intake (Success Education & Visa Services)</option>
+            <option value="may_jul_2026">May / July 2026 Intake</option>
+            <option value="sep_fall_2026">September / Fall 2026 Intake</option>
+            <option value="general_counseling">General Office Counseling / Other</option>
+          </select>
+          <span class="field-error" id="intake-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-country" class="form-label">Preferred Study Destination</label>
+          <select id="reg-country" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
+            <option value="Australia" selected>Australia 🇦🇺</option>
+            <option value="United Kingdom">United Kingdom 🇬🇧</option>
+            <option value="USA">USA 🇺🇸</option>
+            <option value="Canada">Canada 🇨🇦</option>
+            <option value="Europe">Europe / Schengen 🇪🇺</option>
+            <option value="New Zealand">New Zealand 🇳🇿</option>
+          </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="reg-counselled" checked required />
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">
+              I have visited Success Education & Visa Services office and completed my counseling session.
+            </span>
+          </label>
+        </div>
+
         <div class="form-group checkbox-group">
           <label class="custom-checkbox">
             <input type="checkbox" id="reg-consent" required />
@@ -379,7 +390,7 @@
 
         <div class="modal-footer">
           <button type="submit" id="start-spinning-submit-btn" class="btn btn-primary btn-block btn-lg">
-            Verify & Continue to Spin ✨
+            Verify Counseling & Spin the Wheel ✨
           </button>
         </div>
       </form>
@@ -412,17 +423,17 @@
           </div>
         </div>
 
-        <!-- Grand Prize Claim Code Display -->
+        <!-- Grand Prize & Voucher Claim Code Display -->
         <div id="claim-code-container" class="claim-box" style="display: none;">
           <span class="claim-label">OFFICIAL CLAIM CODE:</span>
           <div class="claim-code-row">
-            <code id="claim-code-value" class="claim-code">GP-XXXX-XXXX</code>
+            <code id="claim-code-value" class="claim-code">PRECIOUS-JAN27-XXXX</code>
             <button id="copy-claim-btn" class="btn btn-secondary btn-sm" type="button"
               title="Copy claim code to clipboard">
               Copy
             </button>
           </div>
-          <span class="claim-note">Save this code. You will need it to claim your grand prize!</span>
+          <span class="claim-note">Save this code. Present it at Success Education & Visa Services (Kumaripati) to redeem!</span>
         </div>
 
         <div class="result-spins-left">
@@ -469,17 +480,18 @@
       <button id="close-rules-btn" class="modal-close-btn" type="button">✕</button>
       <div class="modal-header">
         <div class="modal-icon">📜</div>
-        <h2 class="modal-title">Official Promotion Rules</h2>
+        <h2 class="modal-title">Promotion & Counseling Rules</h2>
       </div>
       <div class="modal-body rules-content">
-        <p><strong>1. Eligibility:</strong> Open to all eligible participants. One registration per individual.</p>
-        <p><strong>2. Spin Allocation:</strong> Each participant is allotted exactly 1 promotional spin.</p>
-        <p><strong>3. Random Selection:</strong> Wheel results are generated server-side using cryptographically secure
-          hardware RNG.</p>
-        <p><strong>4. Grand Prize Claim:</strong> Grand prize winners receive a unique cryptographic claim code. Present
-          this code to claim your prize.</p>
-        <p><strong>5. Mystery Box:</strong> The prize inside the MYSTERY BOX will be decided after 3 weeks.</p>
-        <p><strong>6. Fair Play:</strong> Any automated, scripted, or fraudulent entries will be voided.</p>
+        <p><strong>1. Office Counseling Eligibility:</strong> Open to individuals who visit our Kumaripati office and complete a counseling session with our expert counselors at Success Education and Visa Services.</p>
+        <p><strong>2. Visa Jan 2027 Intake Special:</strong> The <strong>first 3 students</strong> appearing for the <strong>January 2027 Visa Intake</strong> from Success Education and Visa Services receive exciting <strong>Precious Gift Vouchers</strong>:
+          <br />• 🥇 <em>Precious Voucher 1:</em> Smart Tablet & Full Visa Processing Fee Waiver
+          <br />• 🥈 <em>Precious Voucher 2:</em> Premium ANC Active Noise-Cancelling Headphones & Full IELTS/PTE Preparation Scholarship
+          <br />• 🥉 <em>Precious Voucher 3:</em> International Luxury Travel Luggage Suite & Study Abroad Preparation Hamper
+        <p><strong>3. Mobile Recharge Balance:</strong> Other 5 to 6 participants receive <strong>NPR 1,000 and NPR 500 NTC / Ncell Mobile Balance</strong>!</p>
+        <p><strong>4. Spin Allocation:</strong> Each counseled participant is allotted exactly 1 verified promotional spin.</p>
+        <p><strong>5. Claim Verification:</strong> Voucher and Balance winners receive a unique claim code to be verified in-person at our Kumaripati branch.</p>
+        <p><strong>6. Fair Play:</strong> One spin per registered participant. Automated or duplicate submissions will be voided.</p>
       </div>
       <div class="modal-footer">
         <button id="rules-agree-btn" class="btn btn-secondary btn-block" type="button">

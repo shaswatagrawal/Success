@@ -73,7 +73,10 @@ export async function createUser(
   deviceId: string,
   consent: boolean,
   email?: string,
-  phone?: string
+  phone?: string,
+  intake?: string,
+  isCounselled?: boolean,
+  preferredCountry?: string
 ): Promise<UserDoc> {
   const doc: UserDoc = {
     _id: generateId(),
@@ -83,6 +86,9 @@ export async function createUser(
     phone: phone ? phone.trim() : undefined,
     contact,
     deviceId,
+    intake: intake ? intake.trim() : undefined,
+    isCounselled: isCounselled ?? true,
+    preferredCountry: preferredCountry ? preferredCountry.trim() : undefined,
     consent,
     createdAt: new Date().toISOString(),
   };
@@ -234,11 +240,58 @@ export async function getGrandPrizeWonCount(): Promise<number> {
   return localDb.data.spins.filter((s) => s.isGrandPrize || s.prizeKey === 'grand_prize' || s.slotIndex === 0).length;
 }
 
+export async function getJan2027PreciousWonCount(): Promise<number> {
+  const preciousKeys = ['precious_gift_1', 'precious_gift_2', 'precious_gift_3', 'grand_prize'];
+  if (isMongoConnected()) {
+    try {
+      return await getDb().collection<SpinDoc>('spins').countDocuments({
+        $or: [
+          { prizeKey: { $in: preciousKeys } },
+          { slotIndex: { $in: [0, 3, 7] }, isGrandPrize: true }
+        ],
+      });
+    } catch {
+      // Fallback
+    }
+  }
+  return localDb.data.spins.filter(
+    (s) => preciousKeys.includes(s.prizeKey) || ([0, 3, 7].includes(s.slotIndex) && s.isGrandPrize)
+  ).length;
+}
+
+export async function getGiftCard500And1000WonCount(): Promise<number> {
+  const cardKeys = [
+    'prize_500_card',
+    'prize_1000_card',
+    'prize_1000_card_2',
+    'prize_500_balance',
+    'prize_100_balance',
+  ];
+  if (isMongoConnected()) {
+    try {
+      return await getDb().collection<SpinDoc>('spins').countDocuments({
+        $or: [
+          { prizeKey: { $in: cardKeys } },
+          { slotIndex: { $in: [2, 5, 9] } }
+        ],
+      });
+    } catch {
+      // Fallback
+    }
+  }
+  return localDb.data.spins.filter(
+    (s) => cardKeys.includes(s.prizeKey) || [2, 5, 9].includes(s.slotIndex)
+  ).length;
+}
+
 export async function insertSpin(params: {
   readonly userId: string;
   readonly userName: string;
   readonly userContact: string;
   readonly deviceId: string;
+  readonly intake?: string;
+  readonly isCounselled?: boolean;
+  readonly preferredCountry?: string;
   readonly userSpinNumber: number;
   readonly globalSpinNumber: number;
   readonly slotIndex: number;
@@ -255,6 +308,9 @@ export async function insertSpin(params: {
     userName: params.userName,
     userContact: params.userContact,
     deviceId: params.deviceId,
+    intake: params.intake,
+    isCounselled: params.isCounselled,
+    preferredCountry: params.preferredCountry,
     userSpinNumber: params.userSpinNumber,
     globalSpinNumber: params.globalSpinNumber,
     slotIndex: params.slotIndex,
@@ -442,6 +498,9 @@ export async function getAdminSpins(query: AdminSpinQuery): Promise<AdminSpinLis
     userName: doc.userName,
     userContact: doc.userContact,
     deviceId: doc.deviceId,
+    intake: doc.intake,
+    isCounselled: doc.isCounselled,
+    preferredCountry: doc.preferredCountry,
     userSpinNumber: doc.userSpinNumber,
     globalSpinNumber: doc.globalSpinNumber,
     slotIndex: doc.slotIndex,
@@ -481,6 +540,9 @@ export async function getAllSpinsForExport(): Promise<readonly SpinRecord[]> {
       userName: doc.userName,
       userContact: doc.userContact,
       deviceId: doc.deviceId,
+      intake: doc.intake,
+      isCounselled: doc.isCounselled,
+      preferredCountry: doc.preferredCountry,
       userSpinNumber: doc.userSpinNumber,
       globalSpinNumber: doc.globalSpinNumber,
       slotIndex: doc.slotIndex,

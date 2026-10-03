@@ -2,22 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { SLOTS } from '../src/config.js';
 import { pickWinningSlot } from '../src/services/rng.js';
 
-describe('Spin Progression (First 20 showcase & Post-20 randomized)', () => {
-  it('should verify all prize slots exist for the first 20 spins showcase', () => {
-    const grand = SLOTS.find((s) => s.isGrandPrize);
-    const earbud = SLOTS.find((s) => s.prizeKey === 'prize_earpods');
-    const powerbank = SLOTS.find((s) => s.prizeKey === 'prize_powerbank');
-    const hamper = SLOTS.find((s) => s.prizeKey === 'prize_mystery_box');
-    const topup500 = SLOTS.find((s) => s.prizeKey === 'prize_500_balance');
-    const topup100 = SLOTS.find((s) => s.prizeKey === 'prize_100_balance');
+describe('Spin Progression (Precious Gifts & Gift Cards)', () => {
+  it('should verify all prize slots exist for precious gifts and gift cards', () => {
+    const precious1 = SLOTS.find((s) => s.prizeKey === 'precious_gift_1');
+    const precious2 = SLOTS.find((s) => s.prizeKey === 'precious_gift_2');
+    const precious3 = SLOTS.find((s) => s.prizeKey === 'precious_gift_3');
+    const card1000 = SLOTS.find((s) => s.prizeKey === 'prize_1000_card');
+    const card500 = SLOTS.find((s) => s.prizeKey === 'prize_500_card');
+    const hamper = SLOTS.find((s) => s.prizeKey === 'prize_gift_hamper');
     const losses = SLOTS.filter((s) => !s.isWin);
 
-    expect(grand).toBeDefined();
-    expect(earbud).toBeDefined();
-    expect(powerbank).toBeDefined();
+    expect(precious1).toBeDefined();
+    expect(precious2).toBeDefined();
+    expect(precious3).toBeDefined();
+    expect(card1000).toBeDefined();
+    expect(card500).toBeDefined();
     expect(hamper).toBeDefined();
-    expect(topup500).toBeDefined();
-    expect(topup100).toBeDefined();
     expect(losses.length).toBeGreaterThanOrEqual(1);
   });
 

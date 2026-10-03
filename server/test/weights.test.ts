@@ -11,9 +11,9 @@ describe('Wheel Configuration & Weights', () => {
     expect(sum).toBeCloseTo(100.0, 5);
   });
 
-  it('should have 6 Better Luck Next Time slots totaling 75%', () => {
+  it('should have 5 Better Luck Next Time slots totaling 75%', () => {
     const lossSlots = SLOTS.filter((s) => !s.isWin);
-    expect(lossSlots).toHaveLength(6);
+    expect(lossSlots).toHaveLength(5);
     const totalWeight = lossSlots.reduce((acc, s) => acc + s.weight, 0);
     expect(totalWeight).toBeCloseTo(75.0, 5);
     for (const slot of lossSlots) {
@@ -22,20 +22,22 @@ describe('Wheel Configuration & Weights', () => {
     }
   });
 
-  it('should have exactly 1 GRAND PRIZE slot with 2% weight', () => {
-    const grandPrizeSlots = SLOTS.filter((s) => s.isGrandPrize);
-    expect(grandPrizeSlots).toHaveLength(1);
-    const grandPrize = grandPrizeSlots[0];
-    expect(grandPrize).toBeDefined();
-    expect(grandPrize?.weight).toBeCloseTo(2.0, 5);
-    expect(grandPrize?.isWin).toBe(true);
+  it('should have 3 Precious Type Gift slots totaling 3% weight', () => {
+    const preciousSlots = SLOTS.filter((s) => s.isGrandPrize);
+    expect(preciousSlots).toHaveLength(3);
+    const totalWeight = preciousSlots.reduce((acc, s) => acc + s.weight, 0);
+    expect(totalWeight).toBeCloseTo(3.0, 5);
+    for (const slot of preciousSlots) {
+      expect(slot.isWin).toBe(true);
+      expect(slot.isGrandPrize).toBe(true);
+    }
   });
 
-  it('should have 5 other win slots totaling 23%', () => {
+  it('should have 4 other win slots totaling 22%', () => {
     const normalPrizes = SLOTS.filter((s) => s.isWin && !s.isGrandPrize);
-    expect(normalPrizes).toHaveLength(5);
+    expect(normalPrizes).toHaveLength(4);
     const totalWeight = normalPrizes.reduce((acc, s) => acc + s.weight, 0);
-    expect(totalWeight).toBeCloseTo(23.0, 5);
+    expect(totalWeight).toBeCloseTo(22.0, 5);
   });
 
   it('should throw if weights do not sum to 100', () => {

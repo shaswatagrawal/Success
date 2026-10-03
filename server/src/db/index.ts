@@ -24,6 +24,9 @@ export interface UserDoc {
   email?: string;
   phone?: string;
   deviceId: string;
+  intake?: string;
+  isCounselled?: boolean;
+  preferredCountry?: string;
   consent: boolean;
   createdAt: string;
 }
@@ -34,6 +37,9 @@ export interface SpinDoc {
   userName: string;
   userContact: string;
   deviceId: string;
+  intake?: string;
+  isCounselled?: boolean;
+  preferredCountry?: string;
   userSpinNumber: number;
   globalSpinNumber: number;
   slotIndex: number;

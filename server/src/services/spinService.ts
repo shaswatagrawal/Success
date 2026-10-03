@@ -13,8 +13,10 @@ import {
   findUserById,
   findUserByIdentifier,
   getCustomPrizeNames,
+  getGiftCard500And1000WonCount,
   getGlobalSpinCount,
   getGrandPrizeWonCount,
+  getJan2027PreciousWonCount,
   getPrizeWonCount,
   getUserRecentSpins,
   getUserSpinCount,
@@ -31,10 +33,9 @@ export function hashIp(ip: string): string {
   return hmac.digest('hex');
 }
 
-export function generateClaimCode(): string {
-  // Generates clean format: GP-XXXX-XXXX
-  const bytes = crypto.randomBytes(4).toString('hex').toUpperCase();
-  return `GP-${bytes.slice(0, 4)}-${bytes.slice(4, 8)}`;
+export function generateClaimCode(prefix = 'GP'): string {
+  const bytes = crypto.randomBytes(3).toString('hex').toUpperCase();
+  return `${prefix}-${bytes.slice(0, 3)}-${bytes.slice(3, 6)}`;
 }
 
 /**
@@ -46,8 +47,8 @@ export function normalizeContact(contact: string): string {
 
 /**
  * Initiates a spin attempt for a user:
- * Upserts the user record, verifies remaining spin count,
- * and issues a single-use signed spin token valid for 60s.
+ * Upserts the user record with counseling & intake metadata,
+ * verifies remaining spin count, and issues a single-use signed spin token valid for 60s.
  */
 export async function startSpin(userInfo: UserInfo): Promise<StartSpinResponse> {
   const email = (userInfo.email || '').trim().toLowerCase();
@@ -65,7 +66,10 @@ export async function startSpin(userInfo: UserInfo): Promise<StartSpinResponse> 
       userInfo.deviceId.trim(),
       userInfo.consent,
       email,
-      phone
+      phone,
+      userInfo.intake,
+      userInfo.isCounselled,
+      userInfo.preferredCountry
     );
   }
 
@@ -94,7 +98,8 @@ export async function startSpin(userInfo: UserInfo): Promise<StartSpinResponse> 
  * Atomically performs the spin:
  * - Consumes the single-use token
  * - Enforces spin limit to prevent concurrency race conditions
- * - Computes winning slot using cryptographically secure weighted RNG
+ * - First 3 students appearing for Visa Jan 2027 Intake get 3 Precious Type Gifts
+ * - Next 5 to 6 participants get NPR 1,000 and NPR 500 Gift Cards
  * - Records spin and returns result
  */
 export async function executeSpin(
@@ -133,105 +138,78 @@ export async function executeSpin(
   const userSpinNumber = currentSpins + 1;
   const globalSpinNumber = (await getGlobalSpinCount()) + 1;
 
-  // 4. Spin Outcome Distribution:
-  // - Phase 1 (Spins 1 to 20): Showcase distribution so all item categories (Grand Prize, Earbud, Powerbank, Gift Hamper, 500 Rs Topup, 100 Rs Topup) are won across the first 20 spins along with Better Luck Next Time.
-  // - Phase 2 (Spins 21+): Fully randomized (weighted CSPRNG) among all available prizes with remaining quota, with infinite Better Luck Next Time.
+  // 4. Determine Prize Allocation according to Promotion Rules:
+  // - First 3 students appearing for Visa Jan 2027 Intake from Success Education & Visa Services get the 3 Precious Type Gifts
+  // - Next 5 to 6 participants get around NPR 500 and NPR 1000 Gift Cards
+  // - Otherwise randomized weighted RNG with infinite Better Luck Next Time
   let winningSlot: (typeof SLOTS)[number];
 
-  const grandSlot = SLOTS.find((s) => s.isGrandPrize) ?? SLOTS[0]!;
-  const earbudSlot = SLOTS.find((s) => s.prizeKey === 'prize_earpods' || s.index === 3);
-  const powerbankSlot = SLOTS.find((s) => s.prizeKey === 'prize_powerbank' || s.index === 5);
-  const hamperSlot = SLOTS.find((s) => s.prizeKey === 'prize_mystery_box' || s.prizeKey === 'prize_gift_hamper' || s.index === 10);
-  const topup500Slot = SLOTS.find((s) => s.prizeKey === 'prize_500_balance' || s.index === 7);
-  const topup100Slot = SLOTS.find((s) => s.prizeKey === 'prize_100_balance' || s.index === 9);
+  const preciousSlot1 = SLOTS[0]!; // Precious Voucher 1 (Smart Tablet + Visa Fee Waiver)
+  const preciousSlot2 = SLOTS[3]!; // Precious Voucher 2 (Premium ANC Headphones + IELTS Scholarship)
+  const preciousSlot3 = SLOTS[7]!; // Precious Voucher 3 (Travel Luggage Suite + Study Abroad Kit)
+
+  const card1000Slot1 = SLOTS[2]!; // NPR 1,000 Card
+  const card1000Slot2 = SLOTS[9]!; // NPR 1,000 Card
+  const card500Slot = SLOTS[5]!;   // NPR 500 Card
+  const hamperSlot = SLOTS[10]!;   // Gift Hamper
   const lossSlots = SLOTS.filter((s) => !s.isWin);
-
-  const [
-    grandPrizeWonCount,
-    earbudWonCount,
-    powerbankWonCount,
-    giftHamperWonCount,
-    topup500WonCount,
-    topup100WonCount,
-  ] = await Promise.all([
-    getGrandPrizeWonCount(),
-    getPrizeWonCount(['prize_earpods'], 3),
-    getPrizeWonCount(['prize_powerbank'], 5),
-    getPrizeWonCount(['prize_mystery_box', 'prize_gift_hamper'], 10),
-    getPrizeWonCount(['prize_500_balance'], 7),
-    getPrizeWonCount(['prize_100_balance'], 9),
-  ]);
-
-  const canWinGrand = grandPrizeWonCount < ENV.GRAND_PRIZE_LIMIT;
-  const canWinEarbud = earbudWonCount < ENV.EARBUD_LIMIT;
-  const canWinPowerbank = powerbankWonCount < ENV.POWERBANK_LIMIT;
-  const canWinGiftHamper = giftHamperWonCount < ENV.GIFT_HAMPER_LIMIT;
-  const canWin500 = topup500WonCount < ENV.TOPUP_500_LIMIT;
-  const canWin100 = topup100WonCount < ENV.TOPUP_100_LIMIT;
 
   const getRandomLossSlot = () => {
     const randomLossIndex = crypto.randomInt(0, lossSlots.length);
     return lossSlots[randomLossIndex] ?? lossSlots[0]!;
   };
 
-  if (globalSpinNumber <= 20) {
-    // --- PHASE 1: First 20 spins ensure all items are awarded across the promotion start ---
-    // Spin 2:  100 Rs Topup
-    // Spin 5:  Earbud
-    // Spin 8:  Powerbank
-    // Spin 11: 500 Rs Topup
-    // Spin 14: Gift Hamper
-    // Spin 17: 100 Rs Topup
-    // Spin 20: Grand Prize
-    // Spins 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19: Better Luck Next Time
-    switch (globalSpinNumber) {
+  const isJan2027Student = Boolean(
+    user.intake === 'jan_2027' ||
+    user.intake?.toLowerCase().includes('jan 2027') ||
+    user.intake?.toLowerCase().includes('2027')
+  );
+
+  const [jan2027PreciousCount, giftCardsWonCount] = await Promise.all([
+    getJan2027PreciousWonCount(),
+    getGiftCard500And1000WonCount(),
+  ]);
+
+  if (isJan2027Student && jan2027PreciousCount < 3) {
+    // === FIRST 3 STUDENTS FOR VISA JAN 2027 INTAKE GET 3 PREVIOUS GIFTS ===
+    if (jan2027PreciousCount === 0) {
+      winningSlot = preciousSlot1;
+    } else if (jan2027PreciousCount === 1) {
+      winningSlot = preciousSlot2;
+    } else {
+      winningSlot = preciousSlot3;
+    }
+  } else if (giftCardsWonCount < 6) {
+    // === NEXT 5 TO 6 PARTICIPANTS GET NPR 500 AND NPR 1,000 GIFT CARDS ===
+    // Alternating between NPR 1,000 and NPR 500
+    switch (giftCardsWonCount) {
+      case 0:
+        winningSlot = card1000Slot1;
+        break;
+      case 1:
+        winningSlot = card500Slot;
+        break;
       case 2:
-        winningSlot = topup100Slot && canWin100 ? topup100Slot : getRandomLossSlot();
+        winningSlot = card1000Slot2;
+        break;
+      case 3:
+        winningSlot = card500Slot;
+        break;
+      case 4:
+        winningSlot = card1000Slot1;
         break;
       case 5:
-        winningSlot = earbudSlot && canWinEarbud ? earbudSlot : getRandomLossSlot();
-        break;
-      case 8:
-        winningSlot = powerbankSlot && canWinPowerbank ? powerbankSlot : getRandomLossSlot();
-        break;
-      case 11:
-        winningSlot = topup500Slot && canWin500 ? topup500Slot : getRandomLossSlot();
-        break;
-      case 14:
-        winningSlot = hamperSlot && canWinGiftHamper ? hamperSlot : getRandomLossSlot();
-        break;
-      case 17:
-        winningSlot = topup100Slot && canWin100 ? topup100Slot : getRandomLossSlot();
-        break;
-      case 20:
-        winningSlot = grandSlot && canWinGrand ? grandSlot : getRandomLossSlot();
-        break;
       default:
-        winningSlot = getRandomLossSlot();
+        winningSlot = card500Slot;
         break;
     }
   } else {
-    // --- PHASE 2: Spins 21+ Fully Randomized ---
-    // Cryptographically secure weighted RNG across all wheel slots.
-    // If a selected prize has reached its winner quota, automatically falls back to Better Luck Next Time.
+    // === STANDARD RANDOMIZED DISTRIBUTION ===
     const selectedSlot = pickWinningSlot(SLOTS);
-
     if (selectedSlot.isGrandPrize) {
-      winningSlot = canWinGrand ? selectedSlot : getRandomLossSlot();
-    } else if (selectedSlot.prizeKey === 'prize_earpods' || selectedSlot.index === 3) {
-      winningSlot = canWinEarbud ? selectedSlot : getRandomLossSlot();
-    } else if (selectedSlot.prizeKey === 'prize_powerbank' || selectedSlot.index === 5) {
-      winningSlot = canWinPowerbank ? selectedSlot : getRandomLossSlot();
-    } else if (selectedSlot.prizeKey === 'prize_500_balance' || selectedSlot.index === 7) {
-      winningSlot = canWin500 ? selectedSlot : getRandomLossSlot();
-    } else if (selectedSlot.prizeKey === 'prize_100_balance' || selectedSlot.index === 9) {
-      winningSlot = canWin100 ? selectedSlot : getRandomLossSlot();
-    } else if (
-      selectedSlot.prizeKey === 'prize_mystery_box' ||
-      selectedSlot.prizeKey === 'prize_gift_hamper' ||
-      selectedSlot.index === 10
-    ) {
-      winningSlot = canWinGiftHamper ? selectedSlot : getRandomLossSlot();
+      winningSlot = getRandomLossSlot();
+    } else if (selectedSlot.prizeKey.includes('card') || selectedSlot.prizeKey.includes('hamper')) {
+      winningSlot = selectedSlot;
     } else if (!selectedSlot.isWin) {
       winningSlot = selectedSlot;
     } else {
@@ -246,29 +224,30 @@ export async function executeSpin(
 
   let prizeImage = winningSlot.image;
   const lower = prizeLabel.toLowerCase();
-  if (winningSlot.isGrandPrize || winningSlot.prizeKey === 'grand_prize') {
-    prizeImage = undefined;
-  } else if (lower.includes('powerbank') || lower.includes('power bank') || lower.includes('charger')) {
-    prizeImage = '/assets/powerbank_pro.jpg';
-  } else if (lower.includes('earpod') || lower.includes('earbud') || lower.includes('airpod')) {
+  if (winningSlot.prizeKey === 'precious_gift_1') {
+    prizeImage = '/assets/mobile_flagship.jpg';
+  } else if (winningSlot.prizeKey === 'precious_gift_2') {
     prizeImage = '/assets/earpods_pro.jpg';
-  } else if (lower.includes('500') || lower.includes('ntc')) {
-    prizeImage = '/assets/ntc_logo.png';
-  } else if (lower.includes('100') || lower.includes('ncell') || lower.includes('cash') || lower.includes('bonus')) {
-    prizeImage = '/assets/ncell_logo.png';
-  } else if (lower.includes('hamper') || lower.includes('mystery') || lower.includes('box') || lower.includes('gift')) {
+  } else if (winningSlot.prizeKey === 'precious_gift_3') {
+    prizeImage = undefined;
+  } else if (lower.includes('1000') || lower.includes('500') || lower.includes('card')) {
+    prizeImage = '/assets/rs500_note.jpg';
+  } else if (lower.includes('hamper') || lower.includes('mystery')) {
     prizeImage = '/assets/mystery_box.png';
-  } else if (lower.includes('kite') || lower.includes('changa')) {
-    prizeImage = '/assets/kite_rainbow.png';
   }
 
-  // 6. Generate claim code for grand prize and physical/gift items
-  const isPhysicalPrize = winningSlot.isGrandPrize ||
-    winningSlot.prizeKey === 'prize_mystery_box' ||
-    winningSlot.prizeKey === 'prize_gift_hamper' ||
-    winningSlot.prizeKey === 'prize_earpods' ||
-    winningSlot.prizeKey === 'prize_powerbank';
-  const claimCode = (winningSlot.isWin && isPhysicalPrize) ? generateClaimCode() : null;
+  // 6. Generate claim code for vouchers and gift cards
+  let claimCode: string | null = null;
+  if (winningSlot.prizeKey.startsWith('precious_gift')) {
+    claimCode = generateClaimCode('PRECIOUS-JAN27');
+  } else if (winningSlot.prizeKey.includes('1000')) {
+    claimCode = generateClaimCode('GC1000');
+  } else if (winningSlot.prizeKey.includes('500')) {
+    claimCode = generateClaimCode('GC500');
+  } else if (winningSlot.isWin) {
+    claimCode = generateClaimCode('SUCCESS');
+  }
+
   const ipHash = hashIp(clientIp);
 
   // 7. Persist spin record
@@ -277,6 +256,9 @@ export async function executeSpin(
     userName: user.name,
     userContact: user.contact,
     deviceId: providedDeviceId || deviceId,
+    intake: user.intake,
+    isCounselled: user.isCounselled,
+    preferredCountry: user.preferredCountry,
     userSpinNumber,
     globalSpinNumber,
     slotIndex: winningSlot.index,
@@ -301,11 +283,17 @@ export async function executeSpin(
     image: prizeImage,
   };
 
-  let message = 'Better luck next time! Thanks for participating.';
-  if (winningSlot.isGrandPrize) {
-    message = '🎉 CONGRATULATIONS! YOU WON THE GRAND PRIZE! 🎉';
-  } else if (winningSlot.prizeKey === 'prize_mystery_box' || winningSlot.prizeKey === 'prize_gift_hamper' || lower.includes('hamper')) {
-    message = `🎁 WOW! YOU UNLOCKED THE EXCLUSIVE ${prizeLabel.toUpperCase()}! 🎉`;
+  let message = 'Better luck next time! Thank you for counseling with Success Education & Visa Services.';
+  if (winningSlot.prizeKey === 'precious_gift_1') {
+    message = '🎉 CONGRATULATIONS! VISA JAN 2027 INTAKE WINNER #1! You won Precious Gift Voucher 1: Smart Tablet + Full Visa Processing Fee Waiver!';
+  } else if (winningSlot.prizeKey === 'precious_gift_2') {
+    message = '🎉 CONGRATULATIONS! VISA JAN 2027 INTAKE WINNER #2! You won Precious Gift Voucher 2: Premium ANC Headphones + Full IELTS/PTE Scholarship!';
+  } else if (winningSlot.prizeKey === 'precious_gift_3') {
+    message = '🎉 CONGRATULATIONS! VISA JAN 2027 INTAKE WINNER #3! You won Precious Gift Voucher 3: Luxury Travel Luggage Suite + Study Abroad Kit!';
+  } else if (winningSlot.prizeKey.includes('1000')) {
+    message = '🎁 CONGRATULATIONS! You won an NPR 1,000 Gift Card Voucher!';
+  } else if (winningSlot.prizeKey.includes('500')) {
+    message = '🎁 CONGRATULATIONS! You won an NPR 500 Gift Card Voucher!';
   } else if (winningSlot.isWin) {
     message = `🎉 Congratulations! You won: ${prizeLabel}!`;
   }
@@ -389,20 +377,20 @@ export async function getPublicWheelConfig(): Promise<readonly PublicSlotConfig[
     let image = slot.image;
 
     const lower = label.toLowerCase();
-    if (slot.isGrandPrize || slot.prizeKey === 'grand_prize') {
-      image = undefined;
-    } else if (lower.includes('powerbank') || lower.includes('power bank') || lower.includes('charger')) {
-      image = '/assets/powerbank_pro.jpg';
-    } else if (lower.includes('earpod') || lower.includes('earbud') || lower.includes('airpod')) {
+    if (slot.prizeKey === 'precious_gift_1') {
+      image = '/assets/mobile_flagship.jpg';
+    } else if (slot.prizeKey === 'precious_gift_2') {
       image = '/assets/earpods_pro.jpg';
-    } else if (lower.includes('500') || lower.includes('ntc')) {
+    } else if (slot.prizeKey === 'precious_gift_3') {
+      image = undefined;
+    } else if (lower.includes('1000') || lower.includes('500') || lower.includes('balance') || lower.includes('card')) {
       image = '/assets/ntc_logo.png';
-    } else if (lower.includes('100') || lower.includes('ncell') || lower.includes('cash') || lower.includes('bonus')) {
-      image = '/assets/ncell_logo.png';
     } else if (lower.includes('hamper') || lower.includes('mystery') || lower.includes('box') || lower.includes('gift')) {
       image = '/assets/mystery_box.png';
-    } else if (lower.includes('kite') || lower.includes('changa')) {
-      image = '/assets/kite_rainbow.png';
+    } else if (lower.includes('powerbank') || lower.includes('power bank')) {
+      image = '/assets/powerbank_pro.jpg';
+    } else if (lower.includes('earpod') || lower.includes('earbud')) {
+      image = '/assets/earpods_pro.jpg';
     }
 
     return {

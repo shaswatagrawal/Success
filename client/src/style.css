@@ -275,227 +275,26 @@ body {
   padding: 0.5rem 0 2rem 0;
 }
 
-/* Wheel Stage Container - Grand Floating Centerpiece */
+/* Wheel Stage Container - Modern Edgeless Studio Centerpiece */
 .wheel-stage {
   position: relative;
   width: 100%;
-  max-width: 680px;
+  max-width: 580px;
   aspect-ratio: 1 / 1;
-  margin: 3.2rem auto 3rem auto;
+  margin: 1.5rem auto 2.2rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: floatingWheelLevitation 4.5s ease-in-out infinite;
 }
 
-@keyframes floatingWheelLevitation {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-16px);
-  }
-}
-
-/* Overhead Luxury Suspension Rig (Anchored from Above behind the wheel) */
-.wheel-overhead-rig {
+.wheel-outer-glow {
   position: absolute;
-  inset: 0;
+  inset: -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.12) 0%, rgba(59, 130, 246, 0.06) 45%, transparent 70%);
+  filter: blur(35px);
   pointer-events: none;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Top Gantry Ceiling Anchor Plate */
-.overhead-ceiling-mount {
-  position: absolute;
-  top: -42px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  max-width: 420px;
-  display: flex;
-  justify-content: center;
-  z-index: 4;
-}
-
-.ceiling-anchor-plate {
-  width: 100%;
-  height: 28px;
-  background: linear-gradient(180deg, #334155 0%, #1E293B 40%, #0F172A 100%);
-  border-radius: 6px;
-  border: 1.5px solid #F59E0B;
-  box-shadow: 
-    0 12px 28px rgba(0, 0, 0, 0.95),
-    0 0 20px rgba(245, 158, 11, 0.4),
-    inset 0 1px 3px rgba(254, 240, 138, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  position: relative;
-}
-
-.anchor-bolt {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFF, #F59E0B 60%, #78350F 100%);
-  border: 1px solid #FEF08A;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-.anchor-brand-plate {
-  font-family: var(--font-heading, 'Outfit', sans-serif);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: #FEF08A;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 158, 11, 0.8);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.25) 0%, rgba(120, 53, 15, 0.4) 100%);
-  padding: 1px 12px;
-  border-radius: 4px;
-  border: 1px solid rgba(254, 240, 138, 0.5);
-}
-
-/* Dual Diagonal High-Tensile Suspension Rods */
-.overhead-rod {
-  position: absolute;
-  top: -24px;
-  height: 52%;
-  width: 14px;
-  background: linear-gradient(90deg, 
-    #0F172A 0%, 
-    #475569 25%, 
-    #E2E8F0 50%, 
-    #F59E0B 75%, 
-    #1E293B 100%
-  );
-  border-radius: 6px;
-  border: 1px solid rgba(254, 240, 138, 0.7);
-  box-shadow: 
-    0 10px 24px rgba(0, 0, 0, 0.9),
-    inset 1px 0 2px rgba(255, 255, 255, 0.6);
-  z-index: 2;
-}
-
-.overhead-rod.rod-left {
-  left: 24%;
-  transform: rotate(-18deg);
-  transform-origin: top center;
-}
-
-.overhead-rod.rod-right {
-  right: 24%;
-  transform: rotate(18deg);
-  transform-origin: top center;
-}
-
-/* Central Articulated Spine Suspension Arm */
-.overhead-spine-arm {
-  position: absolute;
-  top: -24px;
-  height: 56%;
-  width: 44px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-}
-
-.spine-top-clamp {
-  width: 52px;
-  height: 14px;
-  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 40%, #B45309 75%, #451A03 100%);
-  border-radius: 4px;
-  border: 1.5px solid #FDE047;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
-}
-
-.spine-beam {
-  width: 28px;
-  flex: 1;
-  background: linear-gradient(90deg, 
-    #0F172A 0%, 
-    #334155 20%, 
-    #CBD5E1 45%, 
-    #FEF08A 55%, 
-    #D97706 70%, 
-    #0F172A 100%
-  );
-  border-left: 1.5px solid rgba(254, 240, 138, 0.6);
-  border-right: 1.5px solid rgba(217, 119, 6, 0.8);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
-}
-
-.spine-mid-coupler {
-  width: 48px;
-  height: 14px;
-  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 45%, #78350F 100%);
-  border-radius: 4px;
-  border: 1.5px solid #FDE047;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
-}
-
-.spine-lower-beam {
-  width: 32px;
-  height: 38px;
-  background: linear-gradient(90deg, #0F172A 0%, #475569 30%, #FEF08A 55%, #1E293B 100%);
-  border-left: 1.5px solid rgba(254, 240, 138, 0.6);
-  border-right: 1.5px solid rgba(217, 119, 6, 0.8);
-}
-
-.spine-hub-mount {
-  width: 72px;
-  height: 24px;
-  background: radial-gradient(ellipse at center, #FEF08A 0%, #F59E0B 50%, #78350F 100%);
-  border-radius: 12px;
-  border: 2px solid #FDE047;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 0 15px rgba(245, 158, 11, 0.6);
-}
-
-/* Mid-Air Floating Levitation Field & Ambient Ring */
-.floating-levitation-ring {
-  position: absolute;
-  bottom: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 75%;
-  height: 28px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.55) 0%, rgba(245, 158, 11, 0.35) 45%, transparent 75%);
-  filter: blur(14px);
-  animation: pulseFloatingAura 3s ease-in-out infinite alternate;
   z-index: 0;
-}
-
-.floating-midair-shadow {
-  position: absolute;
-  bottom: -45px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 24px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 80%);
-  filter: blur(16px);
-  z-index: 0;
-}
-
-@keyframes pulseFloatingAura {
-  0% {
-    opacity: 0.55;
-    transform: translateX(-50%) scale(0.92);
-  }
-  100% {
-    opacity: 0.95;
-    transform: translateX(-50%) scale(1.08);
-  }
 }
 
 .wheel-wrapper {
@@ -503,10 +302,11 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  background: #0B0F17;
   box-shadow: 
-    0 30px 70px rgba(0, 0, 0, 0.95),
-    0 0 45px rgba(245, 158, 11, 0.35),
-    inset 0 0 24px rgba(0, 0, 0, 0.8);
+    0 24px 64px -12px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   z-index: 3;
   display: flex;
   align-items: center;
@@ -519,13 +319,17 @@ body {
   display: block;
   border-radius: 50%;
   cursor: grab;
-  filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.6));
 }
 
-/* Wheel Pointer / Stopper */
+#wheel-canvas:active {
+  cursor: grabbing;
+}
+
+/* Wheel Pointer / Precision Stopper Needle */
 .wheel-pointer-container {
   position: absolute;
-  top: -24px;
+  top: -14px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -534,71 +338,69 @@ body {
 
 .wheel-pointer {
   position: relative;
-  width: 52px;
-  height: 64px;
+  width: 32px;
+  height: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.9));
-  transition: transform 0.08s ease-out;
-  transform-origin: 50% 14px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+  transition: transform 0.06s cubic-bezier(0.2, 0.8, 0.4, 1);
+  transform-origin: 50% 10px;
 }
 
 .wheel-pointer.ticking {
-  transform: rotate(-14deg);
+  transform: rotate(-16deg);
 }
 
 .pointer-arrow {
   width: 0;
   height: 0;
-  border-left: 25px solid transparent;
-  border-right: 25px solid transparent;
-  border-top: 50px solid #F59E0B;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 36px solid #F59E0B;
   position: relative;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
 }
 
 .pointer-arrow::after {
   content: '';
   position: absolute;
-  top: -48px;
-  left: -21px;
+  top: -36px;
+  left: -9px;
   width: 0;
   height: 0;
-  border-left: 21px solid transparent;
-  border-right: 21px solid transparent;
-  border-top: 44px solid #FEF08A;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 30px solid #FEF08A;
 }
 
 .pointer-jewel {
   position: absolute;
-  top: 4px;
-  width: 20px;
-  height: 20px;
+  top: 2px;
+  width: 13px;
+  height: 13px;
   background: radial-gradient(circle at 35% 30%, #FFF, #EF4444 60%, #991B1B 100%);
   border-radius: 50%;
-  border: 1.5px solid #FEF08A;
-  box-shadow: 0 0 14px rgba(239, 68, 68, 0.95), inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+  border: 1px solid #FEF08A;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Center Hub Spin Button */
+/* Center Hub Spin Button - Sleek Floating Dial */
 .wheel-hub-btn {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(110px, 20vw, 138px);
-  height: clamp(110px, 20vw, 138px);
+  width: clamp(100px, 18vw, 126px);
+  height: clamp(100px, 18vw, 126px);
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #1E293B 0%, #0F172A 65%, #020617 100%);
-  border: none;
+  background: radial-gradient(circle at 45% 35%, #182030 0%, #0F1420 55%, #080B12 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.65);
   box-shadow:
-    0 0 0 4px #F59E0B,
-    0 0 0 7px #78350F,
-    0 0 0 10px rgba(254, 240, 138, 0.5),
-    0 20px 45px rgba(0, 0, 0, 0.95),
-    inset 0 4px 8px rgba(255, 255, 255, 0.3),
-    inset 0 -6px 14px rgba(0, 0, 0, 0.9);
+    0 0 0 5px rgba(255, 255, 255, 0.05),
+    0 14px 34px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.8);
   cursor: pointer;
   z-index: 5;
   display: flex;
@@ -609,29 +411,27 @@ body {
 }
 
 .wheel-hub-btn:hover:not(:disabled) {
-  transform: translate(-50%, -50%) scale(1.08);
+  transform: translate(-50%, -50%) scale(1.06);
+  border-color: #FBBF24;
   box-shadow:
-    0 0 0 5px #FCD34D,
-    0 0 0 9px #92400E,
-    0 0 0 13px rgba(254, 240, 138, 0.7),
-    0 24px 50px rgba(0, 0, 0, 0.98),
-    0 0 28px rgba(245, 158, 11, 0.65),
-    inset 0 4px 8px rgba(255, 255, 255, 0.4);
+    0 0 0 6px rgba(245, 158, 11, 0.25),
+    0 18px 40px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(245, 158, 11, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.35);
 }
 
 .wheel-hub-btn:active:not(:disabled) {
-  transform: translate(-50%, -50%) scale(0.95);
+  transform: translate(-50%, -50%) scale(0.96);
   box-shadow:
-    0 0 0 3px #F59E0B,
-    0 0 0 5px #78350F,
-    0 8px 20px rgba(0, 0, 0, 0.9),
-    inset 0 6px 12px rgba(0, 0, 0, 0.9);
+    0 0 0 4px rgba(245, 158, 11, 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.9),
+    inset 0 3px 6px rgba(0, 0, 0, 0.8);
 }
 
 .wheel-hub-btn:disabled {
-  opacity: 0.65;
+  opacity: 0.55;
   cursor: not-allowed;
-  filter: grayscale(0.4);
+  filter: grayscale(0.5);
 }
 
 .hub-inner {
@@ -643,21 +443,21 @@ body {
 
 .hub-spin-text {
   font-family: var(--font-heading);
-  font-size: clamp(1.45rem, 2.8vw, 1.85rem);
+  font-size: clamp(1.3rem, 2.5vw, 1.65rem);
   font-weight: 900;
-  letter-spacing: 0.08em;
-  background: linear-gradient(180deg, #FFFFFF 0%, #FEF08A 35%, #F59E0B 70%, #B45309 100%);
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FEF08A 45%, #F59E0B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
 }
 
 .hub-sub-text {
-  font-size: clamp(0.68rem, 1.2vw, 0.8rem);
+  font-size: clamp(0.64rem, 1.1vw, 0.74rem);
   font-weight: 800;
-  letter-spacing: 0.16em;
-  color: #FEF08A;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.2em;
+  color: #F59E0B;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
 }
 
 /* Participant Status Card */

@@ -12,95 +12,76 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
  * Slot Configuration: exactly 12 slots.
  * - 1 slot: "GRAND PRIZE" — Smart Phone (2%)
  * - 4 slots: normal prizes (5% + 5% + 5% + 6% = 21% total)
- * - 7 slots: "Better Luck" (11% each = 77% total)
+/**
+ * Slot Configuration: exactly 12 slots.
+ * - 3 slots: Precious Type Gifts (1% each = 3%)
+ * - 2 slots: NPR 1,000 Gift Cards (6% + 6% = 12%)
+ * - 1 slot: NPR 500 Gift Card (6%)
+ * - 1 slot: Exclusive Gift Hamper (4%)
+ * - 5 slots: Better Luck Next Time (14% + 14% + 14% + 14% + 19% = 75%)
  *
- * Sum = 2 + 21 + 77 = 100%
+ * Sum = 3 + 12 + 6 + 4 + 75 = 100%
  */
 export const SLOTS: readonly SlotConfig[] = [
-  // === GRAND PRIZE (Limit: 50) ===
+  // === PRECIOUS GIFT 1: Smart Tablet + Visa Waiver (Slot 0) ===
   {
     index: 0,
-    prizeKey: 'grand_prize',
-    label: 'Grand Prize',
-    weight: 2,
+    prizeKey: 'precious_gift_1',
+    label: 'Precious Voucher 1',
+    weight: 1,
     isWin: true,
     isGrandPrize: true,
     color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#EF4444',
+    accentColor: '#FDE047',
   },
 
-  // === BETTER LUCK NEXT TIME (Infinite) ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 1,
     prizeKey: 'better_luck_1',
     label: 'Better Luck Next Time',
-    weight: 13,
+    weight: 14,
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
     image: '/assets/clover.png',
   },
+
+  // === NPR 1,000 GIFT CARD (Slot 2) ===
   {
     index: 2,
-    prizeKey: 'better_luck_2',
-    label: 'Better Luck Next Time',
-    weight: 13,
-    isWin: false,
-    isGrandPrize: false,
-    color: '#1E40AF',
-    textColor: '#FFFFFF',
-    image: '/assets/clover.png',
-  },
-
-  // === NORMAL PRIZE: Earbud (Limit: 3) ===
-  {
-    index: 3,
-    prizeKey: 'prize_earpods',
-    label: 'Earbud',
-    weight: 5,
-    isWin: true,
-    isGrandPrize: false,
-    color: '#B91C1C',
-    textColor: '#FFFFFF',
-    accentColor: '#F87171',
-    image: '/assets/earpods_pro.jpg',
-  },
-
-  // === BETTER LUCK NEXT TIME (Infinite) ===
-  {
-    index: 4,
-    prizeKey: 'better_luck_3',
-    label: 'Better Luck Next Time',
-    weight: 13,
-    isWin: false,
-    isGrandPrize: false,
-    color: '#1D4ED8',
-    textColor: '#FFFFFF',
-    image: '/assets/clover.png',
-  },
-
-  // === NORMAL PRIZE: Powerbank (Limit: 2) ===
-  {
-    index: 5,
-    prizeKey: 'prize_powerbank',
-    label: 'Powerbank',
-    weight: 5,
+    prizeKey: 'prize_1000_card',
+    label: 'NPR 1,000 Balance',
+    weight: 6,
     isWin: true,
     isGrandPrize: false,
     color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#EF4444',
-    image: '/assets/powerbank_pro.jpg',
+    accentColor: '#FDE047',
   },
 
-  // === BETTER LUCK NEXT TIME (Infinite) ===
+  // === PRECIOUS GIFT 2: ANC Headset + IELTS Scholarship (Slot 3) ===
   {
-    index: 6,
-    prizeKey: 'better_luck_4',
+    index: 3,
+    prizeKey: 'precious_gift_2',
+    label: 'Precious Voucher 2',
+    weight: 1,
+    isWin: true,
+    isGrandPrize: true,
+    color: '#B91C1C',
+    textColor: '#FFFFFF',
+    accentColor: '#FDE047',
+    image: '/assets/earpods_pro.jpg',
+  },
+
+  // === BETTER LUCK NEXT TIME ===
+  {
+    index: 4,
+    prizeKey: 'better_luck_2',
     label: 'Better Luck Next Time',
-    weight: 12,
+    weight: 14,
     isWin: false,
     isGrandPrize: false,
     color: '#1E40AF',
@@ -108,53 +89,77 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/clover.png',
   },
 
-  // === NORMAL PRIZE: 500 Rs Topup (Limit: 5) ===
+  // === NPR 500 GIFT CARD (Slot 5) ===
   {
-    index: 7,
-    prizeKey: 'prize_500_balance',
-    label: '500 Rs Topup',
-    weight: 5,
-    isWin: true,
-    isGrandPrize: false,
-    color: '#B91C1C',
-    textColor: '#FFFFFF',
-    accentColor: '#F87171',
-    image: '/assets/ntc_logo.png',
-  },
-
-  // === BETTER LUCK NEXT TIME (Infinite) ===
-  {
-    index: 8,
-    prizeKey: 'better_luck_5',
-    label: 'Better Luck Next Time',
-    weight: 12,
-    isWin: false,
-    isGrandPrize: false,
-    color: '#1D4ED8',
-    textColor: '#FFFFFF',
-    image: '/assets/clover.png',
-  },
-
-  // === NORMAL PRIZE: 100 Rs Topup (Limit: 20) ===
-  {
-    index: 9,
-    prizeKey: 'prize_100_balance',
-    label: '100 Rs Topup',
+    index: 5,
+    prizeKey: 'prize_500_card',
+    label: 'NPR 500 Balance',
     weight: 6,
     isWin: true,
     isGrandPrize: false,
     color: '#DC2626',
     textColor: '#FFFFFF',
     accentColor: '#EF4444',
-    image: '/assets/ncell_logo.png',
   },
 
-  // === GIFT HAMPER (Limit: 10) ===
+  // === BETTER LUCK NEXT TIME ===
+  {
+    index: 6,
+    prizeKey: 'better_luck_3',
+    label: 'Better Luck Next Time',
+    weight: 14,
+    isWin: false,
+    isGrandPrize: false,
+    color: '#1D4ED8',
+    textColor: '#FFFFFF',
+    image: '/assets/clover.png',
+  },
+
+  // === PRECIOUS GIFT 3: Luxury Travel Luggage + Study Abroad Kit (Slot 7) ===
+  {
+    index: 7,
+    prizeKey: 'precious_gift_3',
+    label: 'Precious Voucher 3',
+    weight: 1,
+    isWin: true,
+    isGrandPrize: true,
+    color: '#7C3AED',
+    textColor: '#FFFFFF',
+    accentColor: '#FDE047',
+  },
+
+  // === BETTER LUCK NEXT TIME ===
+  {
+    index: 8,
+    prizeKey: 'better_luck_4',
+    label: 'Better Luck Next Time',
+    weight: 14,
+    isWin: false,
+    isGrandPrize: false,
+    color: '#1E40AF',
+    textColor: '#FFFFFF',
+    image: '/assets/clover.png',
+  },
+
+  // === NPR 1,000 GIFT CARD (Slot 9) ===
+  {
+    index: 9,
+    prizeKey: 'prize_1000_card_2',
+    label: 'NPR 1,000 Balance',
+    weight: 6,
+    isWin: true,
+    isGrandPrize: false,
+    color: '#DC2626',
+    textColor: '#FFFFFF',
+    accentColor: '#FDE047',
+  },
+
+  // === GIFT HAMPER (Slot 10) ===
   {
     index: 10,
-    prizeKey: 'prize_mystery_box',
+    prizeKey: 'prize_gift_hamper',
     label: 'Gift Hamper',
-    weight: 2,
+    weight: 4,
     isWin: true,
     isGrandPrize: false,
     color: '#7C3AED',
@@ -163,12 +168,12 @@ export const SLOTS: readonly SlotConfig[] = [
     image: '/assets/mystery_box.png',
   },
 
-  // === BETTER LUCK NEXT TIME (Infinite) ===
+  // === BETTER LUCK NEXT TIME ===
   {
     index: 11,
-    prizeKey: 'better_luck_6',
+    prizeKey: 'better_luck_5',
     label: 'Better Luck Next Time',
-    weight: 12,
+    weight: 19,
     isWin: false,
     isGrandPrize: false,
     color: '#1D4ED8',
@@ -202,22 +207,16 @@ function parseEnvInt(val: string | undefined, defaultVal: number): number {
 
 /**
  * Prize Quota / Inventory configuration:
- * - Earbud: 3 winners
- * - Powerbank: 2 winners
- * - Gift Hamper: 10 winners
- * - 100 Rs Topup: 20 winners
- * - 500 Rs Topup: 5 winners
- * - Grand Prize: 50 winners
- * - Better Luck Next Time: Infinite
+ * - 3 Precious Type Gifts reserved for first 3 Jan 2027 visa intake students
+ * - NPR 1000 & 500 Gift Cards for next 5 to 6 participants
  */
 export const PRIZE_QUOTAS = {
-  grand_prize: 50,
-  prize_earpods: 3,
-  prize_powerbank: 2,
-  prize_mystery_box: 10,
+  precious_gift_1: 1,
+  precious_gift_2: 1,
+  precious_gift_3: 1,
+  prize_1000_card: 10,
+  prize_500_card: 10,
   prize_gift_hamper: 10,
-  prize_500_balance: 5,
-  prize_100_balance: 20,
 } as const;
 
 /**
@@ -239,11 +238,15 @@ export const ENV = {
   MYSTERY_BOX_INTERVAL: parseEnvInt(process.env['MYSTERY_BOX_INTERVAL'], 40),
   GRAND_PRIZE_INTERVAL: parseEnvInt(process.env['GRAND_PRIZE_INTERVAL'], 60),
   GRAND_PRIZE_MIN_SPINS: parseEnvInt(process.env['GRAND_PRIZE_MIN_SPINS'], 60),
-  // Explicit prize winner limits
-  GRAND_PRIZE_LIMIT: parseEnvInt(process.env['GRAND_PRIZE_LIMIT'], 50),
+  // Winner limits
+  JAN_2027_PREVIOUS_GIFTS_LIMIT: 3,
+  GIFT_CARD_1000_LIMIT: parseEnvInt(process.env['GIFT_CARD_1000_LIMIT'], 10),
+  GIFT_CARD_500_LIMIT: parseEnvInt(process.env['GIFT_CARD_500_LIMIT'], 10),
+  GIFT_HAMPER_LIMIT: parseEnvInt(process.env['GIFT_HAMPER_LIMIT'], 10),
+  // Legacy aliases for test compatibility
+  GRAND_PRIZE_LIMIT: parseEnvInt(process.env['GRAND_PRIZE_LIMIT'], 3),
   EARBUD_LIMIT: parseEnvInt(process.env['EARBUD_LIMIT'], 3),
   POWERBANK_LIMIT: parseEnvInt(process.env['POWERBANK_LIMIT'], 2),
-  GIFT_HAMPER_LIMIT: parseEnvInt(process.env['GIFT_HAMPER_LIMIT'], 10),
   TOPUP_500_LIMIT: parseEnvInt(process.env['TOPUP_500_LIMIT'], 5),
   TOPUP_100_LIMIT: parseEnvInt(process.env['TOPUP_100_LIMIT'], 20),
   CORS_ORIGIN: (process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:3000')

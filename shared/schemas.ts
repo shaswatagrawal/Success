@@ -37,6 +37,20 @@ export const UserInfoSchema = z.object({
     .trim()
     .optional()
     .or(z.literal('')),
+  intake: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  isCounselled: z
+    .boolean()
+    .optional()
+    .default(true),
+  preferredCountry: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal('')),
   consent: z
     .boolean()
     .refine((val) => val === true, {

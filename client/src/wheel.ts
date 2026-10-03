@@ -14,7 +14,6 @@ export class Wheel {
   private onTick?: () => void;
   private onSpinStart?: () => void;
   private imageCache = new Map<string, HTMLImageElement>();
-
   private lastTickedSlice = -1;
 
   constructor(
@@ -116,7 +115,94 @@ export class Wheel {
   }
 
   /**
+   * Pure luxury studio palette generator for slots:
+   * Sharp, deep obsidian/jewel tones with clean contrast, zero muddy gradients.
+   */
+  private getSliceStyle(slot: PublicSlotConfig, index: number, radius: number): {
+    fill: CanvasGradient | string;
+    accent: string;
+    isPrecious: boolean;
+    isGiftCard: boolean;
+    isHamper: boolean;
+    isBetterLuck: boolean;
+  } {
+    const labelLower = slot.label.toLowerCase();
+    const isPrecious = Boolean(
+      slot.isGrandPrize ||
+      slot.prizeKey?.startsWith('precious_') ||
+      labelLower.includes('precious')
+    );
+    const isGiftCard = Boolean(
+      slot.prizeKey?.includes('card') ||
+      labelLower.includes('card') ||
+      labelLower.includes('1,000') ||
+      labelLower.includes('500')
+    );
+    const isHamper = Boolean(
+      slot.prizeKey === 'prize_gift_hamper' ||
+      slot.prizeKey === 'prize_mystery_box' ||
+      labelLower.includes('hamper') ||
+      labelLower.includes('mystery')
+    );
+    const isBetterLuck = !slot.isWin || labelLower.includes('better luck');
+
+    const grad = this.ctx.createRadialGradient(0, 0, radius * 0.15, 0, 0, radius);
+
+    if (isPrecious) {
+      // Luxury Onyx & Champagne Gold Obsidian
+      grad.addColorStop(0, '#2D200E');
+      grad.addColorStop(0.45, '#1E1609');
+      grad.addColorStop(0.85, '#120E06');
+      grad.addColorStop(1, '#090703');
+      return { fill: grad, accent: '#F59E0B', isPrecious, isGiftCard, isHamper, isBetterLuck };
+    }
+
+    if (isGiftCard) {
+      // Deep Emerald / Sapphire Slate
+      const is500 = labelLower.includes('500');
+      if (is500) {
+        grad.addColorStop(0, '#0E3628');
+        grad.addColorStop(0.5, '#09251C');
+        grad.addColorStop(0.85, '#051610');
+        grad.addColorStop(1, '#020B08');
+        return { fill: grad, accent: '#10B981', isPrecious, isGiftCard, isHamper, isBetterLuck };
+      } else {
+        grad.addColorStop(0, '#152C4D');
+        grad.addColorStop(0.5, '#0C1C33');
+        grad.addColorStop(0.85, '#071221');
+        grad.addColorStop(1, '#03080F');
+        return { fill: grad, accent: '#38BDF8', isPrecious, isGiftCard, isHamper, isBetterLuck };
+      }
+    }
+
+    if (isHamper) {
+      // Deep Imperial Amethyst
+      grad.addColorStop(0, '#2C134A');
+      grad.addColorStop(0.5, '#1B0930');
+      grad.addColorStop(0.85, '#110520');
+      grad.addColorStop(1, '#08020F');
+      return { fill: grad, accent: '#C084FC', isPrecious, isGiftCard, isHamper, isBetterLuck };
+    }
+
+    // Better Luck Next Time: Clean Matte Obsidian / Slate alternating pattern
+    const isAlt = index % 2 === 0;
+    if (isAlt) {
+      grad.addColorStop(0, '#1E2533');
+      grad.addColorStop(0.5, '#141A24');
+      grad.addColorStop(0.85, '#0D1117');
+      grad.addColorStop(1, '#080A0E');
+    } else {
+      grad.addColorStop(0, '#1A202C');
+      grad.addColorStop(0.5, '#12161F');
+      grad.addColorStop(0.85, '#0B0D13');
+      grad.addColorStop(1, '#06070A');
+    }
+    return { fill: grad, accent: 'rgba(255, 255, 255, 0.15)', isPrecious, isGiftCard, isHamper, isBetterLuck };
+  }
+
+  /**
    * Main rendering method for the wheel circle.
+   * Delivers an edgeless, spotless, razor-sharp studio aesthetic.
    */
   public draw(): void {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -124,616 +210,386 @@ export class Wheel {
     const height = this.canvas.height / dpr;
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = Math.min(centerX, centerY) - 14;
+    // Edgeless: extends all the way near the canvas boundary with 2px clearance
+    const radius = Math.min(centerX, centerY) - 2;
 
     this.ctx.clearRect(0, 0, width, height);
 
     if (this.slots.length === 0) return;
 
     const sliceAngles = this.computeSliceAngles();
+    const isMobile = width < 460;
 
     this.ctx.save();
     this.ctx.translate(centerX, centerY);
     this.ctx.rotate(this.currentRotation);
 
-    // 1. Draw Each Slot Slice Wedge & Content
+    // ==========================================
+    // 1. DRAW WEDGES & CONTENT
+    // ==========================================
     for (let i = 0; i < this.slots.length; i++) {
       const slot = this.slots[i]!;
       const { start: startAngle, end: endAngle, angle: sliceAngle } = sliceAngles[i]!;
+      const style = this.getSliceStyle(slot, i, radius);
 
-      // Slice Background Wedge
+      // Wedge background
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0);
       this.ctx.arc(0, 0, radius, startAngle, endAngle);
       this.ctx.closePath();
-
-      // Realistic 3D Radial Gradient per Slice in deep rich jewel tones
-      const isMysteryBox = slot.prizeKey === 'prize_mystery_box' ||
-        slot.prizeKey === 'prize_gift_hamper' ||
-        slot.label.toLowerCase().includes('mystery') ||
-        slot.label.toLowerCase().includes('hamper') ||
-        slot.label.toLowerCase().includes('gift');
-      const isRed = i % 2 === 0;
-      const grad = this.ctx.createRadialGradient(0, 0, 15, 0, 0, radius);
-
-      if (isMysteryBox) {
-        // Mysterious Royal Violet & Purple Gradient with gold highlights
-        grad.addColorStop(0, '#C084FC');
-        grad.addColorStop(0.35, '#7C3AED');
-        grad.addColorStop(0.70, '#581C87');
-        grad.addColorStop(0.92, '#3B0764');
-        grad.addColorStop(1, '#1A0033');
-      } else if (isRed) {
-        // Deep Crimson Red Jewel Tone with outer rim vignette
-        grad.addColorStop(0, '#FF4D4D');
-        grad.addColorStop(0.35, '#DC2626');
-        grad.addColorStop(0.70, '#991B1B');
-        grad.addColorStop(0.92, '#450A0A');
-        grad.addColorStop(1, '#1A0207');
-      } else {
-        // Royal Sapphire Blue Jewel Tone with outer rim vignette
-        grad.addColorStop(0, '#60A5FA');
-        grad.addColorStop(0.35, '#2563EB');
-        grad.addColorStop(0.70, '#1E3A8A');
-        grad.addColorStop(0.92, '#0F172A');
-        grad.addColorStop(1, '#050B14');
-      }
-      this.ctx.fillStyle = grad;
+      this.ctx.fillStyle = style.fill;
       this.ctx.fill();
 
-      // 3D Extruded Metal Divider Rib / Separator Line
+      // Subtle inner rim accent arc for precious & win slots
+      if (style.isPrecious) {
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, radius - 2, startAngle, endAngle);
+        this.ctx.lineWidth = 2.5;
+        this.ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
+        this.ctx.stroke();
+      } else if (style.isGiftCard) {
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, radius - 2, startAngle, endAngle);
+        this.ctx.lineWidth = 1.5;
+        this.ctx.strokeStyle = style.accent;
+        this.ctx.stroke();
+      }
+
+      // Razor-sharp 1px divider hairline
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0);
       this.ctx.lineTo(Math.cos(startAngle) * radius, Math.sin(startAngle) * radius);
-      this.ctx.lineWidth = slot.isGrandPrize || isMysteryBox ? 3.5 : 2.5;
-      this.ctx.strokeStyle = slot.isGrandPrize || isMysteryBox
-        ? '#FDE047'
-        : 'rgba(254, 240, 138, 0.75)';
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      this.ctx.shadowBlur = 3;
-      this.ctx.stroke();
-      this.ctx.shadowBlur = 0; // Reset shadow
-
-      // Inner Concentric Accent Track
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, radius * 0.95, startAngle, endAngle);
-      this.ctx.lineWidth = 1;
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      this.ctx.lineWidth = style.isPrecious ? 1.5 : 1;
+      this.ctx.strokeStyle = style.isPrecious
+        ? 'rgba(245, 158, 11, 0.65)'
+        : 'rgba(255, 255, 255, 0.12)';
       this.ctx.stroke();
 
-      // 2. Draw Slice Content (Image Icon + Label)
+      // ==========================================
+      // 2. SLICE CONTENT: ICON / BADGE & CLEAN TEXT
+      // ==========================================
       this.ctx.save();
       const midAngle = startAngle + sliceAngle / 2;
       this.ctx.rotate(midAngle);
 
-      const isMobile = width < 460;
-      const isBetterLuck = !slot.isWin || slot.label.toLowerCase().includes('better luck');
-      // Position swapped: Pictures at outer portion (wider wedge), Text at inner-mid portion clear of center hub
-      const iconDist = radius * (isMobile ? 0.73 : 0.75);
-      const textDist = radius * (isMobile ? 0.46 : 0.48);
-
-      // Available width at icon distance based on the slice gap/angle
+      // Proportional layout distances
+      const iconDist = radius * (isMobile ? 0.76 : 0.77);
+      const textDist = radius * (isMobile ? 0.44 : 0.46);
       const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
+      const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.95;
 
-      // A) Draw Image Asset or 3D Vector Icon if available
-      if (isMysteryBox) {
-        // Draw 3D Glowing Mystery Gift Box Badge
-        this.ctx.save();
-        this.ctx.translate(iconDist, 0);
-        this.ctx.rotate(Math.PI / 2);
+      // --- A) BADGE / ICON RENDERING ---
+      this.renderSlotIcon(slot, style, iconDist, availableWidthAtIcon, isMobile);
 
-        const baseBadgeRadius = isMobile ? 26 : 38;
-        const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
-        const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
-
-        // Glowing Purple/Gold backdrop disc
-        this.ctx.save();
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-        this.ctx.fillStyle = 'rgba(88, 28, 135, 0.95)';
-        this.ctx.shadowColor = 'rgba(253, 224, 71, 0.95)';
-        this.ctx.shadowBlur = Math.max(10, badgeRadius * 0.65);
-        this.ctx.shadowOffsetY = 2;
-        this.ctx.fill();
-
-        const mysteryImg = slot.image ? this.imageCache.get(slot.image) : null;
-        if (mysteryImg && mysteryImg.complete && mysteryImg.naturalWidth > 0) {
-          this.ctx.beginPath();
-          this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
-          this.ctx.clip();
-          const iconSize = badgeRadius * 2.2;
-          this.ctx.drawImage(mysteryImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-        } else {
-          // Render crisp 3D Golden Mystery Gift Box icon with '?'
-          const boxSize = badgeRadius * 1.15;
-          // Box base
-          this.ctx.fillStyle = '#D97706';
-          this.roundRect(-boxSize * 0.44, -boxSize * 0.25, boxSize * 0.88, boxSize * 0.72, 3);
-          this.ctx.fill();
-          // Box lid
-          this.ctx.fillStyle = '#FBBF24';
-          this.roundRect(-boxSize * 0.52, -boxSize * 0.44, boxSize * 1.04, boxSize * 0.24, 3);
-          this.ctx.fill();
-          // Golden Ribbon
-          this.ctx.fillStyle = '#FEF08A';
-          this.ctx.fillRect(-boxSize * 0.1, -boxSize * 0.44, boxSize * 0.2, boxSize * 0.9);
-          // Big bold '?' mark
-          this.ctx.font = `900 ${badgeRadius * 0.95}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-          this.ctx.fillStyle = '#FFFFFF';
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-          this.ctx.shadowBlur = 4;
-          this.ctx.fillText('?', 0, boxSize * 0.08);
-        }
-        this.ctx.restore();
-
-        // 3D Polished Gold Rim
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-        this.ctx.lineWidth = Math.max(2.2, badgeRadius * 0.14);
-        this.ctx.strokeStyle = '#FDE047';
-        this.ctx.stroke();
-
-        this.ctx.restore();
-      } else if (slot.isGrandPrize && !slot.image) {
-        // Grand Prize without photo: Draw glowing 3D Golden Trophy Badge
-        this.ctx.save();
-        this.ctx.translate(iconDist, 0);
-        this.ctx.rotate(Math.PI / 2);
-
-        const baseBadgeRadius = isMobile ? 26 : 38;
-        const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
-        const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
-
-        // Glowing Gold backdrop disc
-        this.ctx.save();
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-        this.ctx.fillStyle = 'rgba(153, 27, 27, 0.95)';
-        this.ctx.shadowColor = 'rgba(253, 224, 71, 0.95)';
-        this.ctx.shadowBlur = Math.max(12, badgeRadius * 0.75);
-        this.ctx.shadowOffsetY = 2;
-        this.ctx.fill();
-
-        // 3D Gold Trophy Icon
-        this.ctx.font = `${badgeRadius * 1.25}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText('🏆', 0, 0);
-        this.ctx.restore();
-
-        // 3D Polished Gold Rim
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-        this.ctx.lineWidth = Math.max(2.4, badgeRadius * 0.15);
-        this.ctx.strokeStyle = '#FDE047';
-        this.ctx.stroke();
-
-        this.ctx.restore();
-      } else if (slot.image && this.imageCache.has(slot.image)) {
-        const isTelecom =
-          slot.image.includes('ncell') ||
-          slot.image.includes('ntc') ||
-          slot.image.includes('topup') ||
-          slot.label.toLowerCase().includes('topup') ||
-          slot.label.toLowerCase().includes('balance');
-
-        this.ctx.save();
-        this.ctx.translate(iconDist, 0);
-
-        if (isTelecom) {
-          // Both NTC (Nepal Telecom) and Ncell logos side-by-side in dual glowing circular badges
-          this.ctx.rotate(Math.PI / 2);
-          const dualBadgeRadius = isMobile ? 18 : 24;
-          const separation = dualBadgeRadius * 1.05;
-
-          const ntcImg = this.imageCache.get('/assets/ntc_logo.png') || this.imageCache.get(slot.image);
-          const ncellImg = this.imageCache.get('/assets/ncell_logo.png');
-
-          // --- 1. Left Badge: NTC (Namaste) ---
-          this.ctx.save();
-          this.ctx.translate(-separation, 0);
-
-          // NTC Blue background disc
-          this.ctx.beginPath();
-          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
-          this.ctx.fillStyle = '#044C8C';
-          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-          this.ctx.shadowBlur = 6;
-          this.ctx.shadowOffsetY = 2;
-          this.ctx.fill();
-
-          if (ntcImg && ntcImg.complete && ntcImg.naturalWidth > 0) {
-            this.ctx.save();
-            this.ctx.beginPath();
-            this.ctx.arc(0, 0, Math.max(1, dualBadgeRadius - 1), 0, 2 * Math.PI);
-            this.ctx.clip();
-            const iconSize = dualBadgeRadius * 1.95;
-            this.ctx.drawImage(ntcImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-            this.ctx.restore();
-          }
-
-          // NTC Gold Rim
-          this.ctx.beginPath();
-          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
-          this.ctx.lineWidth = Math.max(1.8, dualBadgeRadius * 0.12);
-          this.ctx.strokeStyle = '#FDE047';
-          this.ctx.stroke();
-          this.ctx.restore();
-
-          // --- 2. Right Badge: Ncell ---
-          this.ctx.save();
-          this.ctx.translate(separation, 0);
-
-          // Ncell White background disc
-          this.ctx.beginPath();
-          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
-          this.ctx.fillStyle = '#FFFFFF';
-          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-          this.ctx.shadowBlur = 6;
-          this.ctx.shadowOffsetY = 2;
-          this.ctx.fill();
-
-          if (ncellImg && ncellImg.complete && ncellImg.naturalWidth > 0) {
-            this.ctx.save();
-            this.ctx.beginPath();
-            this.ctx.arc(0, 0, Math.max(1, dualBadgeRadius - 1), 0, 2 * Math.PI);
-            this.ctx.clip();
-            const iconSize = dualBadgeRadius * 1.9;
-            this.ctx.drawImage(ncellImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-            this.ctx.restore();
-          }
-
-          // Ncell Gold Rim
-          this.ctx.beginPath();
-          this.ctx.arc(0, 0, dualBadgeRadius, 0, 2 * Math.PI);
-          this.ctx.lineWidth = Math.max(1.8, dualBadgeRadius * 0.12);
-          this.ctx.strokeStyle = '#FDE047';
-          this.ctx.stroke();
-          this.ctx.restore();
-        } else {
-          const img = this.imageCache.get(slot.image) || (isBetterLuck ? this.imageCache.get('/assets/clover.png') : null);
-          if (img && img.complete && img.naturalWidth > 0) {
-            const isNote = (slot.image?.includes('note') || slot.image?.includes('rs'));
-            const isClover = Boolean(slot.image?.includes('clover') || isBetterLuck);
-            const isGadget = Boolean(
-              slot.image?.includes('mobile') ||
-              slot.image?.includes('phone') ||
-              slot.image?.includes('earpod') ||
-              slot.image?.includes('powerbank') ||
-              slot.image?.includes('charger')
-            );
-
-            if (isClover) {
-              // Pure transparent lucky clover floating directly on the wheel slice with natural 3D drop shadow
-              this.ctx.rotate(Math.PI / 2);
-              const baseSize = isMobile ? 46 : 66;
-              const cloverSize = Math.max(24, Math.min(baseSize, availableWidthAtIcon * 0.92));
-
-              this.ctx.save();
-              this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-              this.ctx.shadowBlur = 8;
-              this.ctx.shadowOffsetY = 3;
-              this.ctx.drawImage(
-                img,
-                -cloverSize / 2,
-                -cloverSize / 2,
-                cloverSize,
-                cloverSize
-              );
-              this.ctx.restore();
-            } else if (isGadget) {
-              // Flagship Mobile Phone, Earpods, Powerbank
-              this.ctx.rotate(Math.PI / 2);
-              const baseBadgeRadius = isMobile ? 26 : 38;
-              const maxAllowedRadius = (availableWidthAtIcon * 0.94) / 2;
-              const badgeRadius = Math.max(16, Math.min(baseBadgeRadius, maxAllowedRadius));
-
-              // Draw glowing backdrop disc with 3D shadow
-              this.ctx.save();
-              this.ctx.beginPath();
-              this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-              this.ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
-              this.ctx.shadowColor = slot.isGrandPrize
-                ? 'rgba(245, 158, 11, 0.95)'
-                : 'rgba(0, 0, 0, 0.85)';
-              this.ctx.shadowBlur = slot.isGrandPrize ? Math.max(10, badgeRadius * 0.65) : 8;
-              this.ctx.shadowOffsetY = 2;
-              this.ctx.fill();
-
-              // Clip and draw image cleanly inside circular badge
-              this.ctx.beginPath();
-              this.ctx.arc(0, 0, Math.max(1, badgeRadius - 1), 0, 2 * Math.PI);
-              this.ctx.clip();
-              const iconSize = badgeRadius * 2.2;
-              this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-              this.ctx.restore();
-
-              // 3D Metallic Gold Rim
-              this.ctx.beginPath();
-              this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-              this.ctx.lineWidth = slot.isGrandPrize ? Math.max(2.4, badgeRadius * 0.15) : 2;
-              this.ctx.strokeStyle = slot.isGrandPrize ? '#FDE047' : 'rgba(254, 240, 138, 0.9)';
-              this.ctx.stroke();
-            } else if (isNote) {
-              // Banknote
-              this.ctx.rotate(-Math.PI / 2);
-              const baseNoteW = isMobile ? 54 : 76;
-              const maxNoteW = Math.max(28, Math.min(baseNoteW, availableWidthAtIcon * 0.96));
-              const noteW = maxNoteW;
-              const noteH = noteW * 0.58;
-
-              this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-              this.ctx.shadowBlur = 10;
-              this.ctx.shadowOffsetY = 3;
-
-              this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-              this.roundRect(-noteW / 2 - 2, -noteH / 2 - 2, noteW + 4, noteH + 4, 4);
-              this.ctx.fill();
-
-              this.ctx.save();
-              this.ctx.beginPath();
-              this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
-              this.ctx.clip();
-              this.ctx.drawImage(img, -noteW / 2, -noteH / 2, noteW, noteH);
-              this.ctx.restore();
-
-              this.ctx.beginPath();
-              this.roundRect(-noteW / 2, -noteH / 2, noteW, noteH, 3.5);
-              this.ctx.lineWidth = 2;
-              this.ctx.strokeStyle = '#FDE047';
-              this.ctx.stroke();
-            } else {
-              // Graphic icon
-              this.ctx.rotate(Math.PI / 2);
-              const baseSize = isMobile ? 48 : 68;
-              const kiteSize = Math.max(24, Math.min(baseSize, availableWidthAtIcon * 0.92));
-
-              this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-              this.ctx.shadowBlur = 8;
-              this.ctx.shadowOffsetY = 3;
-
-              this.ctx.drawImage(
-                img,
-                -kiteSize / 2,
-                -kiteSize / 2,
-                kiteSize,
-                kiteSize
-              );
-            }
-          }
-        }
-
-        this.ctx.restore();
-      }
-
-      // B) Draw Slot Text Label
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-
-      if (isBetterLuck) {
-        // Better Luck Next Time: Draw bold high-contrast 2-line text below the clover badge
-        const availableW = 2 * textDist * Math.tan(sliceAngle / 2) * 0.98;
-
-        let lineFontSize = isMobile ? 14 : 19.5;
-        this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-
-        let m1 = this.ctx.measureText('Better Luck');
-        let m2 = this.ctx.measureText('Next Time');
-        while ((m1.width > availableW || m2.width > availableW) && lineFontSize > 9.5) {
-          lineFontSize -= 0.5;
-          this.ctx.font = `900 ${lineFontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-          m1 = this.ctx.measureText('Better Luck');
-          m2 = this.ctx.measureText('Next Time');
-        }
-
-        this.ctx.save();
-        this.ctx.translate(textDist, 0);
-        this.ctx.rotate(Math.PI / 2);
-
-        const lineSpacing = lineFontSize * 0.78;
-
-        // Dark outline pass for extreme contrast
-        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.98)';
-        this.ctx.lineWidth = 4.5;
-        this.ctx.lineJoin = 'round';
-        this.ctx.strokeText('Better Luck', 0, -lineSpacing, availableW);
-        this.ctx.strokeText('Next Time', 0, lineSpacing, availableW);
-
-        // Bright fill pass with shadow
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.98)';
-        this.ctx.shadowBlur = 8;
-        this.ctx.shadowOffsetX = 2;
-        this.ctx.shadowOffsetY = 2;
-        this.ctx.fillText('Better Luck', 0, -lineSpacing, availableW);
-        this.ctx.fillText('Next Time', 0, lineSpacing, availableW);
-
-        this.ctx.restore();
-      } else {
-        // Prize Slot Label: Prominent large bold typography with dark outline at textDist
-        const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.98;
-        let displayLabel = slot.label;
-        if (displayLabel.toLowerCase() === 'powerbank') {
-          displayLabel = 'Power Bank';
-        }
-
-        const words = displayLabel.split(' ');
-        const shouldSplit = words.length >= 2;
-
-        this.ctx.save();
-        this.ctx.translate(textDist, 0);
-        this.ctx.rotate(Math.PI / 2);
-
-        if (shouldSplit) {
-          // Render as 2 compact stacked lines with large bold font
-          const line1 = words[0]!;
-          const line2 = words.slice(1).join(' ');
-
-          let lineSize = slot.isGrandPrize ? (isMobile ? 15.5 : 21.5) : (isMobile ? 14.5 : 20.5);
-          this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-
-          let mw1 = this.ctx.measureText(line1);
-          let mw2 = this.ctx.measureText(line2);
-          while ((mw1.width > availableTextWidth || mw2.width > availableTextWidth) && lineSize > 10) {
-            lineSize -= 0.5;
-            this.ctx.font = `900 ${lineSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-            mw1 = this.ctx.measureText(line1);
-            mw2 = this.ctx.measureText(line2);
-          }
-
-          const lineSpacing = lineSize * 0.80;
-
-          this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.98)';
-          this.ctx.lineWidth = 4.5;
-          this.ctx.lineJoin = 'round';
-          this.ctx.strokeText(line1, 0, -lineSpacing, availableTextWidth);
-          this.ctx.strokeText(line2, 0, lineSpacing, availableTextWidth);
-
-          this.ctx.fillStyle = slot.isGrandPrize ? '#FEF08A' : (slot.textColor || '#FFFFFF');
-          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.98)';
-          this.ctx.shadowBlur = 8;
-          this.ctx.shadowOffsetX = 2;
-          this.ctx.shadowOffsetY = 2;
-          this.ctx.fillText(line1, 0, -lineSpacing, availableTextWidth);
-          this.ctx.fillText(line2, 0, lineSpacing, availableTextWidth);
-        } else {
-          // Single-line label
-          let fontSize = slot.isGrandPrize ? (isMobile ? 15.5 : 21.5) : (isMobile ? 14.5 : 20.5);
-          this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-
-          let textMetrics = this.ctx.measureText(displayLabel);
-          while (textMetrics.width > availableTextWidth && fontSize > 10) {
-            fontSize -= 0.5;
-            this.ctx.font = `900 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-            textMetrics = this.ctx.measureText(displayLabel);
-          }
-
-          this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.98)';
-          this.ctx.lineWidth = 4.5;
-          this.ctx.lineJoin = 'round';
-          this.ctx.strokeText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
-
-          this.ctx.fillStyle = slot.isGrandPrize ? '#FEF08A' : (slot.textColor || '#FFFFFF');
-          this.ctx.shadowColor = 'rgba(0, 0, 0, 0.98)';
-          this.ctx.shadowBlur = 8;
-          this.ctx.shadowOffsetX = 2;
-          this.ctx.shadowOffsetY = 2;
-          this.ctx.fillText(displayLabel, 0, 0, Math.max(30, availableTextWidth));
-        }
-
-        this.ctx.restore();
-      }
+      // --- B) CLEAN, SHARP TYPOGRAPHY ---
+      this.renderSlotText(slot, style, textDist, availableTextWidth, isMobile);
 
       this.ctx.restore();
     }
 
-    // 2.5 Draw Realistic Glass Specular Sheen / Acrylic Reflection over Wheel Face
-    this.ctx.save();
-    const glossGrad = this.ctx.createLinearGradient(-radius * 0.8, -radius * 0.8, radius * 0.4, radius * 0.4);
-    glossGrad.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
-    glossGrad.addColorStop(0.45, 'rgba(255, 255, 255, 0.04)');
-    glossGrad.addColorStop(0.7, 'rgba(255, 255, 255, 0)');
+    // Outer subtle concentric track line (precision gauge detail)
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius - 2, 0, 2 * Math.PI);
-    this.ctx.fillStyle = glossGrad;
-    this.ctx.fill();
-
-    // Inner Perimeter Recessed Drop Shadow (Dish Depth Effect)
-    const insetShadow = this.ctx.createRadialGradient(0, 0, radius * 0.88, 0, 0, radius);
-    insetShadow.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    insetShadow.addColorStop(0.7, 'rgba(0, 0, 0, 0.25)');
-    insetShadow.addColorStop(1, 'rgba(0, 0, 0, 0.65)');
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-    this.ctx.fillStyle = insetShadow;
-    this.ctx.fill();
-    this.ctx.restore();
-
-    // 3. Draw Heavy 3D Casino Golden Outer Rim
-    this.ctx.restore(); // Undo rotation for stationary border elements
-
-    this.ctx.save();
-    this.ctx.translate(centerX, centerY);
-
-    // Deep Dark Base Shadow under the rim
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius + 4, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 22;
-    this.ctx.strokeStyle = '#1E1005';
-    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-    this.ctx.shadowBlur = 18;
-    this.ctx.shadowOffsetY = 6;
+    this.ctx.arc(0, 0, radius * 0.94, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 1;
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     this.ctx.stroke();
 
-    // Main 3D Metallic Casino Gold Rim with Rich Light Highlights
+    // ==========================================
+    // 3. EDGELESS PRECISION PERIMETER & NOTCHES
+    // ==========================================
+    // Razor-thin titanium/gold perimeter hairline
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius + 2, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 18;
-    const rimGrad = this.ctx.createLinearGradient(-radius, -radius, radius, radius);
-    rimGrad.addColorStop(0, '#FFFBEB');
-    rimGrad.addColorStop(0.20, '#FDE047');
-    rimGrad.addColorStop(0.40, '#D97706');
-    rimGrad.addColorStop(0.60, '#78350F');
-    rimGrad.addColorStop(0.80, '#FBBF24');
-    rimGrad.addColorStop(1, '#FFFBEB');
-    this.ctx.strokeStyle = rimGrad;
-    this.ctx.shadowBlur = 0;
-    this.ctx.stroke();
-
-    // Inner Fine Polished Brass Bevel Lines
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius - 7, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = 'rgba(254, 240, 138, 0.95)';
-    this.ctx.stroke();
-
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius + 10, 0, 2 * Math.PI);
+    this.ctx.arc(0, 0, radius - 0.75, 0, 2 * Math.PI);
     this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = 'rgba(255, 251, 235, 0.8)';
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
     this.ctx.stroke();
 
-    // 4. Draw 3D Chrome & Brass Edge Pins (Ticking Pegs) rotating with the wheel
-    this.ctx.rotate(this.currentRotation);
+    // Minimalist Micro-Tick Notches at each slice boundary (like a luxury chronograph)
     for (let i = 0; i < this.slots.length; i++) {
       const pinAngle = sliceAngles[i]!.start;
-      const pinX = Math.cos(pinAngle) * (radius + 2);
-      const pinY = Math.sin(pinAngle) * (radius + 2);
+      const notchOuterX = Math.cos(pinAngle) * radius;
+      const notchOuterY = Math.sin(pinAngle) * radius;
+      const notchInnerX = Math.cos(pinAngle) * (radius - 5.5);
+      const notchInnerY = Math.sin(pinAngle) * (radius - 5.5);
 
-      // Pin Cast Drop Shadow
-      this.ctx.save();
       this.ctx.beginPath();
-      this.ctx.arc(pinX + 1.5, pinY + 1.5, 6, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-      this.ctx.shadowBlur = 5;
+      this.ctx.moveTo(notchOuterX, notchOuterY);
+      this.ctx.lineTo(notchInnerX, notchInnerY);
+      this.ctx.lineWidth = 1.5;
+      this.ctx.strokeStyle = '#F59E0B';
+      this.ctx.stroke();
+    }
+
+    this.ctx.restore(); // Undo canvas rotation and translation
+  }
+
+  /**
+   * Renders high-DPI, spotless vector badges and image cutouts.
+   */
+  private renderSlotIcon(
+    slot: PublicSlotConfig,
+    style: { isPrecious: boolean; isGiftCard: boolean; isHamper: boolean; isBetterLuck: boolean; accent: string },
+    iconDist: number,
+    availableWidth: number,
+    isMobile: boolean
+  ): void {
+    this.ctx.save();
+    this.ctx.translate(iconDist, 0);
+    this.ctx.rotate(Math.PI / 2);
+
+    const baseBadgeRadius = isMobile ? 22 : 30;
+    const maxRadius = (availableWidth * 0.92) / 2;
+    const badgeRadius = Math.max(14, Math.min(baseBadgeRadius, maxRadius));
+
+    if (style.isBetterLuck) {
+      // Minimalist Clover / Luck Glyph
+      const cloverImg = this.imageCache.get('/assets/clover.png');
+      if (cloverImg && cloverImg.complete && cloverImg.naturalWidth > 0) {
+        const size = badgeRadius * 2.1;
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.85;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.shadowBlur = 4;
+        this.ctx.drawImage(cloverImg, -size / 2, -size / 2, size, size);
+        this.ctx.restore();
+      } else {
+        // Crisp vector four-point star / clover
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius * 0.7, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        this.ctx.fill();
+        this.ctx.font = `${badgeRadius * 0.9}px sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('✦', 0, 0);
+      }
+    } else if (style.isPrecious) {
+      // Precious Gift Voucher: Refined Frosted Gold Disc with Crisp Emblem
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+      this.ctx.fillStyle = 'rgba(24, 18, 8, 0.92)';
       this.ctx.fill();
+      this.ctx.lineWidth = 1.5;
+      this.ctx.strokeStyle = '#F59E0B';
+      this.ctx.stroke();
+
+      const img = slot.image ? this.imageCache.get(slot.image) : null;
+      if (img && img.complete && img.naturalWidth > 0) {
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius - 1.5, 0, 2 * Math.PI);
+        this.ctx.clip();
+        const iconSize = (badgeRadius - 1.5) * 2;
+        this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        this.ctx.restore();
+      } else {
+        // Precision Gold Crown / Trophy Glyph
+        this.ctx.font = `${badgeRadius * 1.15}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('✨', 0, 0);
+      }
+    } else if (style.isGiftCard) {
+      // NTC & Ncell Dual Telecom Balance Badges
+      const ntcImg = this.imageCache.get('/assets/ntc_logo.png');
+      const ncellImg = this.imageCache.get('/assets/ncell_logo.png');
+
+      const singleRadius = Math.max(10, Math.min(15, badgeRadius * 0.72));
+      const separation = singleRadius * 1.05;
+
+      // Clean, edgeless backdrop pill
+      const pillW = separation * 2 + singleRadius * 2 + 6;
+      const pillH = singleRadius * 2 + 5;
+
+      this.ctx.beginPath();
+      this.roundRect(-pillW / 2, -pillH / 2, pillW, pillH, pillH / 2);
+      this.ctx.fillStyle = 'rgba(9, 14, 26, 0.92)';
+      this.ctx.fill();
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = style.accent;
+      this.ctx.stroke();
+
+      // 1. NTC Logo Badge (Left)
+      this.ctx.save();
+      this.ctx.translate(-separation, 0);
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, singleRadius, 0, 2 * Math.PI);
+      this.ctx.fillStyle = '#044C8C';
+      this.ctx.fill();
+      this.ctx.clip();
+      if (ntcImg && ntcImg.complete && ntcImg.naturalWidth > 0) {
+        const iconSize = singleRadius * 2;
+        this.ctx.drawImage(ntcImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+      } else {
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = `bold ${singleRadius * 0.7}px sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('NTC', 0, 0);
+      }
       this.ctx.restore();
 
-      // Pin Brass Collar Ring Base
       this.ctx.beginPath();
-      this.ctx.arc(pinX, pinY, 5.5, 0, 2 * Math.PI);
-      this.ctx.fillStyle = '#B45309';
-      this.ctx.fill();
+      this.ctx.arc(-separation, 0, singleRadius, 0, 2 * Math.PI);
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = '#38BDF8';
+      this.ctx.stroke();
 
-      // Pin 3D Spherical Chrome Core
+      // 2. Ncell Logo Badge (Right)
+      this.ctx.save();
+      this.ctx.translate(separation, 0);
       this.ctx.beginPath();
-      this.ctx.arc(pinX, pinY, 4.2, 0, 2 * Math.PI);
-      const chromeGrad = this.ctx.createRadialGradient(pinX - 1.2, pinY - 1.2, 0.5, pinX, pinY, 4.2);
-      chromeGrad.addColorStop(0, '#FFFFFF');
-      chromeGrad.addColorStop(0.35, '#E2E8F0');
-      chromeGrad.addColorStop(0.70, '#64748B');
-      chromeGrad.addColorStop(1, '#1E293B');
-      this.ctx.fillStyle = chromeGrad;
-      this.ctx.fill();
-
-      // Pin Sharp White Light Glint
-      this.ctx.beginPath();
-      this.ctx.arc(pinX - 1.3, pinY - 1.3, 1.2, 0, 2 * Math.PI);
+      this.ctx.arc(0, 0, singleRadius, 0, 2 * Math.PI);
       this.ctx.fillStyle = '#FFFFFF';
       this.ctx.fill();
+      this.ctx.clip();
+      if (ncellImg && ncellImg.complete && ncellImg.naturalWidth > 0) {
+        const iconSize = singleRadius * 1.95;
+        this.ctx.drawImage(ncellImg, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+      } else {
+        this.ctx.fillStyle = '#7C3AED';
+        this.ctx.font = `bold ${singleRadius * 0.65}px sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('Ncell', 0, 0);
+      }
+      this.ctx.restore();
+
+      this.ctx.beginPath();
+      this.ctx.arc(separation, 0, singleRadius, 0, 2 * Math.PI);
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = '#8B5CF6';
+      this.ctx.stroke();
+    } else {
+      // General Prize / Hamper
+      const img = slot.image ? this.imageCache.get(slot.image) : null;
+      if (img && img.complete && img.naturalWidth > 0) {
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        this.ctx.fill();
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = style.accent;
+        this.ctx.stroke();
+
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, badgeRadius - 1.5, 0, 2 * Math.PI);
+        this.ctx.clip();
+        const iconSize = (badgeRadius - 1.5) * 2;
+        this.ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        this.ctx.restore();
+      } else {
+        this.ctx.font = `${badgeRadius * 1.1}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('🎁', 0, 0);
+      }
+    }
+
+    this.ctx.restore();
+  }
+
+  /**
+   * Renders sharp, non-AI typography without cartoon black stroke outlines.
+   */
+  private renderSlotText(
+    slot: PublicSlotConfig,
+    style: { isPrecious: boolean; isGiftCard: boolean; isHamper: boolean; isBetterLuck: boolean; accent: string },
+    textDist: number,
+    availableWidth: number,
+    isMobile: boolean
+  ): void {
+    this.ctx.save();
+    this.ctx.translate(textDist, 0);
+    this.ctx.rotate(Math.PI / 2);
+
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    // Spotless subtle micro-shadow for crisp legibility
+    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+    this.ctx.shadowBlur = 3;
+    this.ctx.shadowOffsetX = 0;
+    this.ctx.shadowOffsetY = 1;
+
+    let displayLabel = slot.label;
+    if (displayLabel.toLowerCase() === 'powerbank') {
+      displayLabel = 'Power Bank';
+    }
+    if (
+      displayLabel.toLowerCase().includes('card') &&
+      (displayLabel.includes('500') || displayLabel.includes('1,000') || displayLabel.includes('1000'))
+    ) {
+      displayLabel = displayLabel.replace(/card/i, 'Balance');
+    }
+
+    if (style.isBetterLuck) {
+      // 2 clean stacked lines for Better Luck Next Time
+      let fontSize = isMobile ? 12 : 14.5;
+      this.ctx.font = `700 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
+      let m1 = this.ctx.measureText('Better Luck');
+      let m2 = this.ctx.measureText('Next Time');
+
+      while ((m1.width > availableWidth || m2.width > availableWidth) && fontSize > 9) {
+        fontSize -= 0.5;
+        this.ctx.font = `700 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
+        m1 = this.ctx.measureText('Better Luck');
+        m2 = this.ctx.measureText('Next Time');
+      }
+
+      const lineSpacing = fontSize * 0.75;
+      this.ctx.fillStyle = '#CBD5E1';
+      this.ctx.fillText('Better Luck', 0, -lineSpacing);
+      this.ctx.fillText('Next Time', 0, lineSpacing);
+    } else {
+      // Prize slots
+      const words = displayLabel.split(' ');
+      const shouldSplit = words.length >= 2;
+
+      if (shouldSplit) {
+        let line1: string;
+        let line2: string;
+
+        if (words.length === 3 && (words[0]?.toUpperCase() === 'NPR' || words[0]?.toUpperCase() === 'RS')) {
+          line1 = `${words[0]} ${words[1]}`;
+          line2 = words[2]!;
+        } else {
+          line1 = words[0]!;
+          line2 = words.slice(1).join(' ');
+        }
+
+        let fontSize = style.isPrecious ? (isMobile ? 13 : 16) : (isMobile ? 12.5 : 15);
+        this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
+
+        let mw1 = this.ctx.measureText(line1);
+        let mw2 = this.ctx.measureText(line2);
+
+        while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 9) {
+          fontSize -= 0.5;
+          this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
+          mw1 = this.ctx.measureText(line1);
+          mw2 = this.ctx.measureText(line2);
+        }
+
+        const lineSpacing = fontSize * 0.78;
+        this.ctx.fillStyle = style.isPrecious ? '#FEF08A' : (slot.textColor || '#FFFFFF');
+        this.ctx.fillText(line1, 0, -lineSpacing);
+        this.ctx.fillText(line2, 0, lineSpacing);
+      } else {
+        let fontSize = style.isPrecious ? (isMobile ? 13.5 : 16.5) : (isMobile ? 12.5 : 15.5);
+        this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
+
+        let textMetrics = this.ctx.measureText(displayLabel);
+        while (textMetrics.width > availableWidth && fontSize > 9) {
+          fontSize -= 0.5;
+          this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
+          textMetrics = this.ctx.measureText(displayLabel);
+        }
+
+        this.ctx.fillStyle = style.isPrecious ? '#FEF08A' : (slot.textColor || '#FFFFFF');
+        this.ctx.fillText(displayLabel, 0, 0);
+      }
     }
 
     this.ctx.restore();
@@ -762,24 +618,12 @@ export class Wheel {
     this.ctx.closePath();
   }
 
-  private darkenHex(hex: string, amount: number): string {
-    let clean = hex.replace('#', '');
-    if (clean.length === 3) {
-      clean = clean.split('').map((c) => c + c).join('');
-    }
-    const num = parseInt(clean, 16);
-    let r = Math.max(0, Math.floor(((num >> 16) & 255) * (1 - amount)));
-    let g = Math.max(0, Math.floor(((num >> 8) & 255) * (1 - amount)));
-    let b = Math.max(0, Math.floor((num & 255) * (1 - amount)));
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
   /**
-   * Dramatic suspense deceleration easing function.
-   * Starts high speed, gradually slows down, and slowly clicks across the last few slots for high tension.
+   * Suspense deceleration easing function.
+   * Starts with rapid momentum, slows smoothly to build authentic tension.
    */
   private easeOutSuspense(t: number): number {
-    return 1 - Math.pow(1 - t, 4.6);
+    return 1 - Math.pow(1 - t, 4.4);
   }
 
   /**
@@ -799,27 +643,27 @@ export class Wheel {
       // Pointer is stationary at top: -PI/2 radians (270 degrees)
       const pointerAngle = -Math.PI / 2;
 
-      // Center angle of target slot inside unrotated wheel (using proportional angles):
+      // Center angle of target slot inside unrotated wheel:
       const targetSlice = sliceAngles[targetSlotIndex]!;
       const targetCenterAngle = targetSlice.start + targetSlice.angle / 2;
 
-      // Slight natural jitter inside slot slice ([-20%, +20%] of slice width)
-      const jitter = (Math.random() - 0.5) * targetSlice.angle * 0.4;
+      // Subtle natural jitter inside slot slice ([-18%, +18%] of slice width)
+      const jitter = (Math.random() - 0.5) * targetSlice.angle * 0.36;
 
-      // We want: (targetRotation + targetCenterAngle + jitter) % (2 * PI) = pointerAngle
+      // Calculate angle difference
       const currentNorm = this.currentRotation % (2 * Math.PI);
       let angleDiff = (pointerAngle - (targetCenterAngle + jitter) - currentNorm) % (2 * Math.PI);
       if (angleDiff < 0) {
         angleDiff += 2 * Math.PI;
       }
 
-      // 9 full 360-degree rotations for a thrilling fast start
-      const fullRotations = 9 * (2 * Math.PI);
+      // 8 full rotations for crisp cinematic spin
+      const fullRotations = 8 * (2 * Math.PI);
       const startRotation = this.currentRotation;
       const finalRotation = this.currentRotation + fullRotations + angleDiff;
 
-      // 9.2 seconds total duration for intense suspense build-up
-      const durationMs = 9200;
+      // 8.6 seconds duration for suspense
+      const durationMs = 8600;
       const startTime = performance.now();
 
       const pointerEl = document.getElementById('wheel-pointer');
@@ -831,7 +675,7 @@ export class Wheel {
 
         this.currentRotation = startRotation + (finalRotation - startRotation) * easedProgress;
 
-        // Check if pointer crossed a pin (using proportional slice boundaries)
+        // Check if pointer crossed a notch
         const angleUnderPointer =
           ((pointerAngle - this.currentRotation) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
         let currentSliceUnderPointer = 0;
@@ -849,7 +693,7 @@ export class Wheel {
           // Pointer tick bounce effect
           if (pointerEl) {
             pointerEl.classList.add('ticking');
-            setTimeout(() => pointerEl.classList.remove('ticking'), 60);
+            setTimeout(() => pointerEl.classList.remove('ticking'), 50);
           }
         }
 

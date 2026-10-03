@@ -52,6 +52,9 @@ export interface UserInfo {
   readonly email?: string;
   readonly phone?: string;
   readonly contact?: string; // Backwards compatible fallback
+  readonly intake?: string; // e.g. "jan_2027" for January 2027 intake
+  readonly isCounselled?: boolean;
+  readonly preferredCountry?: string;
   readonly consent: boolean;
   readonly deviceId: string;
 }
@@ -61,6 +64,9 @@ export interface StartSpinRequest {
   readonly email?: string;
   readonly phone?: string;
   readonly contact?: string;
+  readonly intake?: string;
+  readonly isCounselled?: boolean;
+  readonly preferredCountry?: string;
   readonly consent: boolean;
   readonly deviceId: string;
 }
@@ -97,6 +103,9 @@ export interface SpinRecord {
   readonly userName: string;
   readonly userContact: string;
   readonly deviceId: string;
+  readonly intake?: string;
+  readonly isCounselled?: boolean;
+  readonly preferredCountry?: string;
   readonly userSpinNumber: number;
   readonly globalSpinNumber: number;
   readonly slotIndex: number;
