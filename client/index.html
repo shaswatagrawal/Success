@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/assets/logo.png" />
+  <title>Success Education & Visa Services | Spin & Win Wheel</title>
+  <meta name="description"
+    content="Spin & Win with Success Education & Visa Services! Complete an in-office counseling session to spin the wheel for instant Gift Vouchers and entry into the January 2027 Visa Lucky Draw for 3 Premium Gifts!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <!-- Fullscreen Video Background -->
+  <div class="video-bg-container">
+    <video class="video-bg" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="/assets/video.mp4" type="video/mp4" />
+    </video>
+    <div class="video-bg-overlay"></div>
+  </div>
+
+  <!-- Background visual glow accents -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <div id="app" class="app-container">
+    <!-- Main Promotion View -->
+    <main id="main-view" class="view-section active">
+      <!-- Navigation Bar -->
+      <header class="navbar">
+        <div class="brand">
+          <img src="/assets/logo.png" alt="SUCCESS Education and Visa Services" class="brand-logo" />
+          <div class="brand-text">
+            <span class="brand-title">Success Education & Visa Services</span>
+            <span class="brand-subtitle">FESTIVE LUCKY DRAW</span>
+          </div>
+        </div>
+        <div class="nav-actions">
+          <button id="sound-toggle-btn" class="icon-btn" type="button" aria-label="Toggle Sound Effects"
+            title="Toggle Sound Effects">
+            <span id="sound-icon">🔊</span>
+          </button>
+          <button id="admin-nav-btn" class="btn btn-secondary btn-sm" type="button">
+            Admin Portal
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Game Content -->
+      <div class="hero-content">
+        <!-- Game Wheel Board (Main Focal Point) -->
+        <div class="wheel-stage">
+          <div class="wheel-outer-glow"></div>
+
+          <div class="wheel-wrapper">
+            <!-- Wheel Pointer Pin -->
+            <div class="wheel-pointer-container">
+              <div class="wheel-pointer" id="wheel-pointer">
+                <div class="pointer-arrow"></div>
+                <div class="pointer-jewel"></div>
+              </div>
+            </div>
+
+            <!-- Interactive Canvas -->
+            <canvas id="wheel-canvas" width="600" height="600"></canvas>
+
+            <!-- Center Hub Spin Button -->
+            <button id="spin-center-btn" class="wheel-hub-btn" type="button" aria-label="Spin the Wheel">
+              <div class="hub-inner">
+                <span class="hub-spin-text">SPIN</span>
+                <span class="hub-sub-text">NOW</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Participant Status Card -->
+        <div class="status-card-container">
+          <div id="user-status-card" class="glass-card status-card">
+            <div class="status-info">
+              <div class="user-greeting">
+                <span id="participant-name-display" class="participant-name">Welcome, Guest!</span>
+                <span class="verified-tag">✓ Verified Entry</span>
+              </div>
+              <div class="spins-badge-wrapper">
+                <span class="spins-label">Spins Remaining:</span>
+                <span id="spins-count-badge" class="badge badge-accent">1 / 1</span>
+              </div>
+            </div>
+            <div class="status-actions">
+              <button id="change-user-btn" class="btn btn-outline btn-sm" type="button">
+                Switch User
+              </button>
+              <button id="view-rules-btn" class="btn btn-text btn-sm" type="button">
+                Official Rules
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Admin Portal View -->
+    <section id="admin-view" class="view-section">
+      <header class="admin-header">
+        <div class="admin-header-title">
+          <button id="back-to-wheel-btn" class="btn btn-secondary btn-sm" type="button">
+            ← Return to Wheel
+          </button>
+          <h2>Promotion Management Dashboard</h2>
+        </div>
+        <button id="admin-logout-btn" class="btn btn-outline btn-sm" type="button">
+          Log Out
+        </button>
+      </header>
+
+      <!-- Admin Content (shown when logged in) -->
+      <div id="admin-authenticated-content" class="admin-dashboard-layout">
+        <!-- KPI Cards -->
+        <div class="stats-grid">
+          <div class="glass-card stat-card">
+            <span class="stat-icon">🎯</span>
+            <div class="stat-data">
+              <span class="stat-label">Total Spins Recorded</span>
+              <span id="stat-total-spins" class="stat-value">0</span>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <span class="stat-icon">👥</span>
+            <div class="stat-data">
+              <span class="stat-label">Unique Participants</span>
+              <span id="stat-unique-users" class="stat-value">0</span>
+            </div>
+          </div>
+          <div class="glass-card stat-card highlight-gold">
+            <span class="stat-icon">🏆</span>
+            <div class="stat-data">
+              <span class="stat-label">Grand Prize Winners</span>
+              <span id="stat-grand-prizes" class="stat-value">0</span>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <span class="stat-icon">🎁</span>
+            <div class="stat-data">
+              <span class="stat-label">Total Prizes Won</span>
+              <span id="stat-total-wins" class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actual vs Expected Distribution Chart & Custom Prize Editor -->
+        <div class="admin-two-col">
+          <!-- Distribution Chart Card -->
+          <div class="glass-card dashboard-panel">
+            <div class="panel-header">
+              <h3>Probability Audit: Actual vs. Expected Distribution</h3>
+              <span class="panel-tag">Monte Carlo Engine Verification</span>
+            </div>
+            <div id="distribution-chart-container" class="chart-container">
+              <!-- Injected dynamically by admin.ts -->
+            </div>
+          </div>
+
+          <!-- Prize Names Editor Card -->
+          <div class="glass-card dashboard-panel">
+            <div class="panel-header">
+              <h3>Customize Prize Labels</h3>
+              <span class="panel-tag">Persisted to SQLite</span>
+            </div>
+            <p class="panel-desc">
+              Update display labels for the 5 normal prize slots without altering backend probabilities.
+            </p>
+            <form id="prize-editor-form" class="prize-editor-list">
+              <!-- Dynamically populated -->
+              <div id="prize-inputs-container" class="inputs-grid"></div>
+              <div class="panel-actions">
+                <button type="submit" id="save-prizes-btn" class="btn btn-primary">
+                  Save Prize Names
+                </button>
+                <span id="prize-save-msg" class="save-status-msg"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Spin Reset & Cooldown Panel -->
+        <div class="glass-card dashboard-panel reset-panel-card">
+          <div class="panel-header">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span style="font-size: 1.4rem;">🔄</span>
+              <div>
+                <h3 style="margin: 0; font-size: 1.1rem;">Spin Number & Participant Log Reset</h3>
+                <p class="panel-desc" style="margin: 0.2rem 0 0 0;">
+                  Reset all recorded promotional spin numbers and participant logs. Strictly restricted to once every 24 hours.
+                </p>
+              </div>
+            </div>
+            <span id="reset-cooldown-badge" class="badge badge-accent">Checking cooldown...</span>
+          </div>
+
+          <div class="reset-panel-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; padding-top: 0.5rem;">
+            <div class="reset-meta-info" style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <div style="font-size: 0.88rem; color: var(--text-main);">
+                <strong style="color: var(--text-muted);">Last Reset:</strong> <span id="last-reset-time-text" style="font-weight: 700; color: #FCD34D;">Never</span>
+              </div>
+              <div style="font-size: 0.88rem; color: var(--text-main);">
+                <strong style="color: var(--text-muted);">Next Allowed Reset:</strong> <span id="next-reset-time-text" style="font-weight: 700; color: #6EE7B7;">Available Now</span>
+              </div>
+            </div>
+
+            <div class="reset-action-group" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
+              <button id="admin-reset-spins-btn" type="button" class="btn btn-reset">
+                ⚠️ Reset All Spin Numbers
+              </button>
+              <span id="reset-feedback-msg" class="save-status-msg" style="font-size: 0.82rem;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spin Records History Table -->
+        <div class="glass-card dashboard-panel">
+          <div class="panel-header table-panel-header">
+            <div>
+              <h3>Participant Spin Log</h3>
+              <p class="panel-desc">Real-time audit log of all recorded promotional spins.</p>
+            </div>
+            <button id="export-csv-btn" class="btn btn-secondary" type="button">
+              📥 Export CSV
+            </button>
+          </div>
+
+          <!-- Table Filters -->
+          <div class="table-filters-bar">
+            <div class="filter-group search-input-group">
+              <input type="text" id="admin-search-input" class="form-control"
+                placeholder="Search by participant, email, phone, or claim code..." />
+            </div>
+            <div class="filter-group">
+              <select id="admin-prize-filter" class="form-control">
+                <option value="all">All Spin Results</option>
+                <option value="lucky">Lucky Draw Entries (Jan 2027 Pool)</option>
+                <option value="win">Instant Gift Vouchers (Rs. 500 & 1,000)</option>
+              </select>
+            </div>
+            <button id="refresh-table-btn" class="btn btn-outline" type="button">
+              ↻ Refresh
+            </button>
+          </div>
+
+          <!-- Spins Data Table -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date & Time</th>
+                  <th>Participant</th>
+                  <th>Contact</th>
+                  <th>Intake & Counseling</th>
+                  <th>User Spin</th>
+                  <th>Result Won</th>
+                  <th>Claim Code</th>
+                  <th>Hashed IP</th>
+                </tr>
+              </thead>
+              <tbody id="admin-spins-table-body">
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-4">Loading spin history...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-bar">
+            <span id="pagination-info" class="pagination-info">Showing 0-0 of 0</span>
+            <div class="pagination-controls">
+              <button id="prev-page-btn" class="btn btn-outline btn-sm" type="button" disabled>
+                Previous
+              </button>
+              <span id="current-page-num" class="page-indicator">1</span>
+              <button id="next-page-btn" class="btn btn-outline btn-sm" type="button" disabled>
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- User Registration Modal -->
+  <div id="registration-modal" class="modal-backdrop">
+    <div class="modal-dialog glass-card">
+      <button id="back-reg-btn" class="modal-back-btn" type="button" aria-label="Back to Wheel">
+        ← Back
+      </button>
+      <button id="close-reg-btn" class="modal-close-btn" type="button" aria-label="Close Registration">
+        ✕
+      </button>
+      <div class="modal-header">
+        <div class="modal-icon">🏢 🎁</div>
+        <h2 class="modal-title">In-Office Counseling Lucky Draw</h2>
+        <p class="modal-subtitle">
+          Success Education & Visa Services — Complete in-office counseling to claim your promotional spin!
+        </p>
+      </div>
+
+      <div class="counseling-highlight-banner" style="background: rgba(180, 83, 9, 0.18); border: 1px solid rgba(253, 224, 71, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #FEF08A; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.25rem;">✨</span>
+        <span><strong>January 2027 Intake Lucky Draw:</strong> Land on <strong>You've Entered the Lucky Draw!</strong> to enter the final draw for <strong>3 Premium Gifts</strong> (for students receiving visa via SEVS)! Or win <strong>Instant Rs. 500 & Rs. 1,000 Gift Vouchers</strong>!</span>
+      </div>
+
+      <form id="registration-form" class="modal-form" novalidate>
+        <div class="form-group">
+          <label for="reg-name" class="form-label">Full Name</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="e.g. Alex Johnson" required
+            autocomplete="name" />
+          <span class="field-error" id="name-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email" class="form-label">Gmail / Email Address</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="e.g. yourname@gmail.com" required
+            autocomplete="email" />
+          <span class="field-error" id="email-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-phone" class="form-label">Mobile / Phone Number</label>
+          <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. 9801234567 or +977 98..." required
+            autocomplete="tel" />
+          <span class="field-error" id="phone-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-intake" class="form-label">Target Visa Intake</label>
+          <select id="reg-intake" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
+            <option value="jan_2027" selected>⭐ January 2027 Intake (Success Education & Visa Services)</option>
+            <option value="may_jul_2026">May / July 2026 Intake</option>
+            <option value="sep_fall_2026">September / Fall 2026 Intake</option>
+            <option value="general_counseling">General Office Counseling / Other</option>
+          </select>
+          <span class="field-error" id="intake-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-country" class="form-label">Preferred Study Destination</label>
+          <select id="reg-country" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
+            <option value="Australia" selected>Australia 🇦🇺</option>
+            <option value="United Kingdom">United Kingdom 🇬🇧</option>
+            <option value="USA">USA 🇺🇸</option>
+            <option value="Canada">Canada 🇨🇦</option>
+            <option value="Europe">Europe / Schengen 🇪🇺</option>
+            <option value="New Zealand">New Zealand 🇳🇿</option>
+          </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="reg-counselled" checked required />
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">
+              I have visited Success Education & Visa Services office and completed my counseling session.
+            </span>
+          </label>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="reg-consent" required />
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">
+              I agree to my details being verified for this promotion.
+            </span>
+          </label>
+          <span class="field-error" id="consent-error"></span>
+        </div>
+
+        <div id="reg-general-error" class="alert-box alert-error" style="display: none;"></div>
+
+        <div class="modal-footer">
+          <button type="submit" id="start-spinning-submit-btn" class="btn btn-primary btn-block btn-lg">
+            Verify Counseling & Spin the Wheel ✨
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Spin Result Modal -->
+  <div id="result-modal" class="modal-backdrop">
+    <div class="modal-dialog glass-card result-dialog">
+      <!-- Confetti Canvas -->
+      <canvas id="confetti-canvas"></canvas>
+
+      <div class="result-header">
+        <div id="result-badge" class="result-badge">RESULT</div>
+        <h2 id="result-title" class="result-title">Spin Result</h2>
+      </div>
+
+      <div class="result-body">
+        <div id="result-prize-icon" class="result-prize-icon">🎉</div>
+        <div id="result-prize-name" class="result-prize-name">Prize Name</div>
+        <p id="result-desc" class="result-desc">Result description</p>
+
+        <!-- Special Mystery Box Announcement Notice -->
+        <div id="mystery-box-notice" class="mystery-notice-box" style="display: none;">
+          <div class="mystery-notice-icon">🎁 ⏳</div>
+          <div class="mystery-notice-content">
+            <span class="mystery-notice-title">SPECIAL NOTICE</span>
+            <p class="mystery-notice-text">The prize inside the <strong>MYSTERY BOX</strong> will be decided after
+              <strong>3 weeks</strong>.</p>
+          </div>
+        </div>
+
+        <!-- Grand Prize & Voucher Claim Code Display -->
+        <div id="claim-code-container" class="claim-box" style="display: none;">
+          <span class="claim-label">OFFICIAL CLAIM CODE:</span>
+          <div class="claim-code-row">
+            <code id="claim-code-value" class="claim-code">PRECIOUS-JAN27-XXXX</code>
+            <button id="copy-claim-btn" class="btn btn-secondary btn-sm" type="button"
+              title="Copy claim code to clipboard">
+              Copy
+            </button>
+          </div>
+          <span class="claim-note">Save this code. Present it at Success Education & Visa Services (Kumaripati) to redeem!</span>
+        </div>
+
+        <div class="result-spins-left">
+          <span id="result-spins-left-text">Spins remaining: 0</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="result-close-btn" class="btn btn-primary btn-block btn-lg" type="button">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div id="admin-login-modal" class="modal-backdrop">
+    <div class="modal-dialog glass-card admin-login-dialog">
+      <button id="close-admin-login-btn" class="modal-close-btn" type="button">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">🔐</div>
+        <h2 class="modal-title">Admin Authentication</h2>
+        <p class="modal-subtitle">Enter administrator password to access promotion controls.</p>
+      </div>
+      <form id="admin-login-form" class="modal-form">
+        <div class="form-group">
+          <label for="admin-password-input" class="form-label">Password</label>
+          <input type="password" id="admin-password-input" class="form-control" placeholder="Enter admin password..."
+            required autocomplete="current-password" />
+          <span class="field-error" id="admin-login-error"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" id="admin-login-submit-btn" class="btn btn-primary btn-block btn-lg">
+            Unlock Portal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Rules Modal -->
+  <div id="rules-modal" class="modal-backdrop">
+    <div class="modal-dialog glass-card rules-dialog">
+      <button id="close-rules-btn" class="modal-close-btn" type="button">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">📜</div>
+        <h2 class="modal-title">Promotion & Counseling Rules</h2>
+      </div>
+      <div class="modal-body rules-content">
+        <p><strong>1. Office Counseling Eligibility:</strong> Students who visit the Success Education & Visa Services (SEVS) office and complete a counseling session are eligible to spin the wheel.</p>
+        <p><strong>2. Spin Allocation:</strong> Each participant receives exactly 1 verified promotional spin.</p>
+        <p><strong>3. Instant Prizes:</strong> If you land on <strong>Rs. 500 Gift Voucher</strong> or <strong>Rs. 1,000 Gift Voucher</strong>, it is treated as an instant prize to be redeemed at our office.</p>
+        <p><strong>4. January 2027 Intake Lucky Draw:</strong> If you land on <strong>“You’ve Entered the Lucky Draw!”</strong>, your details are recorded separately in the official Lucky Draw pool for the January 2027 intake.</p>
+        <p><strong>5. Final Premium Gift Draw:</strong> Students from the Lucky Draw pool who later receive their visa through Success Education & Visa Services will be eligible for the final draw featuring <strong>3 Premium Gifts / Prizes</strong>.</p>
+        <p><strong>6. 100% Guaranteed Outcome:</strong> Every counseled participant wins either an instant voucher or a Lucky Draw qualification.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="rules-agree-btn" class="btn btn-secondary btn-block" type="button">
+          Understood
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
