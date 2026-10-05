@@ -14,7 +14,7 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isWin: true,
     isGrandPrize: false,
     isLuckyDraw: true,
-    color: '#B45309',
+    color: '#F59E0B',
     textColor: '#FEF08A',
     accentColor: '#FDE047',
   },
@@ -26,111 +26,109 @@ const DEFAULT_SLOTS: readonly PublicSlotConfig[] = [
     isGrandPrize: false,
     color: '#1D4ED8',
     textColor: '#FFFFFF',
-    accentColor: '#38BDF8',
+    accentColor: '#60A5FA',
   },
   {
     index: 2,
+    prizeKey: 'better_luck_1',
+    label: 'Better Luck Next Time!',
+    isWin: false,
+    isGrandPrize: false,
+    color: '#991B1B',
+    textColor: '#FEE2E2',
+    accentColor: '#F87171',
+  },
+  {
+    index: 3,
     prizeKey: 'prize_500_voucher_1',
     label: 'Rs. 500 Gift Voucher',
     isWin: true,
     isGrandPrize: false,
-    color: '#047857',
+    color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#10B981',
+    accentColor: '#F87171',
   },
   {
-    index: 3,
+    index: 4,
     prizeKey: 'lucky_draw_2',
     label: "You've Entered the Lucky Draw!",
     isWin: true,
     isGrandPrize: false,
     isLuckyDraw: true,
-    color: '#92400E',
+    color: '#D97706',
     textColor: '#FEF08A',
     accentColor: '#FDE047',
   },
   {
-    index: 4,
+    index: 5,
     prizeKey: 'prize_500_voucher_2',
     label: 'Rs. 500 Gift Voucher',
     isWin: true,
     isGrandPrize: false,
-    color: '#065F46',
+    color: '#EF4444',
     textColor: '#FFFFFF',
-    accentColor: '#34D399',
+    accentColor: '#FCA5A5',
   },
   {
-    index: 5,
+    index: 6,
+    prizeKey: 'better_luck_2',
+    label: 'Better Luck Next Time!',
+    isWin: false,
+    isGrandPrize: false,
+    color: '#1E3A8A',
+    textColor: '#DBEAFE',
+    accentColor: '#60A5FA',
+  },
+  {
+    index: 7,
     prizeKey: 'prize_1000_voucher_2',
     label: 'Rs. 1,000 Gift Voucher',
     isWin: true,
     isGrandPrize: false,
-    color: '#1E40AF',
+    color: '#2563EB',
     textColor: '#FFFFFF',
     accentColor: '#93C5FD',
   },
   {
-    index: 6,
+    index: 8,
     prizeKey: 'lucky_draw_3',
     label: "You've Entered the Lucky Draw!",
     isWin: true,
     isGrandPrize: false,
     isLuckyDraw: true,
-    color: '#B45309',
+    color: '#F59E0B',
     textColor: '#FEF08A',
     accentColor: '#FDE047',
   },
   {
-    index: 7,
+    index: 9,
     prizeKey: 'prize_500_voucher_3',
     label: 'Rs. 500 Gift Voucher',
     isWin: true,
     isGrandPrize: false,
-    color: '#047857',
+    color: '#DC2626',
     textColor: '#FFFFFF',
-    accentColor: '#10B981',
-  },
-  {
-    index: 8,
-    prizeKey: 'prize_1000_voucher_3',
-    label: 'Rs. 1,000 Gift Voucher',
-    isWin: true,
-    isGrandPrize: false,
-    color: '#1D4ED8',
-    textColor: '#FFFFFF',
-    accentColor: '#38BDF8',
-  },
-  {
-    index: 9,
-    prizeKey: 'lucky_draw_4',
-    label: "You've Entered the Lucky Draw!",
-    isWin: true,
-    isGrandPrize: false,
-    isLuckyDraw: true,
-    color: '#92400E',
-    textColor: '#FEF08A',
-    accentColor: '#FDE047',
+    accentColor: '#F87171',
   },
   {
     index: 10,
+    prizeKey: 'better_luck_3',
+    label: 'Better Luck Next Time!',
+    isWin: false,
+    isGrandPrize: false,
+    color: '#B45309',
+    textColor: '#FEF3C7',
+    accentColor: '#FDE047',
+  },
+  {
+    index: 11,
     prizeKey: 'prize_500_voucher_4',
     label: 'Rs. 500 Gift Voucher',
     isWin: true,
     isGrandPrize: false,
-    color: '#065F46',
+    color: '#EF4444',
     textColor: '#FFFFFF',
-    accentColor: '#34D399',
-  },
-  {
-    index: 11,
-    prizeKey: 'lucky_draw_5',
-    label: "You've Entered the Lucky Draw!",
-    isWin: true,
-    isGrandPrize: false,
-    isLuckyDraw: true,
-    color: '#B45309',
-    textColor: '#FEF08A',
-    accentColor: '#FDE047',
+    accentColor: '#FCA5A5',
   },
 ];
 
@@ -322,26 +320,6 @@ class App {
       this.confetti?.stop();
       soundManager.stopSpeech();
       this.updateUserDisplay();
-    });
-
-    // Copy Claim Code Button
-    document.getElementById('copy-claim-btn')?.addEventListener('click', async () => {
-      const codeEl = document.getElementById('claim-code-value');
-      const copyBtn = document.getElementById('copy-claim-btn');
-      if (codeEl?.textContent) {
-        try {
-          await navigator.clipboard.writeText(codeEl.textContent.trim());
-          if (copyBtn) {
-            const original = copyBtn.textContent;
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => {
-              copyBtn.textContent = original;
-            }, 2000);
-          }
-        } catch {
-          // Fallback if clipboard blocked
-        }
-      }
     });
 
     // Registration Form Submit
@@ -598,8 +576,6 @@ class App {
     const iconEl = document.getElementById('result-prize-icon');
     const prizeEl = document.getElementById('result-prize-name');
     const descEl = document.getElementById('result-desc');
-    const claimBox = document.getElementById('claim-code-container');
-    const claimVal = document.getElementById('claim-code-value');
     const spinsRemainingEl = document.getElementById('result-spins-left-text');
 
     const isLucky = Boolean(info.isLuckyDraw || info.prizeName.toLowerCase().includes('lucky draw'));
@@ -625,13 +601,13 @@ class App {
 
     if (iconEl) {
       if (isLucky) {
-        iconEl.innerHTML = `<span style="font-size: 3.5rem;">🎟️</span>`;
+        iconEl.innerHTML = `<span style="font-size: 3.5rem;">❓</span>`;
       } else if (isVoucher) {
         iconEl.innerHTML = `<span style="font-size: 3.5rem;">🎁</span>`;
       } else if (info.image) {
         iconEl.innerHTML = `<div class="result-img-wrapper"><img src="${info.image}" alt="${info.prizeName}" class="result-won-img" /></div>`;
       } else {
-        iconEl.innerHTML = `<span style="font-size: 3.5rem;">${info.isWin ? '🎁' : '🍀'}</span>`;
+        iconEl.innerHTML = `<span style="font-size: 3.5rem;">${info.isWin ? '🎁' : '😭'}</span>`;
       }
     }
 
@@ -641,15 +617,6 @@ class App {
     const mysteryNotice = document.getElementById('mystery-box-notice');
     if (mysteryNotice) {
       mysteryNotice.style.display = 'none';
-    }
-
-    if (claimBox && claimVal) {
-      if (info.claimCode) {
-        claimBox.style.display = 'flex';
-        claimVal.textContent = info.claimCode;
-      } else {
-        claimBox.style.display = 'none';
-      }
     }
 
     if (spinsRemainingEl) {

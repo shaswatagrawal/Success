@@ -144,61 +144,42 @@ export class Wheel {
 
     const grad = this.ctx.createRadialGradient(0, 0, radius * 0.15, 0, 0, radius);
 
-    if (isLuckyDraw) {
-      // Champagne gold for Lucky Draw entries
-      grad.addColorStop(0, '#2D200E');
-      grad.addColorStop(0.45, '#1E1609');
-      grad.addColorStop(0.85, '#120E06');
-      grad.addColorStop(1, '#090703');
-      return { fill: grad, accent: '#F59E0B', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
-    }
+    // Strictly RED, BLUE, and YELLOW palette across all 12 slots
+    // Slices 0, 2, 4, 6, 8: Radiant Golden Yellow
+    // Slices 1, 7, 10: Electric Royal Blue
+    // Slices 3, 5, 9, 11: Vibrant Ruby Crimson Red
+    const isYellow = index === 0 || index === 2 || index === 4 || index === 6 || index === 8;
+    const isBlue = index === 1 || index === 7 || index === 10;
 
-    if (isGiftCard) {
-      // Deep Emerald / Sapphire Slate
-      const is500 = labelLower.includes('500');
-      if (is500) {
-        grad.addColorStop(0, '#0E3628');
-        grad.addColorStop(0.5, '#09251C');
-        grad.addColorStop(0.85, '#051610');
-        grad.addColorStop(1, '#020B08');
-        return { fill: grad, accent: '#10B981', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
-      } else {
-        grad.addColorStop(0, '#152C4D');
-        grad.addColorStop(0.5, '#0C1C33');
-        grad.addColorStop(0.85, '#071221');
-        grad.addColorStop(1, '#03080F');
-        return { fill: grad, accent: '#38BDF8', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
-      }
-    }
-
-    if (isHamper) {
-      // Deep Imperial Amethyst
-      grad.addColorStop(0, '#2C134A');
-      grad.addColorStop(0.5, '#1B0930');
-      grad.addColorStop(0.85, '#110520');
-      grad.addColorStop(1, '#08020F');
-      return { fill: grad, accent: '#C084FC', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
-    }
-
-    // Better Luck Next Time: Clean Matte Obsidian / Slate alternating pattern
-    const isAlt = index % 2 === 0;
-    if (isAlt) {
-      grad.addColorStop(0, '#1E2533');
-      grad.addColorStop(0.5, '#141A24');
-      grad.addColorStop(0.85, '#0D1117');
-      grad.addColorStop(1, '#080A0E');
+    if (isYellow) {
+      // 🌟 Luminous Golden Yellow
+      grad.addColorStop(0, '#5C2B04');
+      grad.addColorStop(0.25, '#92400E');
+      grad.addColorStop(0.6, '#D97706');
+      grad.addColorStop(0.88, '#F59E0B');
+      grad.addColorStop(1, '#FDE047');
+      return { fill: grad, accent: '#FDE047', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
+    } else if (isBlue) {
+      // 💎 Electric Royal Sapphire Blue
+      grad.addColorStop(0, '#060F2E');
+      grad.addColorStop(0.25, '#1E3A8A');
+      grad.addColorStop(0.6, '#1D4ED8');
+      grad.addColorStop(0.88, '#2563EB');
+      grad.addColorStop(1, '#60A5FA');
+      return { fill: grad, accent: '#60A5FA', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
     } else {
-      grad.addColorStop(0, '#1A202C');
-      grad.addColorStop(0.5, '#12161F');
-      grad.addColorStop(0.85, '#0B0D13');
-      grad.addColorStop(1, '#06070A');
+      // 🔥 Radiant Crimson Scarlet Red
+      grad.addColorStop(0, '#300408');
+      grad.addColorStop(0.25, '#7F1D1D');
+      grad.addColorStop(0.6, '#B91C1C');
+      grad.addColorStop(0.88, '#DC2626');
+      grad.addColorStop(1, '#F87171');
+      return { fill: grad, accent: '#FCA5A5', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
     }
-    return { fill: grad, accent: 'rgba(255, 255, 255, 0.15)', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
   }
 
   /**
-   * Main rendering method for the wheel circle.
-   * Delivers an edgeless, spotless, razor-sharp studio aesthetic.
+   * Main rendering method for the wheel circle with a realistic 3D metallic casino border and studs.
    */
   public draw(): void {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -206,59 +187,52 @@ export class Wheel {
     const height = this.canvas.height / dpr;
     const centerX = width / 2;
     const centerY = height / 2;
-    // Edgeless: extends all the way near the canvas boundary with 2px clearance
-    const radius = Math.min(centerX, centerY) - 2;
+    const isMobile = width < 460;
+
+    // Realistic border geometry
+    const outerRadius = Math.min(centerX, centerY) - 2;
+    const borderWidth = isMobile ? 18 : 24;
+    const innerRadius = outerRadius - borderWidth;
 
     this.ctx.clearRect(0, 0, width, height);
 
     if (this.slots.length === 0) return;
 
     const sliceAngles = this.computeSliceAngles();
-    const isMobile = width < 460;
 
     this.ctx.save();
     this.ctx.translate(centerX, centerY);
     this.ctx.rotate(this.currentRotation);
 
     // ==========================================
-    // 1. DRAW WEDGES & CONTENT
+    // 1. DRAW INNER ROTATING WEDGES & CONTENT
     // ==========================================
     for (let i = 0; i < this.slots.length; i++) {
       const slot = this.slots[i]!;
       const { start: startAngle, end: endAngle, angle: sliceAngle } = sliceAngles[i]!;
-      const style = this.getSliceStyle(slot, i, radius);
+      const style = this.getSliceStyle(slot, i, innerRadius);
 
-      // Wedge background
+      // Wedge background with subtle 3D lighting vignette
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0);
-      this.ctx.arc(0, 0, radius, startAngle, endAngle);
+      this.ctx.arc(0, 0, innerRadius, startAngle, endAngle);
       this.ctx.closePath();
       this.ctx.fillStyle = style.fill;
       this.ctx.fill();
 
-      // Subtle inner rim accent arc for precious & win slots
-      if (style.isLuckyDraw) {
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, radius - 2, startAngle, endAngle);
-        this.ctx.lineWidth = 2.5;
-        this.ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
-        this.ctx.stroke();
-      } else if (style.isGiftCard) {
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, radius - 2, startAngle, endAngle);
-        this.ctx.lineWidth = 1.5;
-        this.ctx.strokeStyle = style.accent;
-        this.ctx.stroke();
-      }
-
-      // Razor-sharp 1px divider hairline
+      // Realistic 3D slice divider spoke (embossed highlight & shadow)
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0);
-      this.ctx.lineTo(Math.cos(startAngle) * radius, Math.sin(startAngle) * radius);
-      this.ctx.lineWidth = style.isLuckyDraw ? 1.5 : 1;
-      this.ctx.strokeStyle = style.isLuckyDraw
-        ? 'rgba(245, 158, 11, 0.65)'
-        : 'rgba(255, 255, 255, 0.12)';
+      this.ctx.lineTo(Math.cos(startAngle) * innerRadius, Math.sin(startAngle) * innerRadius);
+      this.ctx.lineWidth = 2.5;
+      this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+      this.ctx.stroke();
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(Math.cos(startAngle) * innerRadius, Math.sin(startAngle) * innerRadius);
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
       this.ctx.stroke();
 
       // ==========================================
@@ -268,11 +242,11 @@ export class Wheel {
       const midAngle = startAngle + sliceAngle / 2;
       this.ctx.rotate(midAngle);
 
-      // Proportional layout distances
-      const iconDist = radius * (isMobile ? 0.76 : 0.77);
-      const textDist = radius * (isMobile ? 0.44 : 0.46);
+      // Proportional layout distances - text moved up and balanced with icon
+      const iconDist = innerRadius * (isMobile ? 0.76 : 0.79);
+      const textDist = innerRadius * (isMobile ? 0.46 : 0.49);
       const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
-      const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.95;
+      const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.98;
 
       // --- A) BADGE / ICON RENDERING ---
       this.renderSlotIcon(slot, style, iconDist, availableWidthAtIcon, isMobile);
@@ -283,36 +257,84 @@ export class Wheel {
       this.ctx.restore();
     }
 
-    // Outer subtle concentric track line (precision gauge detail)
+    // Inner shadow chamfer separating wedges from outer border
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius * 0.94, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    this.ctx.arc(0, 0, innerRadius, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 3;
+    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
     this.ctx.stroke();
 
     // ==========================================
-    // 3. EDGELESS PRECISION PERIMETER & NOTCHES
+    // 3. REALISTIC 3D METALLIC GOLD BORDER (BEZEL)
     // ==========================================
-    // Razor-thin titanium/gold perimeter hairline
+    // Outer metallic ring fill
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, radius - 0.75, 0, 2 * Math.PI);
+    this.ctx.arc(0, 0, outerRadius, 0, 2 * Math.PI);
+    this.ctx.arc(0, 0, innerRadius, 0, 2 * Math.PI, true);
+    this.ctx.closePath();
+
+    const bezelGrad = this.ctx.createRadialGradient(0, 0, innerRadius, 0, 0, outerRadius);
+    bezelGrad.addColorStop(0, '#5C2B04');
+    bezelGrad.addColorStop(0.18, '#B45309');
+    bezelGrad.addColorStop(0.45, '#FDE047');
+    bezelGrad.addColorStop(0.75, '#F59E0B');
+    bezelGrad.addColorStop(0.92, '#78350F');
+    bezelGrad.addColorStop(1, '#3B1A02');
+    this.ctx.fillStyle = bezelGrad;
+    this.ctx.fill();
+
+    // Outer rim highlight hairline
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, outerRadius - 0.75, 0, 2 * Math.PI);
     this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
     this.ctx.stroke();
 
-    // Minimalist Micro-Tick Notches at each slice boundary (like a luxury chronograph)
+    // Inner rim gold hairline
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, innerRadius + 0.75, 0, 2 * Math.PI);
+    this.ctx.lineWidth = 1.5;
+    this.ctx.strokeStyle = 'rgba(253, 224, 71, 0.8)';
+    this.ctx.stroke();
+
+    // ==========================================
+    // 4. 3D GOLDEN RIVET STUDS / PEGS ON THE RIM
+    // ==========================================
+    const studRadius = isMobile ? 3.5 : 4.5;
+    const studCenterDist = (innerRadius + outerRadius) / 2;
+
     for (let i = 0; i < this.slots.length; i++) {
       const pinAngle = sliceAngles[i]!.start;
-      const notchOuterX = Math.cos(pinAngle) * radius;
-      const notchOuterY = Math.sin(pinAngle) * radius;
-      const notchInnerX = Math.cos(pinAngle) * (radius - 5.5);
-      const notchInnerY = Math.sin(pinAngle) * (radius - 5.5);
+      const studX = Math.cos(pinAngle) * studCenterDist;
+      const studY = Math.sin(pinAngle) * studCenterDist;
 
+      // Soft drop shadow behind the peg
       this.ctx.beginPath();
-      this.ctx.moveTo(notchOuterX, notchOuterY);
-      this.ctx.lineTo(notchInnerX, notchInnerY);
-      this.ctx.lineWidth = 1.5;
-      this.ctx.strokeStyle = '#F59E0B';
+      this.ctx.arc(studX + 1.2, studY + 1.5, studRadius, 0, 2 * Math.PI);
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      this.ctx.fill();
+
+      // 3D spherical metallic gold body
+      this.ctx.beginPath();
+      this.ctx.arc(studX, studY, studRadius, 0, 2 * Math.PI);
+      const studGrad = this.ctx.createRadialGradient(
+        studX - studRadius * 0.35,
+        studY - studRadius * 0.35,
+        studRadius * 0.1,
+        studX,
+        studY,
+        studRadius
+      );
+      studGrad.addColorStop(0, '#FFFFFF');
+      studGrad.addColorStop(0.3, '#FEF08A');
+      studGrad.addColorStop(0.7, '#F59E0B');
+      studGrad.addColorStop(1, '#78350F');
+      this.ctx.fillStyle = studGrad;
+      this.ctx.fill();
+
+      // Crisp chrome outline
+      this.ctx.lineWidth = 0.75;
+      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
       this.ctx.stroke();
     }
 
@@ -333,66 +355,70 @@ export class Wheel {
     this.ctx.translate(iconDist, 0);
     this.ctx.rotate(Math.PI / 2);
 
-    const baseBadgeRadius = isMobile ? 22 : 30;
-    const maxRadius = (availableWidth * 0.92) / 2;
+    const baseBadgeRadius = isMobile ? 19 : 25;
+    const maxRadius = (availableWidth * 0.90) / 2;
     const badgeRadius = Math.max(14, Math.min(baseBadgeRadius, maxRadius));
 
     if (style.isBetterLuck) {
-      // Minimalist Clover / Luck Glyph
-      const cloverImg = this.imageCache.get('/assets/clover.png');
-      if (cloverImg && cloverImg.complete && cloverImg.naturalWidth > 0) {
-        const size = badgeRadius * 2.1;
-        this.ctx.save();
-        this.ctx.globalAlpha = 0.85;
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        this.ctx.shadowBlur = 4;
-        this.ctx.drawImage(cloverImg, -size / 2, -size / 2, size, size);
-        this.ctx.restore();
-      } else {
-        // Crisp vector four-point star / clover
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, badgeRadius * 0.7, 0, 2 * Math.PI);
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        this.ctx.fill();
-        this.ctx.font = `${badgeRadius * 0.9}px sans-serif`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText('✦', 0, 0);
-      }
-    } else if (style.isLuckyDraw) {
-      // Lucky Draw Entry: Refined Frosted Gold Disc with Golden Star Emblem
+      // Better Luck Next Time: Crying Face Emoji 😭
       this.ctx.beginPath();
       this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(24, 18, 8, 0.92)';
+      this.ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
       this.ctx.fill();
-      this.ctx.lineWidth = 1.5;
-      this.ctx.strokeStyle = '#F59E0B';
+      this.ctx.lineWidth = 1.4;
+      this.ctx.strokeStyle = style.accent;
       this.ctx.stroke();
 
-      this.ctx.font = `${badgeRadius * 1.15}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+      this.ctx.font = `${badgeRadius * 1.45}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
-      this.ctx.fillText('⭐', 0, 0);
+      this.ctx.fillText('😭', 0, 1);
+    } else if (style.isLuckyDraw) {
+      // Lucky Draw Entry: Refined Frosted Gold Disc with ? Symbol
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+      this.ctx.fillStyle = 'rgba(24, 18, 8, 0.95)';
+      this.ctx.fill();
+      this.ctx.lineWidth = 1.6;
+      this.ctx.strokeStyle = '#FDE047';
+      this.ctx.stroke();
+
+      // Bold, stylish Question Mark ?
+      this.ctx.font = `900 ${badgeRadius * 1.45}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      this.ctx.fillStyle = '#FEF08A';
+      this.ctx.shadowColor = 'rgba(245, 158, 11, 0.85)';
+      this.ctx.shadowBlur = 6;
+      this.ctx.fillText('?', 0, 1);
     } else if (style.isGiftCard) {
-      // Gift Voucher: Luxury Sapphire / Emerald Badge
+      // Gift Voucher: Luxury Sapphire / Emerald Badge with Gift Box
       this.ctx.beginPath();
       this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
       this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       this.ctx.fill();
-      this.ctx.lineWidth = 1.2;
+      this.ctx.lineWidth = 1.4;
       this.ctx.strokeStyle = style.accent;
       this.ctx.stroke();
 
-      this.ctx.font = `${badgeRadius * 1.1}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+      this.ctx.font = `${badgeRadius * 1.45}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
-      this.ctx.fillText('🎁', 0, 0);
+      this.ctx.fillText('🎁', 0, 1);
     } else {
       // General Prize
-      this.ctx.font = `${badgeRadius * 1.1}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
+      this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      this.ctx.fill();
+      this.ctx.lineWidth = 1.4;
+      this.ctx.strokeStyle = style.accent;
+      this.ctx.stroke();
+
+      this.ctx.font = `${badgeRadius * 1.45}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
-      this.ctx.fillText('🎁', 0, 0);
+      this.ctx.fillText('🎁', 0, 1);
     }
 
     this.ctx.restore();
@@ -425,19 +451,19 @@ export class Wheel {
 
     if (style.isBetterLuck) {
       // 2 clean stacked lines for Better Luck Next Time
-      let fontSize = isMobile ? 11.5 : 13.5;
+      let fontSize = isMobile ? 13 : 15.5;
       this.ctx.font = `700 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
       let m1 = this.ctx.measureText('Better Luck');
       let m2 = this.ctx.measureText('Next Time!');
 
-      while ((m1.width > availableWidth || m2.width > availableWidth) && fontSize > 8.5) {
+      while ((m1.width > availableWidth || m2.width > availableWidth) && fontSize > 9) {
         fontSize -= 0.5;
         this.ctx.font = `700 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
         m1 = this.ctx.measureText('Better Luck');
         m2 = this.ctx.measureText('Next Time!');
       }
 
-      const lineSpacing = fontSize * 0.75;
+      const lineSpacing = fontSize * 0.72;
       this.ctx.fillStyle = '#CBD5E1';
       this.ctx.fillText('Better Luck', 0, -lineSpacing);
       this.ctx.fillText('Next Time!', 0, lineSpacing);
@@ -446,20 +472,20 @@ export class Wheel {
       const line1 = "You've Entered";
       const line2 = 'Lucky Draw!';
 
-      let fontSize = isMobile ? 11.5 : 13.5;
+      let fontSize = isMobile ? 13 : 15.5;
       this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
 
       let mw1 = this.ctx.measureText(line1);
       let mw2 = this.ctx.measureText(line2);
 
-      while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 8.5) {
+      while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 9) {
         fontSize -= 0.5;
         this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
         mw1 = this.ctx.measureText(line1);
         mw2 = this.ctx.measureText(line2);
       }
 
-      const lineSpacing = fontSize * 0.78;
+      const lineSpacing = fontSize * 0.74;
       this.ctx.fillStyle = '#FEF08A';
       this.ctx.fillText(line1, 0, -lineSpacing);
       this.ctx.fillText(line2, 0, lineSpacing);
@@ -469,29 +495,29 @@ export class Wheel {
       const line1 = is1000 ? 'Rs. 1,000' : 'Rs. 500';
       const line2 = 'Gift Voucher';
 
-      let fontSize = isMobile ? 12 : 14;
+      let fontSize = isMobile ? 13.5 : 16.5;
       this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
 
       let mw1 = this.ctx.measureText(line1);
       let mw2 = this.ctx.measureText(line2);
 
-      while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 8.5) {
+      while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 9) {
         fontSize -= 0.5;
         this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
         mw1 = this.ctx.measureText(line1);
         mw2 = this.ctx.measureText(line2);
       }
 
-      const lineSpacing = fontSize * 0.78;
+      const lineSpacing = fontSize * 0.74;
       this.ctx.fillStyle = slot.textColor || '#FFFFFF';
       this.ctx.fillText(line1, 0, -lineSpacing);
       this.ctx.fillText(line2, 0, lineSpacing);
     } else {
       // General prize formatting fallback
-      let fontSize = isMobile ? 12 : 14;
+      let fontSize = isMobile ? 13.5 : 16.5;
       this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
       let textMetrics = this.ctx.measureText(displayLabel);
-      while (textMetrics.width > availableWidth && fontSize > 8.5) {
+      while (textMetrics.width > availableWidth && fontSize > 9) {
         fontSize -= 0.5;
         this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
         textMetrics = this.ctx.measureText(displayLabel);

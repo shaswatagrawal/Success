@@ -20,7 +20,7 @@
   <!-- Fullscreen Video Background -->
   <div class="video-bg-container">
     <video class="video-bg" autoplay muted loop playsinline preload="auto" aria-hidden="true">
-      <source src="/assets/video.mp4" type="video/mp4" />
+      <source src="/assets/tihar.mp4" type="video/mp4" />
     </video>
     <div class="video-bg-overlay"></div>
   </div>
@@ -198,24 +198,29 @@
               <div>
                 <h3 style="margin: 0; font-size: 1.1rem;">Spin Number & Participant Log Reset</h3>
                 <p class="panel-desc" style="margin: 0.2rem 0 0 0;">
-                  Reset all recorded promotional spin numbers and participant logs. Strictly restricted to once every 24 hours.
+                  Reset all recorded promotional spin numbers and participant logs. Strictly restricted to once every 24
+                  hours.
                 </p>
               </div>
             </div>
             <span id="reset-cooldown-badge" class="badge badge-accent">Checking cooldown...</span>
           </div>
 
-          <div class="reset-panel-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; padding-top: 0.5rem;">
+          <div class="reset-panel-body"
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; padding-top: 0.5rem;">
             <div class="reset-meta-info" style="display: flex; flex-direction: column; gap: 0.35rem;">
               <div style="font-size: 0.88rem; color: var(--text-main);">
-                <strong style="color: var(--text-muted);">Last Reset:</strong> <span id="last-reset-time-text" style="font-weight: 700; color: #FCD34D;">Never</span>
+                <strong style="color: var(--text-muted);">Last Reset:</strong> <span id="last-reset-time-text"
+                  style="font-weight: 700; color: #FCD34D;">Never</span>
               </div>
               <div style="font-size: 0.88rem; color: var(--text-main);">
-                <strong style="color: var(--text-muted);">Next Allowed Reset:</strong> <span id="next-reset-time-text" style="font-weight: 700; color: #6EE7B7;">Available Now</span>
+                <strong style="color: var(--text-muted);">Next Allowed Reset:</strong> <span id="next-reset-time-text"
+                  style="font-weight: 700; color: #6EE7B7;">Available Now</span>
               </div>
             </div>
 
-            <div class="reset-action-group" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
+            <div class="reset-action-group"
+              style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
               <button id="admin-reset-spins-btn" type="button" class="btn btn-reset">
                 ⚠️ Reset All Spin Numbers
               </button>
@@ -313,11 +318,6 @@
         </p>
       </div>
 
-      <div class="counseling-highlight-banner" style="background: rgba(180, 83, 9, 0.18); border: 1px solid rgba(253, 224, 71, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #FEF08A; display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.25rem;">✨</span>
-        <span><strong>January 2027 Intake Lucky Draw:</strong> Land on <strong>You've Entered the Lucky Draw!</strong> to enter the final draw for <strong>3 Premium Gifts</strong> (for students receiving visa via SEVS)! Or win <strong>Instant Rs. 500 & Rs. 1,000 Gift Vouchers</strong>!</span>
-      </div>
-
       <form id="registration-form" class="modal-form" novalidate>
         <div class="form-group">
           <label for="reg-name" class="form-label">Full Name</label>
@@ -344,9 +344,6 @@
           <label for="reg-intake" class="form-label">Target Visa Intake</label>
           <select id="reg-intake" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
             <option value="jan_2027" selected>⭐ January 2027 Intake (Success Education & Visa Services)</option>
-            <option value="may_jul_2026">May / July 2026 Intake</option>
-            <option value="sep_fall_2026">September / Fall 2026 Intake</option>
-            <option value="general_counseling">General Office Counseling / Other</option>
           </select>
           <span class="field-error" id="intake-error"></span>
         </div>
@@ -355,6 +352,7 @@
           <label for="reg-country" class="form-label">Preferred Study Destination</label>
           <select id="reg-country" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
             <option value="Australia" selected>Australia 🇦🇺</option>
+            <option value="London UK">London UK 🇬🇧</option>
             <option value="United Kingdom">United Kingdom 🇬🇧</option>
             <option value="USA">USA 🇺🇸</option>
             <option value="Canada">Canada 🇨🇦</option>
@@ -417,21 +415,9 @@
           <div class="mystery-notice-content">
             <span class="mystery-notice-title">SPECIAL NOTICE</span>
             <p class="mystery-notice-text">The prize inside the <strong>MYSTERY BOX</strong> will be decided after
-              <strong>3 weeks</strong>.</p>
+              <strong>3 weeks</strong>.
+            </p>
           </div>
-        </div>
-
-        <!-- Grand Prize & Voucher Claim Code Display -->
-        <div id="claim-code-container" class="claim-box" style="display: none;">
-          <span class="claim-label">OFFICIAL CLAIM CODE:</span>
-          <div class="claim-code-row">
-            <code id="claim-code-value" class="claim-code">PRECIOUS-JAN27-XXXX</code>
-            <button id="copy-claim-btn" class="btn btn-secondary btn-sm" type="button"
-              title="Copy claim code to clipboard">
-              Copy
-            </button>
-          </div>
-          <span class="claim-note">Save this code. Present it at Success Education & Visa Services (Kumaripati) to redeem!</span>
         </div>
 
         <div class="result-spins-left">
@@ -481,12 +467,19 @@
         <h2 class="modal-title">Promotion & Counseling Rules</h2>
       </div>
       <div class="modal-body rules-content">
-        <p><strong>1. Office Counseling Eligibility:</strong> Students who visit the Success Education & Visa Services (SEVS) office and complete a counseling session are eligible to spin the wheel.</p>
+        <p><strong>1. Office Counseling Eligibility:</strong> Students who visit the Success Education & Visa Services
+          (SEVS) office and complete a counseling session are eligible to spin the wheel.</p>
         <p><strong>2. Spin Allocation:</strong> Each participant receives exactly 1 verified promotional spin.</p>
-        <p><strong>3. Instant Prizes:</strong> If you land on <strong>Rs. 500 Gift Voucher</strong> or <strong>Rs. 1,000 Gift Voucher</strong>, it is treated as an instant prize to be redeemed at our office.</p>
-        <p><strong>4. January 2027 Intake Lucky Draw:</strong> If you land on <strong>“You’ve Entered the Lucky Draw!”</strong>, your details are recorded separately in the official Lucky Draw pool for the January 2027 intake.</p>
-        <p><strong>5. Final Premium Gift Draw:</strong> Students from the Lucky Draw pool who later receive their visa through Success Education & Visa Services will be eligible for the final draw featuring <strong>3 Premium Gifts / Prizes</strong>.</p>
-        <p><strong>6. 100% Guaranteed Outcome:</strong> Every counseled participant wins either an instant voucher or a Lucky Draw qualification.</p>
+        <p><strong>3. Instant Prizes:</strong> If you land on <strong>Rs. 500 Gift Voucher</strong> or <strong>Rs. 1,000
+            Gift Voucher</strong>, it is treated as an instant prize to be redeemed at our office.</p>
+        <p><strong>4. January 2027 Intake Lucky Draw:</strong> If you land on <strong>“You’ve Entered the Lucky
+            Draw!”</strong>, your details are recorded separately in the official Lucky Draw pool for the January 2027
+          intake.</p>
+        <p><strong>5. Final Premium Gift Draw:</strong> Students from the Lucky Draw pool who later receive their visa
+          through Success Education & Visa Services will be eligible for the final draw featuring <strong>3 Premium
+            Gifts / Prizes</strong>.</p>
+        <p><strong>6. Wheel Slots & Distribution:</strong> The wheel features 12 equal slots consisting of 3 Lucky Draw
+          Entries, 2 Rs. 1,000 Gift Vouchers, 4 Rs. 500 Gift Vouchers, and 3 Better Luck Next Time slots.</p>
       </div>
       <div class="modal-footer">
         <button id="rules-agree-btn" class="btn btn-secondary btn-block" type="button">

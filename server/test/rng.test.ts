@@ -24,6 +24,7 @@ describe('Cryptographically Secure Weighted Picker', () => {
     let luckyDrawTotal = 0;
     let voucher1000Total = 0;
     let voucher500Total = 0;
+    let betterLuckTotal = 0;
 
     for (const slot of SLOTS) {
       const count = counts.get(slot.index) ?? 0;
@@ -33,21 +34,27 @@ describe('Cryptographically Secure Weighted Picker', () => {
         voucher1000Total += count;
       } else if (slot.prizeKey.includes('500')) {
         voucher500Total += count;
+      } else if (!slot.isWin || slot.prizeKey.startsWith('better_luck')) {
+        betterLuckTotal += count;
       }
     }
 
     const luckyDrawPct = (luckyDrawTotal / N) * 100;
     const voucher1000Pct = (voucher1000Total / N) * 100;
     const voucher500Pct = (voucher500Total / N) * 100;
+    const betterLuckPct = (betterLuckTotal / N) * 100;
 
-    // Expected: 41.67% lucky draw (5 slots), 25% 1000 voucher (3 slots), 33.33% 500 voucher (4 slots)
-    expect(luckyDrawPct).toBeGreaterThan(38.0);
-    expect(luckyDrawPct).toBeLessThan(45.0);
+    // Expected: 25.0% lucky draw (3 slots), 16.67% 1000 voucher (2 slots), 33.33% 500 voucher (4 slots), 25.0% Better Luck Next Time (3 slots)
+    expect(luckyDrawPct).toBeGreaterThan(22.0);
+    expect(luckyDrawPct).toBeLessThan(28.0);
 
-    expect(voucher1000Pct).toBeGreaterThan(22.0);
-    expect(voucher1000Pct).toBeLessThan(28.0);
+    expect(voucher1000Pct).toBeGreaterThan(14.0);
+    expect(voucher1000Pct).toBeLessThan(20.0);
 
     expect(voucher500Pct).toBeGreaterThan(30.0);
     expect(voucher500Pct).toBeLessThan(37.0);
+
+    expect(betterLuckPct).toBeGreaterThan(22.0);
+    expect(betterLuckPct).toBeLessThan(28.0);
   });
 });

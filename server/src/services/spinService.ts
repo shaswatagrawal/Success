@@ -187,13 +187,15 @@ export async function executeSpin(
   };
 
   let message = `Congratulations! You won: ${prizeLabel}!`;
-  if (luckyDraw) {
+  if (!winningSlot.isWin || winningSlot.prizeKey.startsWith('better_luck') || prizeLabel.toLowerCase().includes('better luck')) {
+    message = 'Better Luck Next Time!';
+  } else if (luckyDraw) {
     message =
-      "Congratulations! You've Entered the Lucky Draw! This pool is connected to the January 2027 intake. Students from this list who later receive their visa through Success Education & Visa Services will be eligible for the final premium gift draw (3 premium gifts).";
+      "Congratulations! You've Entered the Lucky Draw! ";
   } else if (winningSlot.prizeKey.includes('1000')) {
-    message = 'Congratulations! You won an instant Rs. 1,000 Gift Voucher. Present your claim code at the SEVS office to redeem.';
+    message = 'Congratulations! You won an instant Rs. 1,000 Gift Voucher.';
   } else if (winningSlot.prizeKey.includes('500')) {
-    message = 'Congratulations! You won an instant Rs. 500 Gift Voucher. Present your claim code at the SEVS office to redeem.';
+    message = 'Congratulations! You won an instant Rs. 500 Gift Voucher.';
   }
 
   // 8. Send branded confirmation email to participant asynchronously
