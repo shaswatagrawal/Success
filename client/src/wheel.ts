@@ -258,11 +258,6 @@ export class Wheel {
     this.ctx.fillStyle = premium ? '#F59E0B' : '#2563EB';
     this.ctx.fillRect(-size * 0.46, -size * 0.3, size * 0.18, size * 0.6);
     this.ctx.restore();
-    this.ctx.fillStyle = premium ? '#B45309' : '#1E3A8A';
-    this.ctx.font = `800 ${Math.max(8, size * 0.22)}px Outfit, sans-serif`;
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(premium ? '1,000' : '500', size * 0.1, size * 0.02);
   }
 
   private drawStar(x: number, y: number, inner: number, outer: number, color: string): void {
@@ -290,16 +285,14 @@ export class Wheel {
     const kind = this.slotKind(slot);
     const cabin = this.cabinStyle(index);
     const highlighted = index === this.highlightIndex;
-    const gondolaW = Math.max(isMobile ? 46 : 62, orbit * 0.33);
-    const gondolaH = gondolaW * 1.12;
+    const gondolaW = Math.min(isMobile ? 52 : 68, Math.max(42, orbit * 0.2));
+    const gondolaH = gondolaW * 0.92;
 
     this.ctx.save();
     this.ctx.rotate(midAngle);
     this.ctx.translate(orbit, 0);
     this.ctx.rotate(-(this.currentRotation + midAngle));
-    if (highlighted) this.ctx.scale(1.12, 1.12);
-
-    this.drawMapPin(0, -gondolaH / 2 - (isMobile ? 8 : 11), highlighted ? '#F97316' : cabin.border, isMobile ? 0.72 : 0.86);
+    if (highlighted) this.ctx.scale(1.08, 1.08);
 
     this.ctx.save();
     this.roundRect(-gondolaW / 2, -gondolaH / 2, gondolaW, gondolaH, isMobile ? 10 : 14);
@@ -317,17 +310,17 @@ export class Wheel {
     this.ctx.restore();
 
     this.ctx.save();
-    this.ctx.translate(0, -gondolaH * 0.12);
-    this.drawCabinArt(kind, gondolaW * 0.62);
+    this.ctx.translate(0, -gondolaH * 0.16);
+    this.drawCabinArt(kind, gondolaW * 0.38);
     this.ctx.restore();
 
     const lines =
       kind === 'lucky'
         ? ['Lucky', 'Draw']
         : kind === 'voucher1000'
-          ? ['Rs. 1,000', 'Voucher']
+          ? ['Rs. 1,000', '']
           : kind === 'voucher500'
-            ? ['Rs. 500', 'Voucher']
+            ? ['Rs. 500', '']
             : ['Better', 'Luck'];
 
     let fontSize = Math.max(8, gondolaW * 0.16);
@@ -345,8 +338,12 @@ export class Wheel {
       this.ctx.font = `800 ${fontSize}px ${fontFamily}`;
     }
     const lineGap = fontSize * 0.62;
-    this.ctx.fillText(lines[0]!, 0, gondolaH * 0.22 - lineGap);
-    this.ctx.fillText(lines[1]!, 0, gondolaH * 0.22 + lineGap);
+    if (!lines[1]) {
+      this.ctx.fillText(lines[0]!, 0, gondolaH * 0.24);
+    } else {
+      this.ctx.fillText(lines[0]!, 0, gondolaH * 0.24 - lineGap);
+      this.ctx.fillText(lines[1]!, 0, gondolaH * 0.24 + lineGap);
+    }
 
     this.ctx.restore();
   }
@@ -366,9 +363,8 @@ export class Wheel {
     if (this.slots.length === 0) return;
 
     const sliceAngles = this.computeSliceAngles();
-    const gondolaW = isMobile ? 52 : 74;
-    const margin = isMobile ? 42 : 58;
-    const orbit = Math.min(centerX, centerY) - margin - gondolaW * 0.62;
+    const margin = isMobile ? 30 : 46;
+    const orbit = Math.min(centerX, centerY) - margin - (isMobile ? 22 : 24);
 
     this.drawSupports(centerX, centerY, height, isMobile);
 
@@ -376,16 +372,16 @@ export class Wheel {
     this.ctx.translate(centerX, centerY);
     this.ctx.rotate(this.currentRotation);
 
-    const hubR = isMobile ? 34 : 46;
+    // Draw spokes from center (0,0) to orbit - connects directly with spin button
     this.ctx.lineCap = 'round';
-    this.ctx.strokeStyle = '#2F7FEA';
-    this.ctx.lineWidth = isMobile ? 1.15 : 1.5;
+    this.ctx.strokeStyle = 'rgba(47, 127, 234, 0.85)';
+    this.ctx.lineWidth = isMobile ? 1.1 : 1.35;
 
-    const spokeCount = 36;
+    const spokeCount = 12;
     for (let s = 0; s < spokeCount; s++) {
       const angle = (s / spokeCount) * Math.PI * 2;
       this.ctx.beginPath();
-      this.ctx.moveTo(Math.cos(angle) * hubR, Math.sin(angle) * hubR);
+      this.ctx.moveTo(0, 0); // Start from center to connect with spin button
       this.ctx.lineTo(Math.cos(angle) * orbit, Math.sin(angle) * orbit);
       this.ctx.stroke();
     }
@@ -430,11 +426,10 @@ export class Wheel {
   }
 
   /**
-   * Suspense deceleration easing function.
-   * Starts with rapid momentum, slows smoothly to build authentic tension.
+   * Deceleration curve. A higher power coasts longer, then brakes harder.
    */
-  private easeOutSuspense(t: number): number {
-    return 1 - Math.pow(1 - t, 4.4);
+  private easeOutSuspense(t: number, power: number): number {
+    return 1 - Math.pow(1 - t, power);
   }
 
   /** Uniform value in [0, 1) from the browser CSPRNG. */
@@ -472,8 +467,8 @@ export class Wheel {
       const targetSlice = sliceAngles[targetSlotIndex]!;
       const targetCenterAngle = targetSlice.start + targetSlice.angle / 2;
 
-      // Stop somewhere inside the winning cabin, not always on its exact center.
-      const jitter = (this.randomUnit() - 0.5) * targetSlice.angle * 0.62;
+      // Stop near either edge of the winning cabin, not on a repeated center line.
+      const jitter = (this.randomUnit() - 0.5) * targetSlice.angle * 0.86;
 
       // Calculate angle difference
       const currentNorm = this.currentRotation % (2 * Math.PI);
@@ -482,13 +477,15 @@ export class Wheel {
         angleDiff += 2 * Math.PI;
       }
 
-      // Randomizer: 6 to 10 full turns, so no two spins travel the same path.
-      const fullRotations = this.randomInt(6, 10) * (2 * Math.PI);
+      // Randomizer: 5–14 turns, either direction, and a different brake each spin.
+      const turns = this.randomInt(5, 14);
+      const direction = this.randomUnit() < 0.5 ? 1 : -1;
+      const easePower = 2.8 + this.randomUnit() * 4.2;
+      const fullRotations = direction * turns * (2 * Math.PI);
       const startRotation = this.currentRotation;
       const finalRotation = this.currentRotation + fullRotations + angleDiff;
 
-      // Randomizer: 6.4s to 9.2s, matched to how many turns were drawn.
-      const durationMs = 6400 + Math.floor(this.randomUnit() * 2800);
+      const durationMs = 3800 + turns * 420 + Math.floor(this.randomUnit() * 2200);
       const startTime = performance.now();
 
       const pointerEl = document.getElementById('wheel-pointer');
@@ -496,7 +493,7 @@ export class Wheel {
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(1, elapsed / durationMs);
-        const easedProgress = this.easeOutSuspense(progress);
+        const easedProgress = this.easeOutSuspense(progress, easePower);
 
         this.currentRotation = startRotation + (finalRotation - startRotation) * easedProgress;
 

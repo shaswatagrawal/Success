@@ -12,10 +12,12 @@ export function pickWinningSlot(slots: readonly SlotConfig[]): SlotConfig {
     throw new Error('Cannot pick from an empty slot list');
   }
 
-  // Equal slots: one uniform draw across the wheel. This is the spin randomizer.
+  // Equal slots: mix two independent draws so successive spins do not follow a pattern.
   const firstWeight = slots[0]!.weight;
   if (slots.every((slot) => slot.weight === firstWeight)) {
-    return slots[crypto.randomInt(0, slots.length)]!;
+    const firstDraw = crypto.randomInt(0, slots.length);
+    const secondDraw = crypto.randomInt(0, slots.length);
+    return slots[(firstDraw + secondDraw) % slots.length]!;
   }
 
   // Calculate cumulative integer scale (basis points: 1% = 100 bps, sum = 10,000)
