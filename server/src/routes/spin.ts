@@ -46,7 +46,12 @@ spinRouter.post(
 
       const result = await startSpin({
         name: validated.name,
+        email: validated.email,
+        phone: validated.phone,
         contact: validated.contact,
+        intake: validated.intake,
+        isCounselled: validated.isCounselled,
+        preferredCountry: validated.preferredCountry,
         consent: validated.consent,
         deviceId,
       });

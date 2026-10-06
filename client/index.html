@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Mukta:wght@700;800&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -32,14 +32,51 @@
 
   <div id="app" class="app-container">
     <!-- Main Promotion View -->
-    <main id="main-view" class="view-section active">
+    <main id="main-view" class="view-section active poster-scene">
+      <div class="sky-fixed" aria-hidden="true">
+        <div class="sun-bloom"></div>
+        <div class="sun-disc"></div>
+        <div class="haze-band"></div>
+        <div class="cirrus cirrus-a"></div>
+        <div class="cirrus cirrus-b"></div>
+        <div class="bokeh bokeh-a"></div>
+        <div class="bokeh bokeh-b"></div>
+        <div class="bokeh bokeh-c"></div>
+        <svg class="horizon" viewBox="0 0 1440 460" preserveAspectRatio="none">
+          <path fill="#e7b08f" opacity="0.55" d="M0 210 C160 150 280 240 460 180 C660 110 820 230 1040 170 C1220 120 1340 190 1440 150 L1440 460 L0 460 Z"/>
+          <path fill="#c98468" d="M0 250 C180 190 320 280 520 220 C740 150 900 270 1120 210 C1280 170 1380 220 1440 190 L1440 460 L0 460 Z"/>
+          <path fill="#8d4b3c" d="M0 310 C220 260 380 340 620 300 C860 260 1040 340 1440 280 L1440 460 L0 460 Z"/>
+          <path fill="#5c2c28" d="M0 380 L0 460 L1440 460 L1440 360 L1388 360 L1388 318 L1342 318 L1342 344 L1290 344 L1290 292 L1248 292 L1248 338 L1188 338 L1188 270 L1144 270 L1144 332 L1080 332 L1080 300 L1036 300 L1036 352 L960 352 L960 310 L910 310 L910 368 L820 368 L820 330 L770 330 L770 390 L680 390 L680 348 L630 348 L630 400 L520 400 L520 356 L470 356 L470 392 L360 392 L360 340 L310 340 L310 404 L210 404 L210 362 L150 362 L150 420 L70 420 L70 388 L0 388 Z"/>
+          <g fill="#ffd089" opacity="0.85">
+            <rect x="1152" y="286" width="6" height="8"/>
+            <rect x="1168" y="300" width="6" height="8"/>
+            <rect x="1196" y="312" width="5" height="7"/>
+            <rect x="1258" y="308" width="6" height="8"/>
+            <rect x="1304" y="332" width="5" height="7"/>
+            <rect x="1354" y="334" width="6" height="8"/>
+            <rect x="1048" y="316" width="5" height="7"/>
+            <rect x="920" y="328" width="5" height="7"/>
+            <rect x="782" y="348" width="5" height="7"/>
+            <rect x="322" y="358" width="5" height="7"/>
+            <rect x="162" y="378" width="5" height="7"/>
+            <rect x="486" y="372" width="5" height="7"/>
+          </g>
+        </svg>
+        <svg class="film-grain" aria-hidden="true">
+          <filter id="grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+          </filter>
+          <rect width="100%" height="100%" filter="url(#grain)"/>
+        </svg>
+      </div>
+
       <!-- Navigation Bar -->
       <header class="navbar">
         <div class="brand">
           <img src="/assets/logo.png" alt="SUCCESS Education and Visa Services" class="brand-logo" />
           <div class="brand-text">
             <span class="brand-title">Success Education & Visa Services</span>
-            <span class="brand-subtitle">FESTIVE LUCKY DRAW</span>
+            <span class="brand-subtitle">SPIN & WIN</span>
           </div>
         </div>
         <div class="nav-actions">
@@ -55,16 +92,17 @@
 
       <!-- Main Game Content -->
       <div class="hero-content">
-        <!-- Game Wheel Board (Main Focal Point) -->
+        <div class="poster-layout">
+        <!-- Ferris wheel -->
+        <div class="wheel-column">
         <div class="wheel-stage">
           <div class="wheel-outer-glow"></div>
 
           <div class="wheel-wrapper">
-            <!-- Wheel Pointer Pin -->
+            <!-- Stop pin: the cabin under this marker is the result -->
             <div class="wheel-pointer-container">
               <div class="wheel-pointer" id="wheel-pointer">
-                <div class="pointer-arrow"></div>
-                <div class="pointer-jewel"></div>
+                <div class="map-pin"></div>
               </div>
             </div>
 
@@ -75,10 +113,116 @@
             <button id="spin-center-btn" class="wheel-hub-btn" type="button" aria-label="Spin the Wheel">
               <div class="hub-inner">
                 <span class="hub-spin-text">SPIN</span>
-                <span class="hub-sub-text">NOW</span>
               </div>
             </button>
           </div>
+
+          <div class="location-pill">
+            <span class="pill-pin" aria-hidden="true"></span>
+            SEVS Office, Kathmandu
+          </div>
+        </div>
+        </div>
+
+        <aside class="poster-aside">
+          <svg class="diya diya-small" viewBox="0 0 160 140" aria-hidden="true">
+            <defs>
+              <radialGradient id="clayA" cx="32%" cy="28%" r="78%">
+                <stop offset="0%" stop-color="#F6C09A"/>
+                <stop offset="32%" stop-color="#E18448"/>
+                <stop offset="68%" stop-color="#C25422"/>
+                <stop offset="100%" stop-color="#7C2D12"/>
+              </radialGradient>
+              <linearGradient id="oilA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FDE68A"/>
+                <stop offset="48%" stop-color="#D97706"/>
+                <stop offset="100%" stop-color="#92400E"/>
+              </linearGradient>
+              <linearGradient id="flameA" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#FFF7ED"/>
+                <stop offset="28%" stop-color="#FDE047"/>
+                <stop offset="68%" stop-color="#F97316"/>
+                <stop offset="100%" stop-color="#C2410C"/>
+              </linearGradient>
+              <filter id="blurA" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="3.6"/>
+              </filter>
+            </defs>
+            <ellipse cx="78" cy="126" rx="46" ry="7" fill="#7C2D12" opacity="0.2"/>
+            <path d="M24 90 C22 64 42 52 74 50 C100 48 120 56 132 66 L150 76 C154 80 148 86 138 84 C128 106 108 120 76 122 C42 124 24 110 24 90 Z" fill="url(#clayA)"/>
+            <path d="M36 88 C38 74 54 68 78 68 C104 68 122 76 128 84 C118 76 100 74 78 74 C56 74 40 80 36 88 Z" fill="#6B2B12" opacity="0.45"/>
+            <ellipse cx="80" cy="86" rx="34" ry="9" fill="url(#oilA)"/>
+            <ellipse cx="68" cy="83" rx="12" ry="3" fill="#FFFFFF" opacity="0.38"/>
+            <path d="M32 84 C50 68 108 66 136 78" fill="none" stroke="#F8D0B0" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+            <path d="M82 86 C84 76 80 68 83 58" fill="none" stroke="#3F2A1D" stroke-width="2.3" stroke-linecap="round"/>
+            <circle cx="83" cy="57" r="1.5" fill="#1C1917"/>
+            <g class="diya-glow" filter="url(#blurA)">
+              <path d="M83 10 C96 28 102 44 83 64 C64 44 70 28 83 10 Z" fill="#FB923C" opacity="0.7"/>
+            </g>
+            <g class="diya-flame">
+              <path d="M83 8 C95 26 101 42 83 62 C65 42 71 26 83 8 Z" fill="url(#flameA)"/>
+              <path d="M83 24 C89 34 91 42 83 54 C75 42 77 34 83 24 Z" fill="#FEF9C3"/>
+              <path d="M83 36 C86 42 87 46 83 52 C79 46 80 42 83 36 Z" fill="#FFFFFF" opacity="0.92"/>
+            </g>
+          </svg>
+          <svg class="diya diya-large" viewBox="0 0 160 140" aria-hidden="true">
+            <defs>
+              <radialGradient id="clayB" cx="32%" cy="28%" r="78%">
+                <stop offset="0%" stop-color="#E8A56E"/>
+                <stop offset="34%" stop-color="#C85B2A"/>
+                <stop offset="70%" stop-color="#A34118"/>
+                <stop offset="100%" stop-color="#6B2410"/>
+              </radialGradient>
+              <linearGradient id="oilB" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FCD34D"/>
+                <stop offset="50%" stop-color="#B45309"/>
+                <stop offset="100%" stop-color="#78350F"/>
+              </linearGradient>
+              <linearGradient id="flameB" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#FFFFFF"/>
+                <stop offset="22%" stop-color="#FEF08A"/>
+                <stop offset="60%" stop-color="#F59E0B"/>
+                <stop offset="100%" stop-color="#EA580C"/>
+              </linearGradient>
+              <filter id="blurB" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="3.6"/>
+              </filter>
+            </defs>
+            <ellipse cx="78" cy="126" rx="46" ry="7" fill="#7C2D12" opacity="0.2"/>
+            <path d="M24 90 C22 64 42 52 74 50 C100 48 120 56 132 66 L150 76 C154 80 148 86 138 84 C128 106 108 120 76 122 C42 124 24 110 24 90 Z" fill="url(#clayB)"/>
+            <path d="M36 88 C38 74 54 68 78 68 C104 68 122 76 128 84 C118 76 100 74 78 74 C56 74 40 80 36 88 Z" fill="#5C2410" opacity="0.5"/>
+            <ellipse cx="80" cy="86" rx="34" ry="9" fill="url(#oilB)"/>
+            <ellipse cx="68" cy="83" rx="12" ry="3" fill="#FFFFFF" opacity="0.32"/>
+            <path d="M32 84 C50 68 108 66 136 78" fill="none" stroke="#F3C4A4" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+            <path d="M82 86 C84 76 80 68 83 58" fill="none" stroke="#3F2A1D" stroke-width="2.3" stroke-linecap="round"/>
+            <circle cx="83" cy="57" r="1.5" fill="#1C1917"/>
+            <g class="diya-glow" filter="url(#blurB)">
+              <path d="M83 10 C96 28 102 44 83 64 C64 44 70 28 83 10 Z" fill="#FDBA74" opacity="0.75"/>
+            </g>
+            <g class="diya-flame">
+              <path d="M83 8 C95 26 101 42 83 62 C65 42 71 26 83 8 Z" fill="url(#flameB)"/>
+              <path d="M83 24 C89 34 91 42 83 54 C75 42 77 34 83 24 Z" fill="#FEF9C3"/>
+              <path d="M83 36 C86 42 87 46 83 52 C79 46 80 42 83 36 Z" fill="#FFFFFF" opacity="0.95"/>
+            </g>
+          </svg>
+
+          <p class="poster-slogan">MORE DREAMS.<br />BETTER FUTURE.</p>
+
+          <div class="logo-block">
+            <div class="logo-lockup">
+              <div class="logo-word">Success</div>
+              <div class="logo-service">Education &amp; Visa</div>
+            </div>
+          </div>
+
+          <p class="offer-kicker">January 2027 intake · one spin</p>
+          <ul class="offer-chips">
+            <li>Rs. 1,000 voucher</li>
+            <li>Rs. 500 voucher</li>
+            <li>Lucky Draw entry</li>
+            <li>3 premium gifts</li>
+          </ul>
+        </aside>
         </div>
 
         <!-- Participant Status Card -->
@@ -87,13 +231,18 @@
             <div class="status-info">
               <div class="user-greeting">
                 <span id="participant-name-display" class="participant-name">Welcome, Guest!</span>
-                <span class="verified-tag">✓ Verified Entry</span>
+                <span class="verified-tag is-guest" id="verified-tag">One spin after in-office counselling</span>
               </div>
               <div class="spins-badge-wrapper">
                 <span class="spins-label">Spins Remaining:</span>
                 <span id="spins-count-badge" class="badge badge-accent">1 / 1</span>
               </div>
             </div>
+            <ol class="how-steps">
+              <li><span>1</span>Visit the SEVS office</li>
+              <li><span>2</span>Complete counselling</li>
+              <li><span>3</span>Take your one spin</li>
+            </ol>
             <div class="status-actions">
               <button id="change-user-btn" class="btn btn-outline btn-sm" type="button">
                 Switch User
@@ -342,7 +491,7 @@
 
         <div class="form-group">
           <label for="reg-intake" class="form-label">Target Visa Intake</label>
-          <select id="reg-intake" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
+          <select id="reg-intake" class="form-control">
             <option value="jan_2027" selected>⭐ January 2027 Intake (Success Education & Visa Services)</option>
           </select>
           <span class="field-error" id="intake-error"></span>
@@ -350,7 +499,7 @@
 
         <div class="form-group">
           <label for="reg-country" class="form-label">Preferred Study Destination</label>
-          <select id="reg-country" class="form-control" style="background: rgba(15, 23, 42, 0.85); color: #F8FAFC;">
+          <select id="reg-country" class="form-control">
             <option value="Australia" selected>Australia 🇦🇺</option>
             <option value="London UK">London UK 🇬🇧</option>
             <option value="United Kingdom">United Kingdom 🇬🇧</option>

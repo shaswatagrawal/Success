@@ -180,6 +180,17 @@ class App {
       nameEl.textContent = this.currentUser ? `Welcome, ${this.currentUser.name}!` : 'Welcome, Guest!';
     }
 
+    const tagEl = document.getElementById('verified-tag');
+    if (tagEl) {
+      if (this.currentUser) {
+        tagEl.textContent = '✓ Counselling verified';
+        tagEl.className = 'verified-tag';
+      } else {
+        tagEl.textContent = 'One spin after in-office counselling';
+        tagEl.className = 'verified-tag is-guest';
+      }
+    }
+
     const validLimit = Math.max(1, Number(this.spinLimit) || 1);
     const validLeft = typeof this.spinsLeft === 'number' && !Number.isNaN(this.spinsLeft)
       ? Math.max(0, this.spinsLeft)
@@ -512,7 +523,7 @@ class App {
       this.spinsLeft = spinResult.spinsLeft;
       this.spinsUsed = spinResult.spinsUsed;
 
-      // Step 3: Run smooth 5.5s easing wheel animation to land on exact returned slot index
+      // Step 3: Spin with a fresh randomizer (turns, timing, stop point) onto the drawn cabin
       await this.wheel.spinTo(spinResult.slotIndex);
 
       // Step 4: Play sound & trigger visual celebration + English Text-to-Speech
@@ -540,11 +551,11 @@ class App {
         isGrandPrize: spinResult.prize.isGrandPrize,
         isLuckyDraw: isLucky,
         title: isLucky
-          ? "🎉 Congratulations! You've Entered the Lucky Draw! 🎉"
+          ? "Congratulations! You've Entered the Lucky Draw!"
           : spinResult.prize.isGrandPrize
-          ? '🎉 GRAND PRIZE WINNER! 🎉'
+          ? 'Congratulations! Grand prize winner!'
           : spinResult.prize.isWin
-          ? '🎉 CONGRATULATIONS! 🎉'
+          ? 'Congratulations!'
           : 'Better Luck Next Time!',
         prizeName: spinResult.prize.label,
         desc: spinResult.message,
@@ -601,13 +612,13 @@ class App {
 
     if (iconEl) {
       if (isLucky) {
-        iconEl.innerHTML = `<span style="font-size: 3.5rem;">❓</span>`;
+        iconEl.innerHTML = `<span style="font-size: 3.5rem;">🎟️</span>`;
       } else if (isVoucher) {
         iconEl.innerHTML = `<span style="font-size: 3.5rem;">🎁</span>`;
       } else if (info.image) {
         iconEl.innerHTML = `<div class="result-img-wrapper"><img src="${info.image}" alt="${info.prizeName}" class="result-won-img" /></div>`;
       } else {
-        iconEl.innerHTML = `<span style="font-size: 3.5rem;">${info.isWin ? '🎁' : '😭'}</span>`;
+        iconEl.innerHTML = `<span style="font-size: 3.5rem;">${info.isWin ? '🎁' : '🪔'}</span>`;
       }
     }
 

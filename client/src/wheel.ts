@@ -15,6 +15,7 @@ export class Wheel {
   private onSpinStart?: () => void;
   private imageCache = new Map<string, HTMLImageElement>();
   private lastTickedSlice = -1;
+  private highlightIndex = -1;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -33,6 +34,7 @@ export class Wheel {
 
     this.preloadImages();
     this.setupDpi();
+    document.fonts?.ready.then(() => this.draw()).catch(() => undefined);
 
     window.addEventListener('resize', () => {
       this.setupDpi();
@@ -105,8 +107,8 @@ export class Wheel {
 
   private setupDpi(): void {
     const rect = this.canvas.getBoundingClientRect();
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const size = Math.max(320, Math.min(rect.width, rect.height) || 600);
+    const dpr = Math.min(2.5, Math.max(1, window.devicePixelRatio || 1));
+    const size = Math.max(280, Math.round(Math.min(rect.width, rect.height) || 600));
 
     this.canvas.width = size * dpr;
     this.canvas.height = size * dpr;
@@ -114,72 +116,243 @@ export class Wheel {
     this.ctx.scale(dpr, dpr);
   }
 
-  /**
-   * Pure luxury studio palette generator for slots:
-   * Sharp, deep obsidian/jewel tones with clean contrast, zero muddy gradients.
-   */
-  private getSliceStyle(slot: PublicSlotConfig, index: number, radius: number): {
-    fill: CanvasGradient | string;
-    accent: string;
-    isLuckyDraw: boolean;
-    isGiftCard: boolean;
-    isHamper: boolean;
-    isBetterLuck: boolean;
-  } {
-    const labelLower = slot.label.toLowerCase();
-    const isLuckyDraw = Boolean(
-      slot.isLuckyDraw ||
-      slot.prizeKey?.startsWith('lucky_draw') ||
-      labelLower.includes('lucky draw')
-    );
-    const isGiftCard = Boolean(
-      slot.prizeKey?.includes('voucher') ||
-      slot.prizeKey?.includes('card') ||
-      labelLower.includes('voucher') ||
-      labelLower.includes('1,000') ||
-      labelLower.includes('500')
-    ) && !isLuckyDraw;
-    const isHamper = false;
-    const isBetterLuck = !slot.isWin || labelLower.includes('better luck');
 
-    const grad = this.ctx.createRadialGradient(0, 0, radius * 0.15, 0, 0, radius);
-
-    // Strictly RED, BLUE, and YELLOW palette across all 12 slots
-    // Slices 0, 2, 4, 6, 8: Radiant Golden Yellow
-    // Slices 1, 7, 10: Electric Royal Blue
-    // Slices 3, 5, 9, 11: Vibrant Ruby Crimson Red
-    const isYellow = index === 0 || index === 2 || index === 4 || index === 6 || index === 8;
-    const isBlue = index === 1 || index === 7 || index === 10;
-
-    if (isYellow) {
-      // 🌟 Luminous Golden Yellow
-      grad.addColorStop(0, '#5C2B04');
-      grad.addColorStop(0.25, '#92400E');
-      grad.addColorStop(0.6, '#D97706');
-      grad.addColorStop(0.88, '#F59E0B');
-      grad.addColorStop(1, '#FDE047');
-      return { fill: grad, accent: '#FDE047', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
-    } else if (isBlue) {
-      // 💎 Electric Royal Sapphire Blue
-      grad.addColorStop(0, '#060F2E');
-      grad.addColorStop(0.25, '#1E3A8A');
-      grad.addColorStop(0.6, '#1D4ED8');
-      grad.addColorStop(0.88, '#2563EB');
-      grad.addColorStop(1, '#60A5FA');
-      return { fill: grad, accent: '#60A5FA', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
-    } else {
-      // 🔥 Radiant Crimson Scarlet Red
-      grad.addColorStop(0, '#300408');
-      grad.addColorStop(0.25, '#7F1D1D');
-      grad.addColorStop(0.6, '#B91C1C');
-      grad.addColorStop(0.88, '#DC2626');
-      grad.addColorStop(1, '#F87171');
-      return { fill: grad, accent: '#FCA5A5', isLuckyDraw, isGiftCard, isHamper, isBetterLuck };
+  private slotKind(slot: PublicSlotConfig): 'lucky' | 'voucher1000' | 'voucher500' | 'miss' {
+    const label = slot.label.toLowerCase();
+    if (slot.isLuckyDraw || slot.prizeKey?.startsWith('lucky_draw') || label.includes('lucky draw')) {
+      return 'lucky';
     }
+    if (label.includes('1,000') || label.includes('1000') || slot.prizeKey?.includes('1000')) {
+      return 'voucher1000';
+    }
+    if (label.includes('500') || slot.prizeKey?.includes('500')) {
+      return 'voucher500';
+    }
+    return 'miss';
+  }
+
+  private cabinStyle(index: number): { border: string; fill: string; ink: string } {
+    const cabins = [
+      { border: '#F5B400', fill: '#FFF8E1', ink: '#B45309' },
+      { border: '#22C55E', fill: '#F0FDF4', ink: '#166534' },
+      { border: '#EC4899', fill: '#FDF2F8', ink: '#9D174D' },
+      { border: '#8B5CF6', fill: '#F5F3FF', ink: '#5B21B6' },
+      { border: '#06B6D4', fill: '#ECFEFF', ink: '#0E7490' },
+      { border: '#F97316', fill: '#FFF7ED', ink: '#C2410C' },
+      { border: '#3B82F6', fill: '#EFF6FF', ink: '#1D4ED8' },
+      { border: '#E11D48', fill: '#FFF1F2', ink: '#9F1239' },
+      { border: '#EAB308', fill: '#FEFCE8', ink: '#A16207' },
+      { border: '#14B8A6', fill: '#F0FDFA', ink: '#0F766E' },
+      { border: '#A855F7', fill: '#FAF5FF', ink: '#7E22CE' },
+      { border: '#0EA5E9', fill: '#F0F9FF', ink: '#0369A1' },
+    ];
+    return cabins[index % cabins.length]!;
+  }
+
+  /** Fixed green A-frame. Stays still while the wheel turns. */
+  private drawSupports(centerX: number, centerY: number, height: number, isMobile: boolean): void {
+    const legW = isMobile ? 16 : 22;
+    const bottom = height - 10;
+    const spread = Math.min(centerX, centerY) * 0.72;
+    const topY = centerY + (isMobile ? 8 : 12);
+
+    const grad = this.ctx.createLinearGradient(centerX, centerY, centerX, bottom);
+    grad.addColorStop(0, '#9BE85A');
+    grad.addColorStop(0.45, '#4ADE80');
+    grad.addColorStop(1, '#2F9E44');
+
+    this.ctx.save();
+    this.ctx.lineCap = 'round';
+    this.ctx.lineWidth = legW;
+    this.ctx.strokeStyle = grad;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX - 2, topY);
+    this.ctx.lineTo(centerX - spread, bottom);
+    this.ctx.stroke();
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX + 2, topY);
+    this.ctx.lineTo(centerX + spread, bottom);
+    this.ctx.stroke();
+
+    this.ctx.lineWidth = Math.max(3, legW * 0.22);
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.38)';
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX - 8, topY + 6);
+    this.ctx.lineTo(centerX - spread + 8, bottom - 8);
+    this.ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX + 8, topY + 6);
+    this.ctx.lineTo(centerX + spread - 8, bottom - 8);
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  private drawMapPin(x: number, y: number, color: string, scale: number): void {
+    this.ctx.save();
+    this.ctx.translate(x, y);
+    this.ctx.scale(scale, scale);
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, 11);
+    this.ctx.bezierCurveTo(-9, 3, -8, -8, 0, -8);
+    this.ctx.bezierCurveTo(8, -8, 9, 3, 0, 11);
+    this.ctx.fillStyle = color;
+    this.ctx.fill();
+    this.ctx.lineWidth = 1.4;
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.arc(0, -2.2, 2.5, 0, Math.PI * 2);
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.fill();
+    this.ctx.restore();
+  }
+
+  private drawCabinArt(kind: 'lucky' | 'voucher1000' | 'voucher500' | 'miss', size: number): void {
+    if (kind === 'lucky') {
+      this.roundRect(-size * 0.46, -size * 0.28, size * 0.92, size * 0.56, size * 0.08);
+      this.ctx.fillStyle = '#FEF3C7';
+      this.ctx.fill();
+      this.ctx.lineWidth = Math.max(1.4, size * 0.045);
+      this.ctx.strokeStyle = '#D97706';
+      this.ctx.stroke();
+      this.drawStar(0, 0, size * 0.08, size * 0.2, '#F59E0B');
+      return;
+    }
+
+    if (kind === 'miss') {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, -size * 0.42);
+      this.ctx.quadraticCurveTo(size * 0.18, -size * 0.12, 0, size * 0.02);
+      this.ctx.quadraticCurveTo(-size * 0.18, -size * 0.12, 0, -size * 0.42);
+      this.ctx.fillStyle = '#F97316';
+      this.ctx.fill();
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, -size * 0.28);
+      this.ctx.quadraticCurveTo(size * 0.08, -size * 0.1, 0, -size * 0.02);
+      this.ctx.quadraticCurveTo(-size * 0.08, -size * 0.1, 0, -size * 0.28);
+      this.ctx.fillStyle = '#FEF08A';
+      this.ctx.fill();
+      this.ctx.beginPath();
+      this.ctx.ellipse(0, size * 0.18, size * 0.3, size * 0.14, 0, 0, Math.PI * 2);
+      this.ctx.fillStyle = '#E07A3D';
+      this.ctx.fill();
+      this.ctx.beginPath();
+      this.ctx.ellipse(0, size * 0.14, size * 0.16, size * 0.06, 0, 0, Math.PI * 2);
+      this.ctx.fillStyle = '#FBBF24';
+      this.ctx.fill();
+      return;
+    }
+
+    const premium = kind === 'voucher1000';
+    this.roundRect(-size * 0.46, -size * 0.3, size * 0.92, size * 0.6, size * 0.08);
+    this.ctx.fillStyle = '#FFFFFF';
+    this.ctx.fill();
+    this.ctx.lineWidth = Math.max(1.4, size * 0.04);
+    this.ctx.strokeStyle = premium ? '#D97706' : '#2563EB';
+    this.ctx.stroke();
+    this.ctx.save();
+    this.roundRect(-size * 0.46, -size * 0.3, size * 0.92, size * 0.6, size * 0.08);
+    this.ctx.clip();
+    this.ctx.fillStyle = premium ? '#F59E0B' : '#2563EB';
+    this.ctx.fillRect(-size * 0.46, -size * 0.3, size * 0.18, size * 0.6);
+    this.ctx.restore();
+    this.ctx.fillStyle = premium ? '#B45309' : '#1E3A8A';
+    this.ctx.font = `800 ${Math.max(8, size * 0.22)}px Outfit, sans-serif`;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText(premium ? '1,000' : '500', size * 0.1, size * 0.02);
+  }
+
+  private drawStar(x: number, y: number, inner: number, outer: number, color: string): void {
+    this.ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const radius = i % 2 === 0 ? outer : inner;
+      const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+      const px = x + Math.cos(angle) * radius;
+      const py = y + Math.sin(angle) * radius;
+      if (i === 0) this.ctx.moveTo(px, py);
+      else this.ctx.lineTo(px, py);
+    }
+    this.ctx.closePath();
+    this.ctx.fillStyle = color;
+    this.ctx.fill();
+  }
+
+  private drawGondola(
+    slot: PublicSlotConfig,
+    index: number,
+    midAngle: number,
+    orbit: number,
+    isMobile: boolean
+  ): void {
+    const kind = this.slotKind(slot);
+    const cabin = this.cabinStyle(index);
+    const highlighted = index === this.highlightIndex;
+    const gondolaW = Math.max(isMobile ? 46 : 62, orbit * 0.33);
+    const gondolaH = gondolaW * 1.12;
+
+    this.ctx.save();
+    this.ctx.rotate(midAngle);
+    this.ctx.translate(orbit, 0);
+    this.ctx.rotate(-(this.currentRotation + midAngle));
+    if (highlighted) this.ctx.scale(1.12, 1.12);
+
+    this.drawMapPin(0, -gondolaH / 2 - (isMobile ? 8 : 11), highlighted ? '#F97316' : cabin.border, isMobile ? 0.72 : 0.86);
+
+    this.ctx.save();
+    this.roundRect(-gondolaW / 2, -gondolaH / 2, gondolaW, gondolaH, isMobile ? 10 : 14);
+    this.ctx.fillStyle = cabin.fill;
+    this.ctx.shadowColor = highlighted ? cabin.border : 'rgba(15, 40, 80, 0.16)';
+    this.ctx.shadowBlur = highlighted ? 18 : 10;
+    this.ctx.shadowOffsetY = 4;
+    this.ctx.fill();
+    this.ctx.shadowColor = 'transparent';
+    this.ctx.shadowBlur = 0;
+    this.ctx.shadowOffsetY = 0;
+    this.ctx.lineWidth = highlighted ? 4 : 3;
+    this.ctx.strokeStyle = cabin.border;
+    this.ctx.stroke();
+    this.ctx.restore();
+
+    this.ctx.save();
+    this.ctx.translate(0, -gondolaH * 0.12);
+    this.drawCabinArt(kind, gondolaW * 0.62);
+    this.ctx.restore();
+
+    const lines =
+      kind === 'lucky'
+        ? ['Lucky', 'Draw']
+        : kind === 'voucher1000'
+          ? ['Rs. 1,000', 'Voucher']
+          : kind === 'voucher500'
+            ? ['Rs. 500', 'Voucher']
+            : ['Better', 'Luck'];
+
+    let fontSize = Math.max(8, gondolaW * 0.16);
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillStyle = cabin.ink;
+    const fontFamily = "'Outfit', 'Plus Jakarta Sans', sans-serif";
+    this.ctx.font = `800 ${fontSize}px ${fontFamily}`;
+    const maxWidth = gondolaW * 0.88;
+    while (
+      (this.ctx.measureText(lines[0]!).width > maxWidth || this.ctx.measureText(lines[1]!).width > maxWidth) &&
+      fontSize > 7
+    ) {
+      fontSize -= 0.5;
+      this.ctx.font = `800 ${fontSize}px ${fontFamily}`;
+    }
+    const lineGap = fontSize * 0.62;
+    this.ctx.fillText(lines[0]!, 0, gondolaH * 0.22 - lineGap);
+    this.ctx.fillText(lines[1]!, 0, gondolaH * 0.22 + lineGap);
+
+    this.ctx.restore();
   }
 
   /**
-   * Main rendering method for the wheel circle with a realistic 3D metallic casino border and studs.
+   * Ferris-wheel rendering: fixed green supports, blue spokes, upright prize cabins.
    */
   public draw(): void {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -189,346 +362,49 @@ export class Wheel {
     const centerY = height / 2;
     const isMobile = width < 460;
 
-    // Realistic border geometry
-    const outerRadius = Math.min(centerX, centerY) - 2;
-    const borderWidth = isMobile ? 18 : 24;
-    const innerRadius = outerRadius - borderWidth;
-
     this.ctx.clearRect(0, 0, width, height);
-
     if (this.slots.length === 0) return;
 
     const sliceAngles = this.computeSliceAngles();
+    const gondolaW = isMobile ? 52 : 74;
+    const margin = isMobile ? 42 : 58;
+    const orbit = Math.min(centerX, centerY) - margin - gondolaW * 0.62;
+
+    this.drawSupports(centerX, centerY, height, isMobile);
 
     this.ctx.save();
     this.ctx.translate(centerX, centerY);
     this.ctx.rotate(this.currentRotation);
 
-    // ==========================================
-    // 1. DRAW INNER ROTATING WEDGES & CONTENT
-    // ==========================================
-    for (let i = 0; i < this.slots.length; i++) {
-      const slot = this.slots[i]!;
-      const { start: startAngle, end: endAngle, angle: sliceAngle } = sliceAngles[i]!;
-      const style = this.getSliceStyle(slot, i, innerRadius);
+    const hubR = isMobile ? 34 : 46;
+    this.ctx.lineCap = 'round';
+    this.ctx.strokeStyle = '#2F7FEA';
+    this.ctx.lineWidth = isMobile ? 1.15 : 1.5;
 
-      // Wedge background with subtle 3D lighting vignette
+    const spokeCount = 36;
+    for (let s = 0; s < spokeCount; s++) {
+      const angle = (s / spokeCount) * Math.PI * 2;
       this.ctx.beginPath();
-      this.ctx.moveTo(0, 0);
-      this.ctx.arc(0, 0, innerRadius, startAngle, endAngle);
-      this.ctx.closePath();
-      this.ctx.fillStyle = style.fill;
-      this.ctx.fill();
-
-      // Realistic 3D slice divider spoke (embossed highlight & shadow)
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, 0);
-      this.ctx.lineTo(Math.cos(startAngle) * innerRadius, Math.sin(startAngle) * innerRadius);
-      this.ctx.lineWidth = 2.5;
-      this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
-      this.ctx.stroke();
-
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, 0);
-      this.ctx.lineTo(Math.cos(startAngle) * innerRadius, Math.sin(startAngle) * innerRadius);
-      this.ctx.lineWidth = 1;
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-      this.ctx.stroke();
-
-      // ==========================================
-      // 2. SLICE CONTENT: ICON / BADGE & CLEAN TEXT
-      // ==========================================
-      this.ctx.save();
-      const midAngle = startAngle + sliceAngle / 2;
-      this.ctx.rotate(midAngle);
-
-      // Proportional layout distances - text moved up and balanced with icon
-      const iconDist = innerRadius * (isMobile ? 0.76 : 0.79);
-      const textDist = innerRadius * (isMobile ? 0.46 : 0.49);
-      const availableWidthAtIcon = 2 * iconDist * Math.tan(sliceAngle / 2);
-      const availableTextWidth = 2 * textDist * Math.tan(sliceAngle / 2) * 0.98;
-
-      // --- A) BADGE / ICON RENDERING ---
-      this.renderSlotIcon(slot, style, iconDist, availableWidthAtIcon, isMobile);
-
-      // --- B) CLEAN, SHARP TYPOGRAPHY ---
-      this.renderSlotText(slot, style, textDist, availableTextWidth, isMobile);
-
-      this.ctx.restore();
-    }
-
-    // Inner shadow chamfer separating wedges from outer border
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, innerRadius, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 3;
-    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
-    this.ctx.stroke();
-
-    // ==========================================
-    // 3. REALISTIC 3D METALLIC GOLD BORDER (BEZEL)
-    // ==========================================
-    // Outer metallic ring fill
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, outerRadius, 0, 2 * Math.PI);
-    this.ctx.arc(0, 0, innerRadius, 0, 2 * Math.PI, true);
-    this.ctx.closePath();
-
-    const bezelGrad = this.ctx.createRadialGradient(0, 0, innerRadius, 0, 0, outerRadius);
-    bezelGrad.addColorStop(0, '#5C2B04');
-    bezelGrad.addColorStop(0.18, '#B45309');
-    bezelGrad.addColorStop(0.45, '#FDE047');
-    bezelGrad.addColorStop(0.75, '#F59E0B');
-    bezelGrad.addColorStop(0.92, '#78350F');
-    bezelGrad.addColorStop(1, '#3B1A02');
-    this.ctx.fillStyle = bezelGrad;
-    this.ctx.fill();
-
-    // Outer rim highlight hairline
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, outerRadius - 0.75, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
-    this.ctx.stroke();
-
-    // Inner rim gold hairline
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, innerRadius + 0.75, 0, 2 * Math.PI);
-    this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = 'rgba(253, 224, 71, 0.8)';
-    this.ctx.stroke();
-
-    // ==========================================
-    // 4. 3D GOLDEN RIVET STUDS / PEGS ON THE RIM
-    // ==========================================
-    const studRadius = isMobile ? 3.5 : 4.5;
-    const studCenterDist = (innerRadius + outerRadius) / 2;
-
-    for (let i = 0; i < this.slots.length; i++) {
-      const pinAngle = sliceAngles[i]!.start;
-      const studX = Math.cos(pinAngle) * studCenterDist;
-      const studY = Math.sin(pinAngle) * studCenterDist;
-
-      // Soft drop shadow behind the peg
-      this.ctx.beginPath();
-      this.ctx.arc(studX + 1.2, studY + 1.5, studRadius, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-      this.ctx.fill();
-
-      // 3D spherical metallic gold body
-      this.ctx.beginPath();
-      this.ctx.arc(studX, studY, studRadius, 0, 2 * Math.PI);
-      const studGrad = this.ctx.createRadialGradient(
-        studX - studRadius * 0.35,
-        studY - studRadius * 0.35,
-        studRadius * 0.1,
-        studX,
-        studY,
-        studRadius
-      );
-      studGrad.addColorStop(0, '#FFFFFF');
-      studGrad.addColorStop(0.3, '#FEF08A');
-      studGrad.addColorStop(0.7, '#F59E0B');
-      studGrad.addColorStop(1, '#78350F');
-      this.ctx.fillStyle = studGrad;
-      this.ctx.fill();
-
-      // Crisp chrome outline
-      this.ctx.lineWidth = 0.75;
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      this.ctx.moveTo(Math.cos(angle) * hubR, Math.sin(angle) * hubR);
+      this.ctx.lineTo(Math.cos(angle) * orbit, Math.sin(angle) * orbit);
       this.ctx.stroke();
     }
 
-    this.ctx.restore(); // Undo canvas rotation and translation
-  }
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, orbit, 0, Math.PI * 2);
+    this.ctx.lineWidth = isMobile ? 2 : 2.5;
+    this.ctx.strokeStyle = '#2B74DC';
+    this.ctx.stroke();
 
-  /**
-   * Renders high-DPI, spotless vector badges and image cutouts.
-   */
-  private renderSlotIcon(
-    slot: PublicSlotConfig,
-    style: { isLuckyDraw: boolean; isGiftCard: boolean; isHamper: boolean; isBetterLuck: boolean; accent: string },
-    iconDist: number,
-    availableWidth: number,
-    isMobile: boolean
-  ): void {
-    this.ctx.save();
-    this.ctx.translate(iconDist, 0);
-    this.ctx.rotate(Math.PI / 2);
-
-    const baseBadgeRadius = isMobile ? 19 : 25;
-    const maxRadius = (availableWidth * 0.90) / 2;
-    const badgeRadius = Math.max(14, Math.min(baseBadgeRadius, maxRadius));
-
-    if (style.isBetterLuck) {
-      // Better Luck Next Time: Crying Face Emoji 😭
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-      this.ctx.fill();
-      this.ctx.lineWidth = 1.4;
-      this.ctx.strokeStyle = style.accent;
-      this.ctx.stroke();
-
-      this.ctx.font = `${badgeRadius * 1.45}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText('😭', 0, 1);
-    } else if (style.isLuckyDraw) {
-      // Lucky Draw Entry: Refined Frosted Gold Disc with ? Symbol
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(24, 18, 8, 0.95)';
-      this.ctx.fill();
-      this.ctx.lineWidth = 1.6;
-      this.ctx.strokeStyle = '#FDE047';
-      this.ctx.stroke();
-
-      // Bold, stylish Question Mark ?
-      this.ctx.font = `900 ${badgeRadius * 1.45}px var(--font-heading, 'Outfit', 'Inter', sans-serif)`;
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillStyle = '#FEF08A';
-      this.ctx.shadowColor = 'rgba(245, 158, 11, 0.85)';
-      this.ctx.shadowBlur = 6;
-      this.ctx.fillText('?', 0, 1);
-    } else if (style.isGiftCard) {
-      // Gift Voucher: Luxury Sapphire / Emerald Badge with Gift Box
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-      this.ctx.fill();
-      this.ctx.lineWidth = 1.4;
-      this.ctx.strokeStyle = style.accent;
-      this.ctx.stroke();
-
-      this.ctx.font = `${badgeRadius * 1.45}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText('🎁', 0, 1);
-    } else {
-      // General Prize
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, badgeRadius, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-      this.ctx.fill();
-      this.ctx.lineWidth = 1.4;
-      this.ctx.strokeStyle = style.accent;
-      this.ctx.stroke();
-
-      this.ctx.font = `${badgeRadius * 1.45}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText('🎁', 0, 1);
+    for (let i = 0; i < this.slots.length; i++) {
+      const slice = sliceAngles[i]!;
+      const midAngle = slice.start + slice.angle / 2;
+      this.drawGondola(this.slots[i]!, i, midAngle, orbit, isMobile);
     }
 
     this.ctx.restore();
   }
 
-  /**
-   * Renders sharp, non-AI typography without cartoon black stroke outlines.
-   */
-  private renderSlotText(
-    slot: PublicSlotConfig,
-    style: { isLuckyDraw: boolean; isGiftCard: boolean; isHamper: boolean; isBetterLuck: boolean; accent: string },
-    textDist: number,
-    availableWidth: number,
-    isMobile: boolean
-  ): void {
-    this.ctx.save();
-    this.ctx.translate(textDist, 0);
-    this.ctx.rotate(Math.PI / 2);
-
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-
-    // Spotless subtle micro-shadow for crisp legibility
-    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-    this.ctx.shadowBlur = 3;
-    this.ctx.shadowOffsetX = 0;
-    this.ctx.shadowOffsetY = 1;
-
-    const displayLabel = slot.label;
-
-    if (style.isBetterLuck) {
-      // 2 clean stacked lines for Better Luck Next Time
-      let fontSize = isMobile ? 13 : 15.5;
-      this.ctx.font = `700 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-      let m1 = this.ctx.measureText('Better Luck');
-      let m2 = this.ctx.measureText('Next Time!');
-
-      while ((m1.width > availableWidth || m2.width > availableWidth) && fontSize > 9) {
-        fontSize -= 0.5;
-        this.ctx.font = `700 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-        m1 = this.ctx.measureText('Better Luck');
-        m2 = this.ctx.measureText('Next Time!');
-      }
-
-      const lineSpacing = fontSize * 0.72;
-      this.ctx.fillStyle = '#CBD5E1';
-      this.ctx.fillText('Better Luck', 0, -lineSpacing);
-      this.ctx.fillText('Next Time!', 0, lineSpacing);
-    } else if (style.isLuckyDraw) {
-      // 2 stacked lines for You've Entered the Lucky Draw!
-      const line1 = "You've Entered";
-      const line2 = 'Lucky Draw!';
-
-      let fontSize = isMobile ? 13 : 15.5;
-      this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-
-      let mw1 = this.ctx.measureText(line1);
-      let mw2 = this.ctx.measureText(line2);
-
-      while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 9) {
-        fontSize -= 0.5;
-        this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-        mw1 = this.ctx.measureText(line1);
-        mw2 = this.ctx.measureText(line2);
-      }
-
-      const lineSpacing = fontSize * 0.74;
-      this.ctx.fillStyle = '#FEF08A';
-      this.ctx.fillText(line1, 0, -lineSpacing);
-      this.ctx.fillText(line2, 0, lineSpacing);
-    } else if (displayLabel.includes('Voucher')) {
-      // 2 stacked lines for Rs. 1,000 / Rs. 500 Gift Voucher
-      const is1000 = displayLabel.includes('1,000') || displayLabel.includes('1000');
-      const line1 = is1000 ? 'Rs. 1,000' : 'Rs. 500';
-      const line2 = 'Gift Voucher';
-
-      let fontSize = isMobile ? 13.5 : 16.5;
-      this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-
-      let mw1 = this.ctx.measureText(line1);
-      let mw2 = this.ctx.measureText(line2);
-
-      while ((mw1.width > availableWidth || mw2.width > availableWidth) && fontSize > 9) {
-        fontSize -= 0.5;
-        this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-        mw1 = this.ctx.measureText(line1);
-        mw2 = this.ctx.measureText(line2);
-      }
-
-      const lineSpacing = fontSize * 0.74;
-      this.ctx.fillStyle = slot.textColor || '#FFFFFF';
-      this.ctx.fillText(line1, 0, -lineSpacing);
-      this.ctx.fillText(line2, 0, lineSpacing);
-    } else {
-      // General prize formatting fallback
-      let fontSize = isMobile ? 13.5 : 16.5;
-      this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-      let textMetrics = this.ctx.measureText(displayLabel);
-      while (textMetrics.width > availableWidth && fontSize > 9) {
-        fontSize -= 0.5;
-        this.ctx.font = `800 ${fontSize}px var(--font-heading, 'Outfit', 'Inter', -apple-system, sans-serif)`;
-        textMetrics = this.ctx.measureText(displayLabel);
-      }
-
-      this.ctx.fillStyle = slot.textColor || '#FFFFFF';
-      this.ctx.fillText(displayLabel, 0, 0);
-    }
-
-    this.ctx.restore();
-  }
 
   /**
    * Helper to draw a rounded rectangle.
@@ -561,8 +437,21 @@ export class Wheel {
     return 1 - Math.pow(1 - t, 4.4);
   }
 
+  /** Uniform value in [0, 1) from the browser CSPRNG. */
+  private randomUnit(): number {
+    const buffer = new Uint32Array(1);
+    crypto.getRandomValues(buffer);
+    return buffer[0]! / 0x100000000;
+  }
+
+  /** Inclusive integer range. */
+  private randomInt(min: number, max: number): number {
+    return min + Math.floor(this.randomUnit() * (max - min + 1));
+  }
+
   /**
    * Animates the wheel from current position to land accurately on target slot index.
+   * Turn count, duration, and the stop point inside the winning cabin are randomized.
    */
   public spinTo(targetSlotIndex: number): Promise<void> {
     if (this.isSpinning) {
@@ -570,6 +459,7 @@ export class Wheel {
     }
 
     this.isSpinning = true;
+    this.highlightIndex = -1;
     this.onSpinStart?.();
 
     return new Promise((resolve) => {
@@ -582,8 +472,8 @@ export class Wheel {
       const targetSlice = sliceAngles[targetSlotIndex]!;
       const targetCenterAngle = targetSlice.start + targetSlice.angle / 2;
 
-      // Subtle natural jitter inside slot slice ([-18%, +18%] of slice width)
-      const jitter = (Math.random() - 0.5) * targetSlice.angle * 0.36;
+      // Stop somewhere inside the winning cabin, not always on its exact center.
+      const jitter = (this.randomUnit() - 0.5) * targetSlice.angle * 0.62;
 
       // Calculate angle difference
       const currentNorm = this.currentRotation % (2 * Math.PI);
@@ -592,13 +482,13 @@ export class Wheel {
         angleDiff += 2 * Math.PI;
       }
 
-      // 8 full rotations for crisp cinematic spin
-      const fullRotations = 8 * (2 * Math.PI);
+      // Randomizer: 6 to 10 full turns, so no two spins travel the same path.
+      const fullRotations = this.randomInt(6, 10) * (2 * Math.PI);
       const startRotation = this.currentRotation;
       const finalRotation = this.currentRotation + fullRotations + angleDiff;
 
-      // 8.6 seconds duration for suspense
-      const durationMs = 8600;
+      // Randomizer: 6.4s to 9.2s, matched to how many turns were drawn.
+      const durationMs = 6400 + Math.floor(this.randomUnit() * 2800);
       const startTime = performance.now();
 
       const pointerEl = document.getElementById('wheel-pointer');
@@ -638,6 +528,7 @@ export class Wheel {
           requestAnimationFrame(animate);
         } else {
           this.currentRotation = finalRotation;
+          this.highlightIndex = targetSlotIndex;
           this.draw();
           this.isSpinning = false;
           resolve();

@@ -43,15 +43,28 @@ export function getOrCreateDeviceId(): string {
 }
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(endpoint, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...options?.headers,
-    },
-    credentials: 'include',
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  let res: Response;
+  try {
+    res = await fetch(endpoint, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...options?.headers,
+      },
+      credentials: 'include',
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new ApiError('The spin server did not respond. Start it and try again.', 'TIMEOUT');
+    }
+    throw new ApiError('Could not reach the spin server. The wheel cannot turn until it is running.', 'NETWORK');
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const contentType = res.headers.get('content-type') || '';
   const isJson = contentType.includes('application/json');

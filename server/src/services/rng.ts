@@ -12,6 +12,12 @@ export function pickWinningSlot(slots: readonly SlotConfig[]): SlotConfig {
     throw new Error('Cannot pick from an empty slot list');
   }
 
+  // Equal slots: one uniform draw across the wheel. This is the spin randomizer.
+  const firstWeight = slots[0]!.weight;
+  if (slots.every((slot) => slot.weight === firstWeight)) {
+    return slots[crypto.randomInt(0, slots.length)]!;
+  }
+
   // Calculate cumulative integer scale (basis points: 1% = 100 bps, sum = 10,000)
   const SCALE = 100;
   const cumulativeThresholds: { slot: SlotConfig; upperLimit: number }[] = [];
